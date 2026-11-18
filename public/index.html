@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monthly Target Tracker · Studio 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  color-scheme:light;
+  --bg:#f4f3ef;--surface-1:#fcfcfb;--surface-2:#f1f0ec;--line:#e4e2dc;--line-2:#d6d4cc;
+  --text-primary:#14130f;--text-secondary:#55534d;--text-muted:#8a877e;
+  --s1:#2a78d6;--s2:#eb6834;--s1-soft:#dbe9fa;--s2-soft:#fde3d7;
+  --good:#0f8a3c;--good-soft:#dcf2e3;--warn:#b86e00;--warn-soft:#fbecd2;--bad:#c93836;--bad-soft:#f9dede;
+  --gold:#c9961a;--silver:#8d97a3;--bronze:#b06a3b;
+  --hero1:#14213d;--hero2:#1f3a68;
+  --shadow:0 1px 2px rgba(20,19,15,.05),0 6px 24px -12px rgba(20,19,15,.18);
+  --r:16px;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211;--surface-1:#1a1a19;--surface-2:#232321;--line:#2e2e2b;--line-2:#3a3a36;
+  --text-primary:#f0efec;--text-secondary:#c3c2b7;--text-muted:#8f8d84;
+  --s1:#3987e5;--s2:#d95926;--s1-soft:#1d2f47;--s2-soft:#3d2519;
+  --good:#3cc26b;--good-soft:#173322;--warn:#e0a03a;--warn-soft:#3a2c14;--bad:#e66767;--bad-soft:#3d1d1d;
+  --hero1:#0d1628;--hero2:#18294a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 28px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;background:var(--bg);color:var(--text-primary);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1280px;margin:0 auto;padding:20px 20px 60px}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select{font:inherit;color:inherit}
+
+/* header */
+.hero{background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff;border-radius:22px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12),transparent 70%)}
+.brand{display:flex;gap:14px;align-items:center;position:relative;z-index:1}
+.logo{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.12);display:grid;place-items:center;font-family:Prompt;font-weight:700;font-size:22px;border:1px solid rgba(255,255,255,.18)}
+.brand h1{font-family:Prompt;font-size:22px;margin:0;font-weight:600;letter-spacing:.2px}
+.brand .sub{opacity:.75;font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:1}
+.btn{border:1px solid var(--line-2);background:var(--surface-1);border-radius:10px;padding:8px 14px;font-weight:500;display:inline-flex;gap:6px;align-items:center;transition:.15s}
+.btn:hover{border-color:var(--text-muted)}
+.hero .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff}
+.hero .btn:hover{background:rgba(255,255,255,.18)}
+.hero .btn.primary{background:#fff;color:#14213d;border-color:#fff}
+.btn.primary{background:var(--s1);border-color:var(--s1);color:#fff}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn.ghost{background:transparent}
+
+/* filters */
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 14px}
+.seg{display:inline-flex;background:var(--surface-1);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-size:13px;color:var(--text-secondary)}
+.seg button.on{background:var(--text-primary);color:var(--surface-1)}
+.date{display:inline-flex;gap:6px;align-items:center;background:var(--surface-1);border:1px solid var(--line);border-radius:10px;padding:4px 10px;font-size:13px;color:var(--text-secondary)}
+.date input{border:0;background:transparent;padding:2px}
+.meta{margin-left:auto;font-size:12.5px;color:var(--text-muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:500}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.off{background:var(--warn-soft);color:var(--warn)}
+
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.kpi{padding:16px 18px}
+.kpi .lbl{font-size:12.5px;color:var(--text-secondary);display:flex;justify-content:space-between;gap:6px;align-items:flex-start}.kpi .lbl .chip{white-space:nowrap;flex:none}
+.kpi .val{font-family:Prompt;font-size:28px;font-weight:600;margin-top:4px;letter-spacing:-.3px}
+.kpi .val small{font-size:14px;color:var(--text-muted);font-weight:500;margin-left:3px}
+.kpi .foot{font-size:12px;color:var(--text-muted);margin-top:6px}
+.meter{height:6px;background:var(--surface-2);border-radius:99px;margin-top:10px;overflow:hidden;position:relative}
+.meter i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--s1)}
+.meter.o i{background:var(--s2)}
+
+/* layout */
+.grid2{display:grid;grid-template-columns:1.05fr 1fr;gap:12px;margin-top:12px}
+.sec{padding:18px 18px 16px}
+.sec h2{font-family:Prompt;font-size:16px;font-weight:600;margin:0}
+.sec .hint{font-size:12.5px;color:var(--text-muted);margin-top:2px}
+.sechead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+
+/* podium */
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:10px;align-items:end;margin-top:6px}
+.pod{border-radius:14px;padding:14px 10px 12px;text-align:center;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;transition:.15s}
+.pod:hover{transform:translateY(-2px)}
+.pod .medal{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;color:#fff;font-family:Prompt;font-weight:700;font-size:17px}
+.pod.p1{padding-top:22px;background:linear-gradient(180deg,rgba(201,150,26,.16),var(--surface-2))}
+.pod.p1 .medal{background:var(--gold);width:50px;height:50px;font-size:21px}
+.pod.p2 .medal{background:var(--silver)}
+.pod.p3 .medal{background:var(--bronze)}
+.pod .nm{font-weight:600;font-size:15px}
+.pod .sc{font-family:Prompt;font-size:30px;font-weight:600;line-height:1.1;margin-top:4px}
+.pod .sc small{font-size:13px;color:var(--text-muted);font-weight:500}
+.pod .mini{font-size:12px;color:var(--text-secondary);margin-top:4px}
+.watch{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--bad-soft);color:var(--text-primary);font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.watch b{color:var(--bad)}
+
+/* charts */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.axis text{fill:var(--text-muted);font-size:11px}
+.grid line{stroke:var(--line);stroke-width:1}
+.tip{position:fixed;pointer-events:none;background:var(--text-primary);color:var(--surface-1);padding:8px 10px;border-radius:9px;font-size:12.5px;line-height:1.45;z-index:50;opacity:0;transition:opacity .1s;max-width:240px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.tip b{font-weight:600}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--text-secondary);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* table */
+.tablewrap{overflow-x:auto;margin:0 -18px;padding:0 18px}
+table{width:100%;border-collapse:separate;border-spacing:0;min-width:980px}
+th{font-size:12px;font-weight:500;color:var(--text-muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--surface-1)}
+th:hover{color:var(--text-primary)}
+th.l,td.l{text-align:left}
+th .ar{opacity:.5;font-size:10px}
+th.sorted{color:var(--text-primary)}
+td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+tbody tr{cursor:pointer;transition:background .1s}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+.rk{width:30px;height:30px;border-radius:9px;display:inline-grid;place-items:center;font-family:Prompt;font-weight:600;background:var(--surface-2);color:var(--text-secondary)}
+.rk.r1{background:var(--gold);color:#fff}.rk.r2{background:var(--silver);color:#fff}.rk.r3{background:var(--bronze);color:#fff}
+.who{display:flex;flex-direction:column}
+.person{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:var(--surface-2);display:inline-grid;place-items:center;font-family:Prompt;font-weight:600;font-size:14px;color:var(--text-secondary);border:1px solid var(--line);overflow:hidden}
+.av.lg{width:72px;height:72px;font-size:24px}
+.av.xl{width:88px;height:88px;font-size:28px}
+.pod .avwrap{position:relative;width:max-content;margin:0 auto 8px}
+.pod .avwrap .medal{position:absolute;right:-6px;bottom:-4px;width:28px;height:28px;font-size:13px;margin:0;border:2px solid var(--surface-1)}
+.pod.p1 .avwrap .medal{width:32px;height:32px;font-size:15px}
+.pod.p1 .av{border:3px solid var(--gold)}.pod.p2 .av{border:3px solid var(--silver)}.pod.p3 .av{border:3px solid var(--bronze)}
+.photo-cell{display:flex;align-items:center;gap:6px}
+.photo-cell .av{width:34px;height:34px;font-size:12px}
+.who b{font-weight:600}
+.who small{color:var(--text-muted);font-size:11.5px}
+.scorecell{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.scorebar{width:120px;height:10px;border-radius:99px;background:var(--surface-2);display:flex;gap:2px;overflow:hidden}
+.scorebar i{display:block;height:100%}
+.scorebar i.a{background:var(--s1);border-radius:99px 0 0 99px}
+.scorebar i.f{background:var(--s2)}
+.scorenum{font-family:Prompt;font-weight:600;font-size:17px;min-width:30px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:500}
+.chip.g{background:var(--good-soft);color:var(--good)}
+.chip.w{background:var(--warn-soft);color:var(--warn)}
+.chip.b{background:var(--bad-soft);color:var(--bad)}
+.fcbar{display:inline-flex;align-items:center;gap:8px}
+.fcbar .t{width:70px;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.fcbar .t i{display:block;height:100%;background:var(--s2);border-radius:99px}
+tfoot td{font-weight:600;background:var(--surface-2);border-bottom:0}
+tfoot td:first-child{border-radius:10px 0 0 10px}tfoot td:last-child{border-radius:0 10px 10px 0}
+.search{border:1px solid var(--line);background:var(--surface-1);border-radius:10px;padding:7px 12px;width:200px}
+
+/* modal / drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,10,10,.45);display:none;z-index:40;align-items:center;justify-content:center;padding:16px}
+.scrim.on{display:flex}
+.modal{background:var(--surface-1);border-radius:20px;max-width:760px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.modal header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface-1);z-index:2}
+.modal header h3{margin:0;font-family:Prompt;font-weight:600;font-size:18px}
+.modal .body{padding:18px 22px}
+.x{border:0;background:var(--surface-2);width:34px;height:34px;border-radius:10px;font-size:18px}
+.drop{display:block;cursor:pointer;border:2px dashed var(--line-2);border-radius:16px;padding:34px 20px;text-align:center;background:var(--surface-2);transition:.15s}
+.drop.over{border-color:var(--s1);background:var(--s1-soft)}
+.drop .big{font-family:Prompt;font-size:17px;font-weight:600}
+.drop p{color:var(--text-secondary);margin:6px 0 14px}
+.status{margin-top:14px;font-size:13px;padding:10px 12px;border-radius:10px;display:none}
+.status.on{display:block}
+.status.ok{background:var(--good-soft);color:var(--good)}
+.status.err{background:var(--bad-soft);color:var(--bad)}
+.status.busy{background:var(--s1-soft);color:var(--text-primary)}
+.or{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:12.5px;margin:16px 0 10px}.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);color:var(--text-primary);border-radius:10px;padding:10px;font:12px/1.4 ui-monospace,Menlo,monospace;resize:vertical}
+.chk{font-size:12.5px;color:var(--text-secondary);display:inline-flex;gap:6px;align-items:center}
+[hidden]{display:none!important}.admin-only{display:none!important}body.admin .admin-only{display:inline-flex!important}
+.steps{font-size:13px;color:var(--text-secondary);margin:16px 0 0;padding-left:18px}
+.steps li{margin:3px 0}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.field label{display:block;font-size:12.5px;color:var(--text-secondary);margin-bottom:4px}
+.field input{width:100%;border:1px solid var(--line-2);background:var(--surface-1);border-radius:10px;padding:8px 10px}
+.field .help{font-size:11.5px;color:var(--text-muted);margin-top:3px}
+.stafftbl{min-width:0;margin-top:6px}
+.stafftbl td,.stafftbl th{padding:6px 6px;text-align:left;cursor:default}
+.stafftbl input{border:1px solid var(--line);background:var(--surface-1);border-radius:8px;padding:5px 8px;width:100%}
+.stafftbl tbody tr{cursor:default}
+.stafftbl tbody tr:hover{background:transparent}
+.h4{font-family:Prompt;font-weight:600;font-size:15px;margin:20px 0 6px}
+.modal footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface-1)}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.dstat{background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.dstat .l{font-size:12px;color:var(--text-muted)}
+.dstat .v{font-family:Prompt;font-weight:600;font-size:20px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text-primary);color:var(--surface-1);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;transition:.25s;z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.formula{font-size:12.5px;color:var(--text-secondary);background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-top:10px}
+.empty{padding:30px;text-align:center;color:var(--text-muted)}
+
+@media (max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:12px 12px 40px}.hero{padding:18px}.meta{margin-left:0;width:100%}.form{grid-template-columns:1fr}.dgrid{grid-template-columns:repeat(2,1fr)}.kpi .val{font-size:24px}}
+
+/* ---- tracker additions ---- */
+.tabs{display:inline-flex;background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:4px;gap:2px}
+.tabs a{padding:8px 16px;border-radius:9px;text-decoration:none;color:var(--text-secondary);font-weight:500;font-size:14px}
+.tabs a.on{background:var(--text-primary);color:var(--surface-1)}
+.view{display:none}.view.on{display:block}
+.daybox{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--text-secondary)}
+.daybox b{font-family:Prompt;font-size:15px;color:var(--text-primary)}
+.kpis4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.bigval{font-family:Prompt;font-size:30px;font-weight:600;letter-spacing:-.3px;margin-top:2px}
+.bigval small{font-size:14px;color:var(--text-muted);font-weight:500;margin-left:4px}
+.track{height:10px;background:var(--surface-2);border-radius:99px;position:relative;margin-top:12px;overflow:visible}
+.track>i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--s1);max-width:100%}
+.track>i.fc{background:transparent;border:2px dashed var(--s1);opacity:.45}
+.track .pace{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text-primary);border-radius:2px}
+.track .pace:after{content:attr(data-l);position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--text-muted);white-space:nowrap}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.cat{padding:16px 16px 14px}
+.cat .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cat .nm{font-weight:600}
+.cat .pct{font-family:Prompt;font-weight:600;font-size:22px}
+.cat .sub{font-size:12.5px;color:var(--text-muted);margin-top:2px}
+.cat .row2{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-secondary);margin-top:24px;gap:8px}
+.cat .row2 b{color:var(--text-primary);font-weight:600}
+.st{font-weight:600}
+.st.g{color:var(--good)}.st.w{color:var(--warn)}.st.b{color:var(--bad)}
+td.heat{position:relative}
+td .u{display:block;font-size:11px;color:var(--text-muted)}
+td.zero{color:var(--text-muted)}
+th.grp{text-align:center;border-bottom:0;padding-bottom:0;font-weight:600;color:var(--text-secondary)}
+.wide{min-width:1400px}
+/* person view */
+.picker{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.pk{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;border-radius:14px;border:1px solid var(--line);background:var(--surface-1);width:92px;cursor:pointer;transition:.15s}
+.pk:hover{border-color:var(--text-muted)}
+.pk.on{border-color:var(--s1);box-shadow:0 0 0 2px var(--s1) inset}
+.pk .n{font-size:12.5px;font-weight:600;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk .p{font-size:11px;color:var(--text-muted)}
+.profile{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;padding:20px}
+.profile h2{font-family:Prompt;font-size:24px;margin:0;font-weight:600}
+.profile .meta2{color:var(--text-muted);font-size:13px}
+.ring{width:110px;height:110px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .c b{font-family:Prompt;font-size:24px;font-weight:600;display:block;line-height:1}
+.ring .c span{font-size:11px;color:var(--text-muted)}
+.goalbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line-2);background:var(--surface-1);padding:6px 12px;border-radius:99px;font-size:13px;font-weight:500}
+.chips button.on{background:var(--s1);border-color:var(--s1);color:#fff}
+.pctin{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--surface-1)}
+.pctin button{border:0;background:var(--surface-2);width:30px;height:32px;font-size:16px}
+.pctin input{width:54px;border:0;text-align:center;background:transparent;font-weight:600;height:32px;-moz-appearance:textfield}
+.pctin input::-webkit-outer-spin-button,.pctin input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pctin span{padding-right:8px;color:var(--text-muted);font-size:13px}
+.need{font-weight:600}
+.need.done{color:var(--good)}
+.sumcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sumcard{padding:18px;border-radius:16px;background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff}
+.sumcard .l{opacity:.75;font-size:13px}
+.sumcard .v{font-family:Prompt;font-size:30px;font-weight:600;margin-top:4px}
+.sumcard .v small{font-size:14px;opacity:.75;font-weight:500;margin-left:4px}
+.sumcard .f{opacity:.7;font-size:12px;margin-top:2px}
+.attrow{display:flex;flex-wrap:wrap;gap:8px}
+.attbox{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:110px}
+.attbox .l{font-size:12px;color:var(--text-muted)}
+.attbox .v{font-family:Prompt;font-weight:600;font-size:18px}
+.attbox .v.g{color:var(--good)}.attbox .v.b{color:var(--bad)}
+textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-radius:12px;padding:10px 12px;background:var(--surface-1);color:var(--text-primary);font:inherit;resize:vertical}
+.localnote{font-size:12px;color:var(--text-muted)}
+.tgtbl input{width:100%;min-width:84px;border:1px solid var(--line);background:var(--surface-1);border-radius:8px;padding:5px 6px;text-align:right}
+.tgtbl td,.tgtbl th{padding:5px 4px}
+.modal.xl{max-width:1180px}
+.planCards{display:none}
+.pc{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
+.pc1{display:flex;justify-content:space-between;align-items:center}
+.pc2{font-size:12.5px;color:var(--text-muted);margin:4px 0 10px}
+.pc3{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pc3 small{font-weight:500;color:var(--text-muted)}
+@media (max-width:640px){.planTbl{display:none}.planCards{display:block}}
+@media (max-width:1050px){.kpis4{grid-template-columns:repeat(2,1fr)}.sumcards{grid-template-columns:1fr}}
+@media (max-width:640px){.profile{grid-template-columns:auto 1fr}.profile .ring{grid-column:1/-1;justify-self:center}.kpis4{grid-template-columns:1fr 1fr}.bigval{font-size:24px}.sumcard .v{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="brand">
+      <div class="logo">🎯</div>
+      <div>
+        <h1>Monthly Target Tracker</h1>
+        <div class="sub" id="brandSub">Studio 7 Mega Bangna · สาขา 251</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary admin-only" id="openUpload">⬆ อัปเดตข้อมูล</button>
+      <button class="btn admin-only" id="openSettings">⚙ เป้า & ตั้งค่า</button>
+      <button class="btn admin-only" id="logoutBtn" title="ออกจากโหมดผู้ดูแล">ออก</button>
+      <button class="btn" id="loginBtn" hidden>🔒 ผู้ดูแล</button>
+      <button class="btn" id="themeBtn" aria-label="สลับธีม">◐</button>
+    </div>
+  </header>
+
+  <div class="bar">
+    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#people" id="tabPeople">รายบุคคล</a></nav>
+    <div class="daybox" id="daybox"></div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <!-- ================= STORE ================= -->
+  <section class="view" id="vStore">
+    <div class="kpis4" id="storeKpis"></div>
+    <section class="card sec" style="margin-top:12px">
+      <div class="sechead"><div><h2>ยอดขายตามหมวด เทียบเป้าเดือนนี้</h2><div class="hint">แถบทึบ = ทำได้แล้ว · เส้นประ = คาดการณ์สิ้นเดือน (FC) · ขีดดำ = ควรอยู่ตรงนี้ตามจำนวนวันที่ผ่านไป</div></div></div>
+      <div class="catgrid" id="catGrid"></div>
+    </section>
+    <section class="card sec" style="margin-top:12px">
+      <div class="sechead">
+        <div><h2>ยอดขายรายบุคคล</h2><div class="hint">เรียงตาม % ยอดรวมเทียบเป้า · คลิกหัวคอลัมน์เพื่อเรียง · คลิกชื่อเพื่อดูแผนรายบุคคล</div></div>
+        <input class="search" id="search" placeholder="ค้นหาชื่อ / รหัส">
+      </div>
+      <div class="tablewrap"><table id="staffTbl" class="wide"></table></div>
+    </section>
+    <div class="grid2">
+      <section class="card sec">
+        <div class="sechead"><div><h2>MIX 3RD (เป้า <span class="mixT">7%</span>)</h2><div class="hint">ยอด 3RD ÷ ยอดขายที่ไม่ใช่ 3RD · เส้นประ = เป้า</div></div></div>
+        <div class="chart" id="mixChart"></div>
+      </section>
+      <section class="card sec">
+        <div class="sechead"><div><h2>ยอดขายรวมรายวัน (ทั้งร้าน)</h2><div class="hint">บาท · พนักงานในรายชื่อ</div></div></div>
+        <div class="chart" id="dailyChart"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ================= PERSON ================= -->
+  <section class="view" id="vPeople">
+    <div class="picker" id="picker"></div>
+    <div id="personBody"></div>
+  </section>
+</div>
+
+<!-- upload -->
+<div class="scrim" id="upScrim"><div class="modal">
+  <header><h3>อัปเดตข้อมูลยอดขาย</h3><button class="x" data-close>×</button></header>
+  <div class="body">
+    <label class="drop" id="drop">
+      <div class="big">ลากไฟล์ Excel มาวางที่นี่</div>
+      <p>ไฟล์ export ยอดขาย หรือไฟล์ที่มีชีต Data (และชีต TG ถ้าต้องการอัปเดตเป้า)</p>
+      <span class="btn primary">เลือกไฟล์</span>
+      <input type="file" id="file" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+    </label>
+    <label class="chk" style="margin-top:12px"><input type="checkbox" id="mergeChk"> รวมกับข้อมูลเดิม (แทนที่เฉพาะวันที่ซ้ำ) — ติ๊กเมื่อไฟล์มีเฉพาะยอดวันใหม่</label><br>
+    <label class="chk" style="margin-top:6px"><input type="checkbox" id="tgChk" checked> ถ้าไฟล์มีชีต <b>TG</b> ให้อัปเดตเป้าพนักงานตามไฟล์</label>
+    <div class="status" id="upStatus"></div>
+    <ol class="steps">
+      <li>ใช้ไฟล์ export ดิบได้เลย ไม่ต้องใส่สูตร (ต้องมีคอลัมน์ Number, ราคาขายตามบิล, Category (ID), Category (Name), Sub Category, Brand, Product (Code), Customer (Code), Branch (ID), Officer (ID), Doc Date)</li>
+      <li>จัดกลุ่ม Sub Category → iPhone / 3RD / BTB(Apple) / Service เหมือน VLOOKUP เดิม (ถ้าไฟล์มีตาราง A:B จะใช้ของไฟล์ใหม่)</li>
+      <li>ระบบเก็บเฉพาะยอดของเดือนล่าสุดในไฟล์ · ส่งขึ้นเซิร์ฟเวอร์เป็นยอดสรุป คนดูโหลดเร็ว</li>
+    </ol>
+  </div>
+</div></div>
+
+<!-- settings -->
+<div class="scrim" id="setScrim"><div class="modal xl">
+  <header><h3>เป้าหมาย & ตั้งค่า</h3><button class="x" data-close>×</button></header>
+  <div class="body">
+    <div class="form" style="grid-template-columns:repeat(4,1fr)">
+      <div class="field"><label>วันที่ยอดขายล่าสุด (ปล่อยว่าง = อัตโนมัติ)</label><input type="number" id="sDay" min="1" max="31" placeholder="อัตโนมัติ"><div class="help" id="sDayHelp"></div></div>
+      <div class="field"><label>เป้า ATT Cover Plus %</label><input type="number" id="aSmile"></div>
+      <div class="field"><label>เป้า MIX 3RD %</label><input type="number" id="aMix"></div>
+      <div class="field"><label>เป้า AC+ %</label><input type="number" id="aAc"></div>
+      <div class="field"><label>เป้า Sim ATT %</label><input type="number" id="aSim"></div>
+      <div class="field"><label>เป้า UFUND ATT %</label><input type="number" id="aUfund"></div>
+      <div class="field"><label>เป้า PVL ATT %</label><input type="number" id="aPvl"></div>
+      <div class="field"><label>เป้า Pencil ATT %</label><input type="number" id="aPencil"></div>
+    </div>
+    <div class="help" style="margin-top:4px">ช่องเป้า ATT ที่เป็น 0 = ไม่ระบายสีเขียว/แดง</div>
+    <div class="h4">พนักงาน & เป้ายอดขายรายเดือน (บาท · Sim เป็นจำนวนเครื่อง)</div>
+    <div class="tablewrap" style="margin:0"><table class="stafftbl tgtbl" style="min-width:1080px"><thead><tr><th>รูป</th><th>รหัส</th><th>ชื่อ</th><th>ตำแหน่ง</th><th>Mac</th><th>iPad</th><th>iPhone</th><th>AW</th><th>ABA</th><th>3RD</th><th>Sim</th><th></th></tr></thead><tbody id="staffBody"></tbody>
+    <tfoot><tr><td colspan="4" style="text-align:right;font-weight:500;background:transparent">เติมเป้าเท่ากันทุกคน →</td>
+      <td><input data-all="mac"></td><td><input data-all="ipad"></td><td><input data-all="iphone"></td><td><input data-all="aw"></td><td><input data-all="aba"></td><td><input data-all="rd"></td><td><input data-all="sim"></td><td><button class="btn sm" id="fillAll">เติม</button></td></tr></tfoot></table></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn sm" id="addStaff">+ เพิ่มพนักงาน</button>
+      <select class="btn sm" id="addFromData"><option value="">+ เพิ่มจากรายชื่อในข้อมูล…</option></select>
+    </div>
+  </div>
+  <footer><button class="btn" data-close>ยกเลิก</button><button class="btn primary" id="saveSettings">บันทึก</button></footer>
+</div></div>
+
+<!-- login -->
+<div class="scrim" id="loginScrim"><div class="modal" style="max-width:420px">
+  <header><h3>เข้าสู่โหมดผู้ดูแล</h3><button class="x" data-close>×</button></header>
+  <div class="body"><div class="field"><label>รหัสผู้ดูแล (ADMIN_KEY ที่ตั้งไว้ใน Netlify)</label><input type="password" id="keyInp" autocomplete="current-password"></div>
+  <div class="status" id="loginStatus"></div></div>
+  <footer><button class="btn" data-close>ยกเลิก</button><button class="btn primary" id="loginGo">เข้าสู่ระบบ</button></footer>
+</div></div>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<script id="baseline" type="application/json">{"source":"7 Wonder (1–18 พ.ย. 2569)","staff":[{"branch":251,"id":21095,"name":"ชัยสิทธิ","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":14306,"name":"พิสุทธิ์","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":7700,"name":"วรชัย","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":12558,"name":"นุชจิรา","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":35202,"name":"ศรีสุดา","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":20353,"name":"วัชรพงษ์","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":12165,"name":"อภิชาติ","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":24600,"name":"สุพรรณี","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":24737,"name":"นันท์นภัส","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":31408,"name":"ณัทญา","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":31607,"name":"ประวีณา","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":32548,"name":"จีรวรรณ","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":33384,"name":"ธนากร","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}},{"branch":251,"id":35835,"name":"กัญญารัตน์","pos":"PIA","tg":{"mac":698555.29,"ipad":823552.64,"iphone":6512387.64,"aw":869320.93,"aba":619082.43,"rd":398385.07,"sim":22.21}}],"names":{"12165":"อภิชาติ","21095":"ชัยสิทธิ์","32548":"จีรวรรณ","35202":"ศรีสุดา","7700":"วรชัย","33384":"ธนากร","20353":"วัชรพงษ์","35835":"กัญญารัตน์","14306":"พิสุทธิ์","34593":"น้ำเพชร","12558":"นุชจิรา","31408":"ณัทญา","24600":"สุพรรณี","31607":"ประวีณา","34692":"กฤติกา","34575":"ขวัญชนก","24737":"นันท์นภัส","34592":"ณัฎฐมนู","10273":"มานพ","12171":"ผดุงศิษย์","1":"System","2220":"ชาญวิทย์","13063":"ปรียาวดี"},"settings":{"dayOverride":null,"att":{"smile":0.25,"sim":0,"ufund":0,"pvl":0,"ac":0,"pencil":0,"mix":0.07}},"rows":[["2026-11-01",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,18865.0,0.0,0.0,0.0,0.0],["2026-11-01",251,2220,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4180.0,0.0,0.0,0.0,0.0],["2026-11-01",251,7700,1.0,27900.0,2.0,56600.0,8.0,449503.86,0.0,0.0,0.0,1.0,0.0,1.0,0.0,3.0,2.0,23714.42,25061.72,0.0,0.0,0.0],["2026-11-01",251,12165,1.0,66200.0,0.0,0.0,7.0,383650.58,0.0,0.0,0.0,1.0,0.0,0.0,3.0,2.0,1.0,50414.42,15151.0,0.0,0.0,0.0],["2026-11-01",251,12558,1.0,41600.0,1.0,16900.0,8.0,416280.0,5.0,104500.0,2.0,0.0,2.0,1.0,0.0,1.0,0.0,9900.0,18343.0,0.0,0.0,9998.0],["2026-11-01",251,14306,0.0,0.0,1.0,28300.0,7.0,329960.0,1.0,16900.0,2.0,1.0,2.0,0.0,0.0,1.0,0.0,6060.0,16139.0,0.0,0.0,9398.0],["2026-11-01",251,20353,0.0,0.0,3.0,61500.0,9.0,457365.0,2.0,31800.0,3.0,2.0,0.0,1.0,1.0,1.0,1.0,22270.0,13689.0,0.0,0.0,14997.0],["2026-11-01",251,21095,4.0,154800.0,2.0,52629.15,8.0,385724.25,0.0,0.0,3.0,3.0,0.0,2.0,4.0,2.0,1.0,34953.66,24614.94,0.0,0.0,14997.0],["2026-11-01",251,24600,0.0,0.0,1.0,16900.0,7.0,352300.0,0.0,0.0,2.0,0.0,1.0,0.0,4.0,3.0,3.0,37000.0,14858.0,0.0,0.0,9998.0],["2026-11-01",251,24737,0.0,0.0,0.0,0.0,10.0,487402.15,0.0,0.0,3.0,3.0,0.0,1.0,0.0,0.0,3.0,26370.0,20712.85,0.0,0.0,14997.0],["2026-11-01",251,31408,0.0,0.0,1.0,16900.0,8.0,477280.0,0.0,0.0,2.0,0.0,1.0,0.0,0.0,1.0,1.0,11050.0,15209.0,0.0,0.0,9998.0],["2026-11-01",251,31607,0.0,0.0,1.0,16900.0,6.0,273480.0,2.0,35800.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,15100.0,9410.0,0.0,0.0,9998.0],["2026-11-01",251,32548,1.0,125900.0,3.0,71500.0,7.0,328620.0,1.0,14900.0,0.0,0.0,1.0,0.0,1.0,1.0,1.0,32830.0,11028.0,0.0,0.0,0.0],["2026-11-01",251,33384,2.0,72800.0,2.0,33800.0,5.0,263641.04,1.0,16900.0,2.0,1.0,1.0,0.0,0.0,2.0,1.0,28190.0,11897.96,0.0,0.0,15998.0],["2026-11-01",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,3.0,57700.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2590.0,0.0,0.0,0.0,0.0],["2026-11-01",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,2.0,38490.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2740.0,950.0,0.0,0.0,0.0],["2026-11-01",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,2.0,29800.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1390.0,1150.0,0.0,0.0,0.0],["2026-11-01",251,35202,1.0,48700.0,1.0,28281.34,5.0,216542.31,1.0,18900.0,3.0,2.0,0.0,0.0,0.0,1.0,2.0,18520.0,10781.35,0.0,0.0,14997.0],["2026-11-01",251,35835,0.0,0.0,0.0,0.0,3.0,141184.12,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,4.0,26600.0,3462.88,0.0,0.0,0.0],["2026-11-02",251,7700,0.0,0.0,0.0,0.0,1.0,48900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-02",251,12165,0.0,0.0,1.0,24300.0,4.0,253600.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,2.0,29940.0,10528.0,0.0,0.0,0.0],["2026-11-02",251,12558,1.0,27900.0,2.0,33800.0,4.0,227680.0,1.0,7590.0,1.0,0.0,0.0,1.0,0.0,2.0,2.0,30200.0,13732.0,0.0,0.0,4999.0],["2026-11-02",251,20353,1.0,61900.0,1.0,16900.0,4.0,231906.34,4.0,78600.0,1.0,0.0,0.0,2.0,0.0,0.0,2.0,19073.66,9849.0,0.0,0.0,4999.0],["2026-11-02",251,21095,8.0,1321610.0,1.0,27300.0,6.0,317377.91,2.0,59800.0,0.0,2.0,0.0,0.0,2.0,1.0,0.0,17970.0,14645.09,0.0,0.0,0.0],["2026-11-02",251,24600,0.0,0.0,0.0,0.0,2.0,96880.0,1.0,16900.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,9690.0,5939.0,0.0,0.0,0.0],["2026-11-02",251,24737,0.0,0.0,0.0,0.0,3.0,133700.0,4.0,74600.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,11650.0,8519.0,0.0,0.0,0.0],["2026-11-02",251,31408,1.0,66200.0,1.0,24300.0,6.0,288120.18,3.0,40390.0,0.0,2.0,2.0,1.0,1.0,0.0,2.0,41640.0,10702.82,0.0,963.0,0.0],["2026-11-02",251,31607,0.0,0.0,3.0,154100.0,0.0,0.0,1.0,16900.0,1.0,0.0,0.0,0.0,1.0,3.0,1.0,23240.0,5300.0,0.0,0.0,4999.0],["2026-11-02",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,6140.0,0.0,0.0,0.0,0.0],["2026-11-02",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,790.0,0.0,0.0,0.0,0.0],["2026-11-02",251,35202,1.0,41600.0,1.0,37300.0,3.0,174780.0,2.0,48800.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,12330.0,9652.0,0.0,0.0,0.0],["2026-11-02",251,35835,0.0,0.0,0.0,0.0,1.0,52900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-03",251,7700,1.0,27900.0,2.0,56600.0,1.0,42633.63,1.0,14900.0,0.0,1.0,0.0,0.0,0.0,1.0,6.0,37730.0,7494.37,0.0,0.0,0.0],["2026-11-03",251,12558,2.0,54100.0,0.0,0.0,4.0,278680.0,0.0,0.0,1.0,0.0,0.0,2.0,0.0,0.0,0.0,6230.0,4260.0,0.0,0.0,4999.0],["2026-11-03",251,14306,0.0,0.0,1.0,34300.0,3.0,140685.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0,2.0,18710.0,8049.0,0.0,0.0,0.0],["2026-11-03",251,21095,1.0,41600.0,3.0,70529.15,1.0,69925.49,2.0,59800.0,1.0,2.0,0.0,0.0,2.0,3.0,0.0,30960.0,20146.36,0.0,0.0,4999.0],["2026-11-03",251,24600,0.0,0.0,2.0,41286.73,3.0,190700.0,1.0,14900.0,1.0,1.0,0.0,0.0,2.0,3.0,3.0,83310.0,9016.27,0.0,0.0,4999.0],["2026-11-03",251,24737,0.0,0.0,2.0,33800.0,5.0,325217.18,0.0,0.0,2.0,2.0,1.0,0.0,0.0,2.0,1.0,23430.0,11550.82,0.0,0.0,9998.0],["2026-11-03",251,31408,0.0,0.0,0.0,0.0,5.0,260580.0,1.0,23900.0,0.0,1.0,0.0,1.0,2.0,1.0,1.0,49840.0,7639.0,0.0,0.0,0.0],["2026-11-03",251,31607,1.0,41600.0,1.0,24300.0,1.0,48900.0,1.0,16900.0,0.0,0.0,0.0,0.0,1.0,0.0,2.0,24660.0,2482.0,0.0,0.0,0.0],["2026-11-03",251,33384,1.0,59100.0,2.0,56600.0,2.0,105800.0,1.0,7590.0,1.0,0.0,0.0,0.0,2.0,2.0,0.0,17520.0,18591.0,0.0,0.0,4999.0],["2026-11-03",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,1.0,29900.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,8780.0,2830.0,0.0,0.0,0.0],["2026-11-03",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3590.0,5088.0,0.0,0.0,0.0],["2026-11-03",251,35835,1.0,27900.0,1.0,27100.0,3.0,136700.0,1.0,14900.0,0.0,0.0,0.0,0.0,1.0,2.0,0.0,16910.0,1789.0,0.0,0.0,0.0],["2026-11-04",251,1,0.0,0.0,0.0,0.0,2.0,66555.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3800.0,0.0,0.0,0.0,0.0],["2026-11-04",251,7700,0.0,0.0,1.0,28300.0,4.0,211600.0,1.0,29900.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,12390.0,6189.0,0.0,0.0,0.0],["2026-11-04",251,12165,1.0,48700.0,1.0,16900.0,5.0,285007.0,0.0,0.0,1.0,1.0,0.0,1.0,0.0,1.0,0.0,7920.0,10583.0,0.0,0.0,4999.0],["2026-11-04",251,14306,2.0,74500.0,0.0,0.0,5.0,245558.28,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,690.0,11184.72,0.0,0.0,0.0],["2026-11-04",251,20353,0.0,0.0,1.0,28300.0,3.0,150780.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,2.0,18780.0,7070.0,0.0,0.0,0.0],["2026-11-04",251,21095,1.0,109500.0,0.0,0.0,7.0,362380.0,4.0,46980.0,0.0,0.0,0.0,0.0,3.0,1.0,1.0,44560.0,16943.0,0.0,0.0,0.0],["2026-11-04",251,24737,0.0,0.0,0.0,0.0,8.0,388420.47,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,2.0,11770.0,13758.53,0.0,0.0,0.0],["2026-11-04",251,31408,0.0,0.0,1.0,20900.0,5.0,287500.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,4320.0,7870.0,0.0,0.0,4999.0],["2026-11-04",251,32548,0.0,0.0,0.0,0.0,1.0,52900.0,2.0,31800.0,1.0,0.0,0.0,1.0,1.0,0.0,0.0,11840.0,690.0,0.0,0.0,4999.0],["2026-11-04",251,33384,0.0,0.0,0.0,0.0,3.0,142808.34,0.0,0.0,0.0,1.0,1.0,1.0,1.0,0.0,0.0,13920.0,7309.66,0.0,0.0,0.0],["2026-11-04",251,35202,1.0,41600.0,0.0,0.0,2.0,97880.0,2.0,33800.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3160.0,4263.0,0.0,0.0,0.0],["2026-11-04",251,35835,0.0,0.0,1.0,27100.0,2.0,83800.0,2.0,31800.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,13450.0,5500.0,0.0,0.0,0.0],["2026-11-05",251,1,0.0,0.0,0.0,0.0,0.0,0.0,1.0,29900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1500.0,0.0,0.0,0.0,0.0],["2026-11-05",251,7700,0.0,0.0,2.0,62600.0,3.0,144780.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0,2.0,1.0,23830.0,8760.0,0.0,0.0,4999.0],["2026-11-05",251,12165,0.0,0.0,1.0,28300.0,2.0,101800.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,13740.0,440.0,0.0,0.0,0.0],["2026-11-05",251,12558,1.0,27900.0,0.0,0.0,2.0,105800.0,3.0,53390.0,0.0,0.0,1.0,2.0,0.0,0.0,0.0,6670.0,12828.0,0.0,0.0,0.0],["2026-11-05",251,14306,0.0,0.0,0.0,0.0,2.0,101800.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,17490.0,12139.0,0.0,0.0,0.0],["2026-11-05",251,20353,0.0,0.0,4.0,77800.0,1.0,56900.0,1.0,18900.0,0.0,0.0,0.0,0.0,1.0,1.0,2.0,29390.0,4350.0,0.0,0.0,0.0],["2026-11-05",251,24600,0.0,0.0,2.0,78200.0,4.0,167600.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,1.0,3.0,29450.0,16557.0,0.0,0.0,0.0],["2026-11-05",251,31607,0.0,0.0,1.0,24300.0,2.0,105800.0,1.0,14900.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,6660.0,13718.0,0.0,0.0,0.0],["2026-11-05",251,32548,0.0,0.0,0.0,0.0,4.0,197600.0,1.0,14900.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,17530.0,6750.0,0.0,0.0,0.0],["2026-11-05",251,33384,1.0,41600.0,1.0,42900.0,3.0,178700.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,13030.0,15134.0,0.0,0.0,0.0],["2026-11-05",251,35202,2.0,79800.0,2.0,39183.95,6.0,271200.0,0.0,0.0,0.0,2.0,0.0,1.0,0.0,1.0,1.0,32250.0,9485.05,0.0,963.0,0.0],["2026-11-05",251,35835,0.0,0.0,0.0,0.0,4.0,233680.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,8820.0,7540.0,0.0,0.0,0.0],["2026-11-06",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1500.0,0.0,0.0,0.0,0.0],["2026-11-06",251,7700,2.0,93700.0,0.0,0.0,4.0,253680.0,0.0,0.0,1.0,0.0,0.0,0.0,2.0,0.0,3.0,47790.0,9886.0,0.0,0.0,4999.0],["2026-11-06",251,12165,0.0,0.0,3.0,80900.0,3.0,182700.0,1.0,12650.0,2.0,0.0,0.0,1.0,1.0,1.0,1.0,16410.0,8420.0,0.0,0.0,11998.0],["2026-11-06",251,12558,0.0,0.0,0.0,0.0,3.0,142864.42,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,2.0,20189.0,13510.58,0.0,0.0,4999.0],["2026-11-06",251,14306,0.0,0.0,1.0,28300.0,3.0,148828.16,3.0,34890.0,1.0,0.0,1.0,0.0,0.0,0.0,1.0,8331.84,8527.0,0.0,0.0,4999.0],["2026-11-06",251,20353,1.0,41600.0,0.0,0.0,6.0,353647.3,0.0,0.0,2.0,1.0,0.0,0.0,0.0,1.0,2.0,27317.7,2820.0,0.0,0.0,9998.0],["2026-11-06",251,21095,0.0,0.0,1.0,23100.0,7.0,307083.92,1.0,29900.0,2.0,0.0,1.0,0.0,1.0,2.0,3.0,32716.08,15179.0,0.0,0.0,9398.0],["2026-11-06",251,24600,0.0,0.0,0.0,0.0,2.0,97880.0,1.0,12650.0,1.0,0.0,0.0,1.0,1.0,0.0,1.0,24720.0,2929.0,0.0,0.0,4999.0],["2026-11-06",251,31607,0.0,0.0,1.0,24300.0,0.0,0.0,2.0,42550.0,0.0,0.0,0.0,0.0,2.0,1.0,0.0,9650.0,7950.0,0.0,0.0,0.0],["2026-11-06",251,33384,0.0,0.0,0.0,0.0,1.0,56747.16,2.0,27300.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,13180.0,6290.84,0.0,0.0,0.0],["2026-11-06",251,35202,0.0,0.0,1.0,25900.0,2.0,108682.69,2.0,33300.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,7780.0,9371.31,0.0,0.0,0.0],["2026-11-06",251,35835,0.0,0.0,3.0,72500.0,1.0,44980.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,3.0,4.0,49320.0,7979.0,0.0,0.0,0.0],["2026-11-07",251,7700,0.0,0.0,2.0,48000.0,4.0,194706.19,1.0,14650.0,0.0,1.0,1.0,1.0,1.0,2.0,1.0,19349.0,8682.81,0.0,0.0,0.0],["2026-11-07",251,12165,0.0,0.0,1.0,54900.0,1.0,48900.0,4.0,54257.22,0.0,1.0,0.0,0.0,1.0,2.0,1.0,24140.0,32817.78,0.0,0.0,0.0],["2026-11-07",251,12558,1.0,27900.0,1.0,27100.0,2.0,83800.0,3.0,57200.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,9980.0,16559.0,0.0,0.0,0.0],["2026-11-07",251,14306,0.0,0.0,1.0,28300.0,3.0,135780.0,1.0,12650.0,0.0,0.0,0.0,0.0,2.0,1.0,1.0,25470.0,9070.0,0.0,0.0,0.0],["2026-11-07",251,20353,0.0,0.0,1.0,28300.0,6.0,288640.0,0.0,0.0,2.0,0.0,1.0,0.0,1.0,1.0,3.0,33628.0,13060.0,0.0,0.0,9998.0],["2026-11-07",251,21095,1.0,48700.0,0.0,0.0,5.0,251771.45,1.0,29900.0,0.0,1.0,0.0,0.0,0.0,1.0,2.0,19214.42,10856.13,0.0,0.0,0.0],["2026-11-07",251,24600,0.0,0.0,1.0,28300.0,5.0,311605.0,0.0,0.0,2.0,1.0,0.0,1.0,1.0,1.0,1.0,25080.0,11108.0,0.0,0.0,15998.0],["2026-11-07",251,24737,0.0,0.0,1.0,42900.0,5.0,232638.28,1.0,12650.0,1.0,1.0,0.0,0.0,0.0,0.0,2.0,11070.0,11148.72,0.0,0.0,4999.0],["2026-11-07",251,31408,1.0,41600.0,2.0,56600.0,5.0,238430.55,2.0,21240.0,1.0,2.0,0.0,0.0,0.0,1.0,3.0,28540.0,23901.45,0.0,0.0,4999.0],["2026-11-07",251,33384,0.0,0.0,0.0,0.0,3.0,167860.0,2.0,33300.0,1.0,0.0,0.0,1.0,2.0,0.0,0.0,7450.0,2381.0,0.0,0.0,10999.0],["2026-11-07",251,35202,0.0,0.0,2.0,56600.0,7.0,381485.0,1.0,12650.0,1.0,2.0,0.0,1.0,2.0,1.0,1.0,43129.0,19493.0,0.0,0.0,4999.0],["2026-11-07",251,35835,0.0,0.0,0.0,0.0,5.0,233380.0,4.0,52600.0,0.0,0.0,0.0,0.0,1.0,0.0,2.0,26150.0,14739.0,0.0,0.0,0.0],["2026-11-08",251,7700,0.0,0.0,0.0,0.0,10.0,557800.0,2.0,42550.0,1.0,0.0,0.0,0.0,1.0,0.0,0.0,15739.0,30939.0,0.0,0.0,6999.0],["2026-11-08",251,12165,1.0,41600.0,3.0,78700.0,6.0,319698.53,0.0,0.0,3.0,0.0,1.0,0.0,0.0,2.0,3.0,22161.47,14316.0,0.0,0.0,14997.0],["2026-11-08",251,12558,0.0,0.0,4.0,82049.0,10.0,550255.12,0.0,0.0,1.0,3.0,1.0,1.0,0.0,2.0,1.0,11781.47,17062.41,0.0,0.0,4999.0],["2026-11-08",251,14306,1.0,39275.0,0.0,0.0,7.0,382776.36,0.0,0.0,2.0,2.0,0.0,0.0,1.0,0.0,2.0,18698.64,10023.0,0.0,0.0,9998.0],["2026-11-08",251,20353,2.0,107800.0,1.0,18552.86,10.0,538060.82,1.0,12650.0,2.0,2.0,1.0,0.0,0.0,1.0,2.0,22812.81,24625.51,0.0,0.0,9998.0],["2026-11-08",251,21095,0.0,0.0,2.0,68600.0,18.0,931688.96,3.0,52950.0,4.0,3.0,1.0,0.0,5.0,3.0,4.0,68543.67,24615.37,0.0,0.0,19996.0],["2026-11-08",251,24600,0.0,0.0,4.0,85000.0,11.0,585883.69,0.0,0.0,1.0,1.0,1.0,0.0,0.0,2.0,7.0,48584.22,21842.09,0.0,963.0,4399.0],["2026-11-08",251,24737,0.0,0.0,0.0,0.0,7.0,386300.0,0.0,0.0,2.0,0.0,0.0,1.0,0.0,1.0,0.0,10090.0,11829.0,0.0,0.0,9998.0],["2026-11-08",251,31408,0.0,0.0,3.0,66900.0,9.0,462459.16,0.0,0.0,1.0,4.0,0.0,1.0,0.0,1.0,3.0,20396.38,16717.46,0.0,963.0,4399.0],["2026-11-08",251,32548,0.0,0.0,1.0,27100.0,5.0,276500.0,1.0,14650.0,1.0,0.0,1.0,0.0,0.0,1.0,1.0,14990.0,890.0,0.0,0.0,4999.0],["2026-11-08",251,33384,1.0,52900.0,3.0,104100.0,4.0,243600.0,1.0,7590.0,1.0,0.0,0.0,0.0,1.0,1.0,1.0,20730.0,12649.0,0.0,0.0,4999.0],["2026-11-08",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,3.0,39950.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,4320.0,2170.0,0.0,0.0,0.0],["2026-11-08",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,6.0,79900.0,0.0,0.0,0.0,1.0,0.0,0.0,2.0,16850.0,4249.0,0.0,0.0,0.0],["2026-11-08",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,3.0,41950.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,6180.0,350.0,0.0,0.0,0.0],["2026-11-08",251,35202,0.0,0.0,1.0,38900.0,10.0,533892.18,0.0,0.0,2.0,1.0,0.0,0.0,0.0,0.0,0.0,5030.0,11221.82,0.0,0.0,9998.0],["2026-11-08",251,35835,0.0,0.0,2.0,47200.0,7.0,321380.0,1.0,27650.0,1.0,0.0,0.0,1.0,1.0,1.0,2.0,19329.0,15129.0,0.0,0.0,4399.0],["2026-11-09",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-09",251,10273,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,500.0,0.0,0.0],["2026-11-09",251,12165,0.0,0.0,2.0,45200.0,6.0,314480.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,1.0,1.0,10160.0,9147.0,0.0,0.0,9998.0],["2026-11-09",251,12171,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,500.0,0.0,0.0],["2026-11-09",251,12558,2.0,97400.0,1.0,16900.0,5.0,304500.0,1.0,12650.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,21750.0,6240.0,0.0,0.0,0.0],["2026-11-09",251,20353,0.0,0.0,2.0,33800.0,5.0,250500.0,3.0,34890.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,6830.0,11220.0,0.0,0.0,0.0],["2026-11-09",251,21095,0.0,0.0,3.0,145149.0,7.0,395300.0,0.0,0.0,1.0,2.0,0.0,0.0,1.0,0.0,0.0,14730.0,30005.0,0.0,963.0,9999.0],["2026-11-09",251,24737,1.0,48700.0,0.0,0.0,4.0,229600.0,1.0,18650.0,2.0,1.0,0.0,0.0,0.0,0.0,2.0,20848.0,33508.0,0.0,0.0,9998.0],["2026-11-09",251,31408,0.0,0.0,2.0,84200.0,4.0,227600.0,1.0,14650.0,1.0,0.0,0.0,0.0,1.0,2.0,0.0,15740.0,8040.0,0.0,0.0,4999.0],["2026-11-09",251,31607,1.0,47000.0,1.0,30300.0,3.0,174700.0,0.0,0.0,2.0,0.0,0.0,0.0,1.0,1.0,0.0,13170.0,17101.0,0.0,0.0,9998.0],["2026-11-09",251,32548,0.0,0.0,0.0,0.0,4.0,224058.46,1.0,29900.0,0.0,1.0,0.0,0.0,0.0,0.0,2.0,15825.54,6299.0,0.0,0.0,0.0],["2026-11-09",251,33384,1.0,39900.0,2.0,56600.0,0.0,0.0,1.0,12650.0,0.0,0.0,0.0,0.0,1.0,2.0,0.0,9290.0,7310.0,0.0,0.0,0.0],["2026-11-09",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,12319.0,6690.0,0.0,0.0,0.0],["2026-11-09",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,2.0,20240.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,790.0,1780.0,0.0,0.0,0.0],["2026-11-09",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2580.0,0.0,0.0,0.0,0.0],["2026-11-09",251,35202,0.0,0.0,0.0,0.0,7.0,380100.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,3640.0,23587.0,0.0,0.0,9998.0],["2026-11-10",251,7700,0.0,0.0,0.0,0.0,4.0,246600.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,11050.0,10659.0,0.0,0.0,0.0],["2026-11-10",251,12558,0.0,0.0,1.0,27100.0,5.0,251740.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3.0,1.0,27900.0,16268.0,0.0,0.0,0.0],["2026-11-10",251,14306,1.0,48700.0,1.0,24300.0,2.0,92022.3,3.0,59450.0,1.0,0.0,0.0,0.0,2.0,0.0,2.0,23237.7,10842.0,0.0,0.0,4999.0],["2026-11-10",251,21095,0.0,0.0,2.0,70600.0,11.0,633980.0,5.0,82250.0,1.0,0.0,0.0,0.0,1.0,2.0,0.0,21640.0,18560.0,0.0,0.0,4999.0],["2026-11-10",251,24737,0.0,0.0,1.0,42900.0,7.0,400300.0,1.0,14650.0,1.0,1.0,1.0,0.0,0.0,1.0,1.0,20059.0,24616.0,0.0,0.0,4999.0],["2026-11-10",251,31408,0.0,0.0,0.0,0.0,5.0,237580.0,2.0,27300.0,2.0,0.0,1.0,0.0,1.0,0.0,0.0,3330.0,12590.0,0.0,0.0,9998.0],["2026-11-10",251,31607,0.0,0.0,0.0,0.0,2.0,107778.28,2.0,27300.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,9300.0,9500.72,0.0,0.0,0.0],["2026-11-10",251,32548,1.0,76900.0,1.0,24300.0,4.0,206680.0,1.0,33900.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,8740.0,5949.0,0.0,0.0,0.0],["2026-11-10",251,33384,0.0,0.0,1.0,20900.0,3.0,145860.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,20530.0,7440.0,0.0,0.0,0.0],["2026-11-10",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,2.0,40300.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,5580.0,0.0,0.0,0.0,0.0],["2026-11-10",251,35835,0.0,0.0,0.0,0.0,4.0,247600.0,4.0,87100.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1580.0,7399.0,0.0,0.0,0.0],["2026-11-11",251,1,0.0,0.0,0.0,0.0,0.0,0.0,2.0,25089.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1685.2,50.0,0.0,0.0],["2026-11-11",251,7700,1.0,61900.0,0.0,0.0,6.0,309480.0,0.0,0.0,4.0,0.0,0.0,0.0,0.0,0.0,0.0,990.0,2080.0,0.0,0.0,19996.0],["2026-11-11",251,12165,0.0,0.0,0.0,0.0,2.0,93880.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3.0,22387.0,290.0,0.0,0.0,0.0],["2026-11-11",251,14306,0.0,0.0,1.0,16900.0,3.0,147761.04,0.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0,0.0,11870.0,13327.96,0.0,0.0,0.0],["2026-11-11",251,20353,0.0,0.0,2.0,115200.0,4.0,217705.0,4.0,69600.0,1.0,2.0,0.0,0.0,2.0,1.0,1.0,28469.0,19838.0,0.0,0.0,4999.0],["2026-11-11",251,21095,1.0,26200.0,0.0,0.0,4.0,215600.0,1.0,12650.0,1.0,0.0,2.0,0.0,0.0,0.0,2.0,16770.0,4840.0,0.0,0.0,4999.0],["2026-11-11",251,24600,0.0,0.0,0.0,0.0,1.0,60900.0,1.0,14650.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,43170.0,5100.0,0.0,0.0,0.0],["2026-11-11",251,24737,0.0,0.0,2.0,45200.0,2.0,95880.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0,2.0,0.0,8550.0,4290.0,0.0,0.0,4999.0],["2026-11-11",251,31408,0.0,0.0,1.0,16900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,16979.0,4870.0,0.0,0.0,0.0],["2026-11-11",251,32548,0.0,0.0,0.0,0.0,3.0,132860.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,6250.0,5410.0,0.0,0.0,0.0],["2026-11-11",251,33384,1.0,48700.0,0.0,0.0,2.0,121800.0,1.0,12650.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,7360.0,5700.0,0.0,0.0,0.0],["2026-11-11",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4170.0,0.0,0.0,0.0,0.0],["2026-11-11",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,2.0,20240.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2140.0,3010.0,0.0,0.0,0.0],["2026-11-11",251,35202,0.0,0.0,0.0,0.0,5.0,262500.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,0.0,6040.0,6579.0,0.0,0.0,4999.0],["2026-11-11",251,35835,0.0,0.0,1.0,16900.0,4.0,202680.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,1.0,19750.0,10550.0,0.0,0.0,0.0],["2026-11-12",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2100.0,0.0,0.0,0.0,0.0],["2026-11-12",251,7700,0.0,0.0,1.0,24300.0,4.0,205600.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0,1.0,2.0,27230.0,17129.0,0.0,0.0,4999.0],["2026-11-12",251,12165,1.0,48700.0,0.0,0.0,3.0,162780.0,1.0,29900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,600.0,9707.0,0.0,0.0,0.0],["2026-11-12",251,12558,0.0,0.0,0.0,0.0,4.0,313600.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,11840.0,2470.0,0.0,0.0,0.0],["2026-11-12",251,14306,0.0,0.0,0.0,0.0,2.0,87800.0,1.0,29900.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,12300.0,6999.0,0.0,0.0,4999.0],["2026-11-12",251,20353,1.0,41600.0,0.0,0.0,1.0,52900.0,4.0,64540.0,0.0,0.0,0.0,0.0,2.0,0.0,2.0,28499.0,1590.0,0.0,0.0,0.0],["2026-11-12",251,21095,0.0,0.0,0.0,0.0,1.0,60900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3260.0,0.0,0.0,0.0],["2026-11-12",251,24600,1.0,59100.0,0.0,0.0,3.0,170700.0,0.0,0.0,2.0,0.0,1.0,0.0,0.0,1.0,0.0,7750.0,14581.0,0.0,0.0,9998.0],["2026-11-12",251,24737,1.0,39900.0,0.0,0.0,6.0,376480.0,1.0,12650.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,6780.0,7757.0,0.0,0.0,0.0],["2026-11-12",251,31408,0.0,0.0,1.0,34300.0,1.0,76900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2380.0,0.0,0.0,0.0],["2026-11-12",251,31607,0.0,0.0,3.0,103100.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,3.0,0.0,25670.0,11360.0,0.0,0.0,0.0],["2026-11-12",251,32548,0.0,0.0,0.0,0.0,2.0,175800.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,10450.0,11179.0,0.0,0.0,6999.0],["2026-11-12",251,33384,0.0,0.0,0.0,0.0,1.0,60900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-12",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2040.0,1190.0,0.0,0.0,0.0],["2026-11-12",251,34592,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,600.0,0.0,0.0,0.0,0.0],["2026-11-12",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,790.0,0.0,0.0,0.0],["2026-11-12",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-12",251,35835,1.0,44900.0,0.0,0.0,5.0,284500.0,0.0,0.0,2.0,0.0,0.0,0.0,1.0,0.0,0.0,15320.0,8633.0,0.0,0.0,9998.0],["2026-11-13",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,6889.0,750.0,50.0,0.0,0.0],["2026-11-13",251,7700,0.0,0.0,2.0,56800.0,7.0,461300.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,8450.0,18169.0,0.0,0.0,0.0],["2026-11-13",251,12165,0.0,0.0,1.0,32900.0,10.0,616107.56,0.0,0.0,1.0,2.0,0.0,0.0,2.0,1.0,2.0,40730.0,12315.44,0.0,0.0,10999.0],["2026-11-13",251,12558,0.0,0.0,0.0,0.0,5.0,315483.7,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0,4.0,22920.0,10843.3,0.0,0.0,0.0],["2026-11-13",251,14306,1.0,72900.0,1.0,16900.0,2.0,109800.0,3.0,59200.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,13140.0,15251.0,0.0,0.0,4999.0],["2026-11-13",251,20353,0.0,0.0,2.0,67800.0,9.0,531180.0,1.0,14650.0,2.0,0.0,0.0,0.0,3.0,0.0,0.0,32500.0,11190.0,0.0,0.0,9998.0],["2026-11-13",251,21095,0.0,0.0,2.0,57800.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,990.0,0.0,0.0,0.0],["2026-11-13",251,24600,1.0,44900.0,1.0,31900.0,9.0,569158.32,0.0,0.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0,6070.0,17692.68,0.0,0.0,4999.0],["2026-11-13",251,24737,0.0,0.0,0.0,0.0,11.0,773900.0,0.0,0.0,3.0,0.0,0.0,2.0,2.0,0.0,1.0,30690.0,28972.0,0.0,0.0,18997.0],["2026-11-13",251,31408,0.0,0.0,2.0,49800.0,2.0,144800.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,2.0,18240.0,10822.0,0.0,0.0,0.0],["2026-11-13",251,31607,0.0,0.0,0.0,0.0,6.0,321400.0,1.0,16650.0,2.0,0.0,0.0,0.0,0.0,0.0,1.0,7060.0,7520.0,0.0,0.0,9998.0],["2026-11-13",251,33384,0.0,0.0,0.0,0.0,1.0,87900.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1791.0,0.0,0.0,10999.0],["2026-11-13",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,6880.0,1880.0,0.0,0.0,0.0],["2026-11-13",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1780.0,3810.0,0.0,0.0,0.0],["2026-11-13",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,10080.0,0.0,0.0,0.0,0.0],["2026-11-13",251,35202,2.0,177300.0,0.0,0.0,5.0,226500.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,0.0,20670.0,8233.0,0.0,0.0,0.0],["2026-11-13",251,35835,1.0,32900.0,1.0,24900.0,4.0,211760.0,1.0,12650.0,0.0,0.0,0.0,0.0,3.0,1.0,2.0,26530.0,10137.0,0.0,0.0,0.0],["2026-11-14",251,7700,0.0,0.0,0.0,0.0,5.0,295500.0,1.0,12650.0,2.0,0.0,1.0,0.0,1.0,0.0,2.0,16590.0,14140.0,0.0,0.0,9998.0],["2026-11-14",251,12165,1.0,26200.0,1.0,16900.0,6.0,321907.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,2.0,12750.0,10936.0,0.0,0.0,0.0],["2026-11-14",251,12558,0.0,0.0,1.0,24900.0,12.0,644907.94,1.0,14650.0,1.0,1.0,1.0,0.0,2.0,0.0,1.0,20980.0,21688.06,0.0,0.0,4999.0],["2026-11-14",251,14306,1.0,24900.0,1.0,24900.0,5.0,259580.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,8950.0,15662.0,0.0,0.0,0.0],["2026-11-14",251,20353,1.0,53700.0,1.0,28900.0,14.0,819760.0,0.0,0.0,5.0,0.0,0.0,0.0,2.0,0.0,2.0,25349.0,15871.0,0.0,0.0,24395.0],["2026-11-14",251,21095,0.0,0.0,0.0,0.0,3.0,206700.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2470.0,0.0,0.0,0.0],["2026-11-14",251,24600,0.0,0.0,3.0,109500.0,5.0,284500.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,2.0,0.0,13720.0,9220.0,0.0,0.0,0.0],["2026-11-14",251,24737,0.0,0.0,1.0,34925.96,2.0,101612.43,0.0,0.0,0.0,2.0,0.0,0.0,1.0,1.0,0.0,11340.0,3855.61,0.0,0.0,0.0],["2026-11-14",251,31408,0.0,0.0,3.0,77700.0,10.0,665000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,6760.0,17670.0,0.0,0.0,0.0],["2026-11-14",251,31607,0.0,0.0,2.0,41800.0,8.0,415010.0,1.0,7590.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,9710.0,20921.0,0.0,0.0,0.0],["2026-11-14",251,32548,0.0,0.0,0.0,0.0,7.0,372380.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,1.0,16210.0,9351.0,0.0,0.0,9998.0],["2026-11-14",251,33384,0.0,0.0,0.0,0.0,1.0,46878.28,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1901.72,0.0,0.0,0.0],["2026-11-14",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,2.0,42550.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,10640.0,2460.0,0.0,0.0,0.0],["2026-11-14",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,8600.0,6719.0,0.0,0.0,0.0],["2026-11-14",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,2.0,29300.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3670.0,0.0,0.0,0.0,0.0],["2026-11-14",251,35202,1.0,32900.0,3.0,103700.0,10.0,532978.08,1.0,29900.0,1.0,2.0,0.0,0.0,1.0,3.0,0.0,26990.0,25141.92,0.0,0.0,4999.0],["2026-11-14",251,35835,0.0,0.0,2.0,33800.0,6.0,371377.41,2.0,27300.0,0.0,1.0,0.0,0.0,0.0,1.0,1.0,18720.0,4312.59,0.0,0.0,0.0],["2026-11-15",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1190.0,0.0,0.0,0.0],["2026-11-15",251,7700,3.0,247200.0,0.0,0.0,3.0,193700.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,8579.0,15313.0,0.0,0.0,0.0],["2026-11-15",251,12165,1.0,104900.0,3.0,90700.0,5.0,255660.0,0.0,0.0,1.0,0.0,0.0,3.0,0.0,2.0,1.0,24789.0,18330.0,0.0,0.0,4999.0],["2026-11-15",251,12558,0.0,0.0,0.0,0.0,8.0,516280.0,1.0,16650.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,17339.0,12058.0,0.0,0.0,0.0],["2026-11-15",251,14306,0.0,0.0,2.0,55800.0,5.0,260580.0,2.0,29300.0,1.0,1.0,1.0,0.0,1.0,0.0,1.0,13700.0,8159.0,0.0,0.0,4999.0],["2026-11-15",251,20353,1.0,83900.0,2.0,44800.0,11.0,524124.0,1.0,12650.0,2.0,1.0,0.0,0.0,0.0,0.0,2.0,14630.0,6622.0,0.0,0.0,9398.0],["2026-11-15",251,21095,0.0,0.0,1.0,28900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,990.0,0.0,0.0,0.0],["2026-11-15",251,24600,0.0,0.0,0.0,0.0,9.0,506100.0,0.0,0.0,3.0,1.0,1.0,0.0,0.0,1.0,1.0,9970.0,7402.0,0.0,0.0,14997.0],["2026-11-15",251,24737,0.0,0.0,0.0,0.0,3.0,158700.0,0.0,0.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-15",251,31408,0.0,0.0,4.0,119600.0,8.0,425434.77,0.0,0.0,1.0,2.0,3.0,0.0,1.0,2.0,1.0,17040.0,20373.23,0.0,0.0,4999.0],["2026-11-15",251,31607,0.0,0.0,1.0,27900.0,7.0,483181.92,0.0,0.0,1.0,1.0,1.0,3.0,2.0,0.0,2.0,28979.0,11212.08,0.0,0.0,4999.0],["2026-11-15",251,32548,1.0,27900.0,1.0,16900.0,5.0,334405.0,0.0,0.0,1.0,1.0,0.0,1.0,1.0,0.0,1.0,10620.0,37631.0,0.0,0.0,10999.0],["2026-11-15",251,33384,0.0,0.0,0.0,0.0,6.0,304560.0,0.0,0.0,1.0,0.0,1.0,1.0,1.0,0.0,0.0,40190.0,13489.0,0.0,0.0,4999.0],["2026-11-15",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,3.0,57200.0,0.0,0.0,0.0,0.0,1.0,0.0,2.0,18560.0,2870.0,0.0,0.0,0.0],["2026-11-15",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,6.0,74840.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,8550.0,2080.0,0.0,0.0,0.0],["2026-11-15",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,4.0,51480.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1570.0,0.0,0.0,0.0],["2026-11-15",251,35202,1.0,59900.0,0.0,0.0,7.0,375900.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,10230.0,16959.0,0.0,0.0,9998.0],["2026-11-15",251,35835,0.0,0.0,3.0,92700.0,6.0,338400.0,0.0,0.0,0.0,0.0,0.0,0.0,3.0,2.0,0.0,28460.0,18779.0,0.0,0.0,0.0],["2026-11-16",251,7700,1.0,104900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],["2026-11-16",251,12165,0.0,0.0,2.0,63800.0,3.0,158700.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0,2.0,1.0,32500.0,11950.0,0.0,0.0,4999.0],["2026-11-16",251,12558,0.0,0.0,1.0,24900.0,6.0,403400.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,13560.0,12618.0,0.0,0.0,4999.0],["2026-11-16",251,20353,1.0,76900.0,1.0,16900.0,4.0,219600.0,0.0,0.0,1.0,0.0,1.0,0.0,1.0,0.0,0.0,25970.0,10862.0,0.0,0.0,4999.0],["2026-11-16",251,24600,1.0,32900.0,0.0,0.0,8.0,521200.0,0.0,0.0,2.0,0.0,0.0,0.0,1.0,0.0,0.0,18400.0,3860.0,0.0,0.0,10998.0],["2026-11-16",251,24737,0.0,0.0,2.0,76800.0,1.0,52980.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,3.0,0.0,23630.0,20479.0,0.0,0.0,0.0],["2026-11-16",251,31408,0.0,0.0,0.0,0.0,2.0,132880.0,1.0,14650.0,1.0,0.0,1.0,1.0,1.0,1.0,4.0,50100.0,9428.0,0.0,0.0,4999.0],["2026-11-16",251,31607,3.0,111200.0,1.0,20900.0,3.0,174700.0,1.0,12650.0,0.0,0.0,0.0,1.0,3.0,1.0,0.0,28870.0,7735.0,0.0,0.0,0.0],["2026-11-16",251,32548,0.0,0.0,1.0,31878.97,3.0,155780.0,0.0,0.0,1.0,2.0,0.0,3.0,1.0,1.0,0.0,31270.0,16280.03,0.0,0.0,4999.0],["2026-11-16",251,34575,0.0,0.0,0.0,0.0,0.0,0.0,1.0,29900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,790.0,950.0,0.0,0.0,0.0],["2026-11-17",251,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,350.0,890.0,0.0,0.0,0.0],["2026-11-17",251,7700,1.0,135400.0,3.0,73700.0,3.0,144700.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,2.0,0.0,30110.0,5390.0,0.0,0.0,0.0],["2026-11-17",251,12558,3.0,159700.0,0.0,0.0,5.0,283580.0,1.0,12650.0,0.0,0.0,0.0,0.0,0.0,0.0,3.0,17309.0,10133.0,0.0,0.0,0.0],["2026-11-17",251,13063,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,0.0,2980.0,0.0,0.0,0.0,0.0],["2026-11-17",251,14306,0.0,0.0,2.0,70800.0,3.0,163500.0,1.0,14650.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,2980.0,12769.0,0.0,0.0,4999.0],["2026-11-17",251,20353,1.0,74900.0,0.0,0.0,1.0,60900.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,10790.0,0.0,0.0,0.0,0.0],["2026-11-17",251,21095,0.0,0.0,3.0,99700.0,6.0,327560.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,1.0,2.0,39590.0,11390.0,0.0,0.0,0.0],["2026-11-17",251,24600,2.0,235800.0,1.0,16900.0,4.0,271680.0,2.0,31300.0,0.0,0.0,0.0,0.0,1.0,2.0,3.0,36720.0,39897.0,0.0,0.0,0.0],["2026-11-17",251,24737,1.0,69900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1983.0,0.0,0.0,0.0],["2026-11-17",251,31408,1.0,27900.0,1.0,26700.0,5.0,320313.63,0.0,0.0,2.0,1.0,0.0,0.0,0.0,1.0,0.0,5520.0,2500.37,0.0,963.0,9998.0],["2026-11-17",251,31607,0.0,0.0,1.0,16900.0,3.0,158780.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,1.0,0.0,23480.0,7710.0,0.0,0.0,0.0],["2026-11-17",251,32548,0.0,0.0,1.0,24900.0,3.0,217700.0,2.0,19000.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,21410.0,15179.0,0.0,0.0,0.0],["2026-11-17",251,33384,0.0,0.0,0.0,0.0,4.0,255600.0,1.0,8500.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,11550.0,6990.0,0.0,0.0,4999.0],["2026-11-17",251,34593,0.0,0.0,0.0,0.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,790.0,4160.0,0.0,0.0,0.0],["2026-11-17",251,34692,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3280.0,0.0,0.0,0.0,0.0],["2026-11-17",251,35202,0.0,0.0,2.0,48800.0,4.0,232600.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,2990.0,3470.0,0.0,0.0,0.0],["2026-11-18",251,7700,0.0,0.0,1.0,54900.0,2.0,101800.0,2.0,27300.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,690.0,8480.0,0.0,0.0,9998.0],["2026-11-18",251,12165,0.0,0.0,0.0,0.0,1.0,87900.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,4190.0,4860.0,0.0,0.0,0.0],["2026-11-18",251,12558,0.0,0.0,0.0,0.0,1.0,127900.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,11050.0,0.0,0.0,0.0,0.0],["2026-11-18",251,14306,0.0,0.0,1.0,56900.0,3.0,221183.47,0.0,0.0,1.0,1.0,0.0,1.0,3.0,1.0,1.0,42580.0,16816.53,0.0,0.0,4999.0],["2026-11-18",251,20353,1.0,54900.0,2.0,58800.0,0.0,0.0,1.0,14650.0,0.0,0.0,0.0,0.0,1.0,2.0,0.0,12040.0,2860.0,0.0,0.0,0.0],["2026-11-18",251,21095,0.0,0.0,1.0,26700.0,2.0,128800.0,1.0,8500.0,0.0,0.0,0.0,0.0,1.0,2.0,1.0,24420.0,1880.0,0.0,0.0,0.0],["2026-11-18",251,31408,0.0,0.0,0.0,0.0,3.0,171700.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,11050.0,9370.0,0.0,0.0,0.0],["2026-11-18",251,32548,0.0,0.0,0.0,0.0,1.0,79900.0,2.0,21150.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,8190.0,6040.0,0.0,0.0,0.0],["2026-11-18",251,33384,0.0,0.0,0.0,0.0,3.0,180780.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,45690.0,2630.0,0.0,0.0,0.0],["2026-11-18",251,35202,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,17630.0,890.0,0.0,0.0,0.0],["2026-11-18",251,35835,0.0,0.0,1.0,27900.0,1.0,48900.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,7080.0,2930.0,0.0,0.0,0.0]],"map":{"2.1":"3RD","casing iphone air":"BTB(APPLE)","casing iphone 17e":"BTB(APPLE)","casing iphone 17 pro max":"BTB(APPLE)","casing iphone 17 pro":"BTB(APPLE)","casing iphone 17":"BTB(APPLE)","casing iphone 16e":"BTB(APPLE)","casing iphone 16 pro max":"BTB(APPLE)","casing iphone 16 pro":"BTB(APPLE)","casing iphone 16 plus":"BTB(APPLE)","casing iphone 16":"BTB(APPLE)","casing iphone 15 pro max":"BTB(APPLE)","casing iphone 15 pro":"BTB(APPLE)","casing iphone 15 plus":"BTB(APPLE)","casing iphone 15":"BTB(APPLE)","case iphone":"3RD","1099":"sim","1199":"sim","1299":"sim","1399":"sim","1499":"sim","1699":"Sim",".":"Other","0-299":"Sim","1001-3000":"3RD","1200-up":"Sim","2.5 inches":"3RD","3.5 inches":"3RD","300-599":"Sim","600-899":"Sim","900-1199":"Sim","acc airport & apple tv":"BTB(APPLE)","acc cable & adapter":"BTB(APPLE)","acc keyboard mouse & trackpad":"BTB(APPLE)","acc watch alpine loop":"BTB(APPLE)","acc watch cable":"BTB(APPLE)","acc watch leather band":"BTB(APPLE)","acc watch leather link":"BTB(APPLE)","acc watch milanese loop":"BTB(APPLE)","acc watch nylon band":"BTB(APPLE)","acc watch ocean band":"BTB(APPLE)","acc watch promotion":"BTB(APPLE)","acc watch sport band":"BTB(APPLE)","acc watch sport loop band":"BTB(APPLE)","acc watch stainless steel alloy band":"BTB(APPLE)","acc watch trail loop":"BTB(APPLE)","accessories":"3RD","accessory kit":"3RD","accessory smartphone":"Other","action cam":"3RD","action camera":"3RD","action camera accessories":"3RD","activity monitor":"3RD","activity tracker":"3RD","adapter":"3RD","adapters":"3RD","adaptor":"3RD","air card":"3RD","airpod case":"3RD","airtag accessories":"BTB(APPLE)","all in one":"3RD","all-in-one":"3RD","antivirus":"3RD","antivirus & security":"3RD","app for apple watch":"BTB(APPLE)","app for headphones":"BTB(APPLE)","app for ipad":"BTB(APPLE)","app for iphone":"BTB(APPLE)","app for ipod":"BTB(APPLE)","app for mac":"BTB(APPLE)","apple adapters":"BTB(APPLE)","apple case & protection":"BTB(APPLE)","apple service":"Service","apple world cup case":"Other","application for business":"3RD","application for educational":"3RD","application for entertainment":"3RD","audio accessory":"3RD","backpack":"3RD","backup station":"3RD","batteries":"3RD","bluetooth 2.0":"3RD","bluetooth 2.1":"3RD","bluetooth headset":"3RD","bluetooth keyboard":"3RD","bluetooth speaker":"3RD","bluetooth speaker 2.0":"3RD","bluetooth speaker 2.1":"3RD","book note":"3RD","btb":"Other","cable":"3RD","cables":"BTB(APPLE)","cables & inerconnects":"3RD","camera":"3RD","capture card":"3RD","car charger":"3RD","car holder":"3RD","car holder mobile and tablet":"3RD","card adaptor":"3RD","card reader & usb hub":"3RD","card reader/usb hub":"3RD","carrybag":"3RD","case airpods":"3RD","case airtag":"3RD","case apple pencil":"3RD","case apple watch":"3RD","case ipad":"3RD","case ipad air":"3RD","case ipad mini":"3RD","case ipad pro":"3RD","case ipod":"3RD","case macbook":"3RD","case smartphone":"3RD","casing ipad 10th gen":"BTB(APPLE)","casing ipad air 5th":"BTB(APPLE)","casing ipad mini 6":"BTB(APPLE)","casing ipad mini4 silicone case back":"BTB(APPLE)","casing ipad mini4 smart cover":"BTB(APPLE)","casing ipad pro":"BTB(APPLE)","casing ipad pro 10.5":"BTB(APPLE)","casing ipad pro 11":"BTB(APPLE)","casing ipad pro 11 3rd gen":"BTB(APPLE)","casing ipad pro 11 4th gen":"BTB(APPLE)","casing ipad pro 12.9":"BTB(APPLE)","casing ipad pro 12.9 3rd gen":"BTB(APPLE)","casing ipad pro 12.9 6th gen":"BTB(APPLE)","casing ipad pro 9.7":"BTB(APPLE)","casing iphone 11":"BTB(APPLE)","casing iphone 11 pro":"BTB(APPLE)","casing iphone 11 pro max":"BTB(APPLE)","casing iphone 11 pro max leahter":"BTB(APPLE)","casing iphone 11 pro max leather":"BTB(APPLE)","casing iphone 11 pro max leather folio":"BTB(APPLE)","casing iphone 11 pro max silicone":"BTB(APPLE)","casing iphone 11 pro silicone":"BTB(APPLE)","casing iphone 11 silicone":"BTB(APPLE)","casing iphone 12 mini":"BTB(APPLE)","casing iphone 12/12 pro":"BTB(APPLE)","casing iphone 13":"BTB(APPLE)","casing iphone 13 mini":"BTB(APPLE)","casing iphone 13 pro":"BTB(APPLE)","casing iphone 13 pro max":"BTB(APPLE)","casing iphone 14":"BTB(APPLE)","casing iphone 14 plus":"BTB(APPLE)","casing iphone 14 pro":"BTB(APPLE)","casing iphone 14 pro max":"BTB(APPLE)","casing iphone 5c":"BTB(APPLE)","casing iphone 5s":"BTB(APPLE)","casing iphone 6 leather case":"BTB(APPLE)","casing iphone 6 plus leather case":"BTB(APPLE)","casing iphone 6 plus silicone case":"BTB(APPLE)","casing iphone 6 silicone case":"BTB(APPLE)","casing iphone 6s":"BTB(APPLE)","casing iphone 6s leather case":"BTB(APPLE)","casing iphone 6s plus leather case":"BTB(APPLE)","casing iphone 6s plus silicone case":"BTB(APPLE)","casing iphone 6s silicone case":"BTB(APPLE)","casing iphone 7":"BTB(APPLE)","casing iphone 7 leather case":"BTB(APPLE)","casing iphone 7 plus":"BTB(APPLE)","casing iphone 7 plus leather case":"BTB(APPLE)","casing iphone 7 plus silicone case":"BTB(APPLE)","casing iphone 7 silicone case":"BTB(APPLE)","casing iphone 8/7 leather":"BTB(APPLE)","casing iphone 8/7 plus leather":"BTB(APPLE)","casing iphone 8/7 plus silicone":"BTB(APPLE)","casing iphone 8/7 silicone":"BTB(APPLE)","casing iphone leather":"BTB(APPLE)","casing iphone smart battery case":"BTB(APPLE)","casing iphone x leather":"BTB(APPLE)","casing iphone x silicone":"BTB(APPLE)","casing iphone xr":"BTB(APPLE)","casing iphone xs leather":"BTB(APPLE)","casing iphone xs max leather":"BTB(APPLE)","casing iphone xs max silicone":"BTB(APPLE)","casing iphone xs silicone":"BTB(APPLE)","casing mac":"3RD","casing macbook pro 13 leather":"BTB(APPLE)","casing macbook pro 15 leather":"BTB(APPLE)","casing new ipad 2017":"3RD","casing pencil":"3RD","casing-ipad":"3RD","casing-ipad air":"3RD","casing-ipad mini":"3RD","casing-ipad mini2":"3RD","casing-ipad mini3":"3RD","casing-iphone":"3RD","casing-iphone 5c":"3RD","casing-iphone 5s":"3RD","casing-iphone4":"3RD","cleaner":"3RD","clearguard":"3RD","colour":"3RD","connector":"3RD","console":"3RD","console device accessories":"3RD","controller":"3RD","cooler":"3RD","cpu accessory":"3RD","cto":"Mac","daybag":"3RD","decor":"3RD","demo apple btb":"BTB(APPLE)","demo apple cpu":"Mac","demo apple etc":"BTB(APPLE)","demo apple ipad":"iPad","demo apple iphone":"iPhone","demo external harddrive":"3RD","demo headphone for sale":"3RD","demo sale apple btb":"BTB(APPLE)","demo sale apple cpu":"Mac","demo sale apple ipad":"iPad","demo sale apple iphone":"iPhone","demo sale apple watch":"Apple Watch","demo smartwatch":"3RD","demo speaker":"3RD","demo speaker for sale":"3RD","demo unit":"3RD","display":"Mac","dock & dock adapters":"BTB(APPLE)","drone":"3RD","earbud":"3RD","earbud wireless":"3RD","earbud with mic":"3RD","etc":"3RD","event":"3RD","external":"3RD","file index":"3RD","film apple watch":"3RD","film imac":"3RD","film ipad":"3RD","film iphone":"3RD","film macbook":"3RD","film notebook":"3RD","film other":"3RD","film smartphone":"3RD","furniture":"3RD","gadget":"3RD","games":"3RD","gaming headset":"3RD","gaming mouse & keyboard & mouse pad":"3RD","gaming vrs":"3RD","general health product":"3RD","harddrive for notebook":"3RD","harddrive for pc":"3RD","hdmi streaming":"3RD","headphone":"3RD","headphone on ear":"3RD","headphone wireless":"3RD","headphone with mic":"3RD","headphone with mic wireless":"3RD","headset":"3RD","headset blutooth":"3RD","health & sport":"3RD","health & wellness":"3RD","hobby & entertainment":"3RD","home":"3RD","home appliance":"3RD","home automation":"3RD","home equipment":"3RD","home security":"3RD","home speaker":"3RD","icare":"Service","imac":"Mac","imac pro":"Mac","in ear":"3RD","in ear wireless":"3RD","inear":"3RD","inear with mic":"3RD","inear with mic wireless":"3RD","ink cartridge":"3RD","ink tank printer":"3RD","ink/cartridge":"3RD","inkjet printer":"3RD","insurance":"Other","ip cameras":"3RD","ipad":"iPad","ipad 10th gen (2022)":"iPad","ipad 2":"iPad","ipad 3":"iPad","ipad 4":"iPad","ipad 6th gen":"ipad","ipad 7th gen (2019)":"iPad","ipad 8th gen (2020)":"iPad","ipad 9th gen (2021)":"iPad","ipad air 1":"iPad","ipad air 10.5 (2019)":"iPad","ipad air 2":"iPad","ipad air 4th gen (2020)":"iPad","ipad air 5th gen (2022)":"iPad","ipad bag sleeve":"3RD","ipad mini 1":"iPad","ipad mini 2":"iPad","ipad mini 3":"iPad","ipad mini 4":"iPad","ipad mini 5 (2019)":"iPad","ipad mini 6 (2021)":"iPad","ipad pro":"iPad","ipad pro 11-inch 3rd gen (2021)":"iPad","ipad pro 11-inch 4th gen (2022)":"iPad","ipad pro 12.9-inch 4th gen (2020)":"iPad","ipad pro 12.9-inch 5th gen (2021)":"iPad","ipad pro 12.9-inch 6th gen (2022)":"iPad","iphone 11":"iPhone","iphone 11 pro":"iPhone","iphone 11 pro max":"iPhone","iphone 12":"iPhone","iphone 12 mini":"iPhone","iphone 12 pro":"iPhone","iphone 12 pro max":"iPhone","iphone 13":"iPhone","iphone 13 mini":"iPhone","iphone 13 pro":"iPhone","iphone 13 pro max":"iPhone","iphone 14":"iPhone","iphone 14 plus":"iPhone","iphone 14 pro":"iPhone","iphone 14 pro max":"iPhone","iphone 4s":"iPhone","iphone 5c":"iPhone","iphone 5s":"iPhone","iphone 6":"iPhone","iphone 6 plus":"iPhone","iphone 6s":"iPhone","iphone 6s plus":"iPhone","iphone 7":"iPhone","iphone 7 plus":"iPhone","iphone 8":"iPhone","iphone 8 plus":"iPhone","iphone promo code":"Other","iphone se":"iPhone","iphone x":"iPhone","iphone xr":"iPhone","iphone xs":"iPhone","iphone xs max":"iPhone","ipod nano":"iPod","ipod shuffle":"iPod","ipod touch":"iPod","ips":"3RD","istudio service":"Service","joy pad":"3RD","joy pad & mouse pad & mic":"3RD","keyboard":"3RD","laptop bag":"3RD","laptop sleeve":"3RD","laser printer":"3RD","laserjet":"3RD","legacy":"3RD","lifestyle":"3RD","lifestyle gadget":"3RD","lightning":"3RD","lightning flash drive":"3RD","mac accessory":"Mac","mac mini":"Mac","mac pro":"Mac","mac studio":"Mac","macbook":"Mac","macbook air":"Mac","macbook pro":"Mac","macbook pro retina":"Mac","made for device":"3RD","magic keyboard":"BTB(APPLE)","memory card":"3RD","mesh wi-fi":"3RD","micro sd":"3RD","micro sd card":"3RD","microphone":"3RD","mobile gaming":"3RD","mobile phone gadget":"3RD","mobile router":"3RD","mobile usb cable":"3RD","modem router":"3RD","monitor arm":"3RD","mouse":"3RD","mouse & keyboards":"3RD","mouse pad":"3RD","network accessories":"3RD","non touch":"Other","numeric":"3RD","ocean band":"BTB(APPLE)","operating systems":"3RD","other":"3RD","other protection":"3RD","pad":"3RD","paper":"3RD","pc speaker":"3RD","pc speaker 2.0 channel":"3RD","pc speaker 2.1 channel":"3RD","pen and related":"3RD","pen and touch":"3RD","photo printer":"3RD","plug":"3RD","pointer":"3RD","portable speaker":"3RD","pouch":"3RD","power":"BTB(APPLE)","power bank":"3RD","power case":"3RD","power supply":"3RD","pre-bag/backpack":"3RD","pre-other":"3RD","pre-softcase":"3RD","pre-speaker":"3RD","premium":"3RD","premium app enabled-accessory":"3RD","premium btb":"3RD","premium for istudio day":"Other","premium printer":"3RD","premium smartphone":"Other","premium tablet":"Other","prenb-bagbackpack":"3RD","prenb-other":"Other","prenb-ram nb":"3RD","prenb-softcase":"3RD","pro display xdr":"Mac","projector":"3RD","projector accessories":"3RD","projector screens":"3RD","promotion":"3RD","promotion code":"3RD","promotion code for ipad & iphone":"Other","ram for notebook":"3RD","ram for pc":"3RD","redeem":"3RD","router":"3RD","router & access point":"3RD","scissors and related":"3RD","sd card":"3RD","se (2023)":"Apple Watch","se watch nike cellular":"Apple Watch","se watch nike cellular (2022)":"Apple Watch","se watch sport cellular":"Apple Watch","se watch sport cellular (2023)":"Apple Watch","se watch sport cellular (2nd gen)":"Apple Watch","se watch sport gps":"Apple Watch","se watch sport gps (2022)":"Apple Watch","se watch sport gps (2023)":"Apple Watch","se watch sport gps (2nd gen)":"Apple Watch","series 1 (2nd gen) sport":"Apple Watch","series 2 (2nd gen) watch":"Apple Watch","series 2 (2nd gen) watch edition":"Apple Watch","series 2 (2nd gen) watch sport":"Apple Watch","series 3 watch cellular":"Apple Watch","series 3 watch nike cellular":"Apple Watch","series 3 watch sport cellular":"Apple Watch","series 3 watch sport gps":"Apple Watch","series 4 watch cellular":"Apple Watch","series 4 watch nike cellular":"Apple Watch","series 4 watch sport cellular":"Apple Watch","series 4 watch sport gps":"Apple Watch","series 5 watch cellular":"Apple Watch","series 5 watch nike":"Apple Watch","series 5 watch nike cellular":"Apple Watch","series 5 watch sport cellular":"Apple Watch","series 5 watch sport gps":"Apple Watch","series 6 watch sport cellular":"Apple Watch","series 6 watch sport gps":"Apple Watch","series 7 watch cellular":"Apple Watch","series 7 watch nike cellular":"Apple Watch","series 7 watch sport cellular":"Apple Watch","series 7 watch sport gps":"Apple Watch","series 8 watch cellular":"Apple Watch","series 8 watch sport cellular":"Apple Watch","series 8 watch sport gps":"Apple Watch","service":"Service","silicone back case mini 4":"BTB(APPLE)","sim card adapter":"3RD","sim extra avd payment":"sim","sim แบบเติมเงิน":"3RD","sim แบบรายเดือน":"3RD","small appliance":"3RD","smart case air 1":"BTB(APPLE)","smart case air 2":"BTB(APPLE)","smart case cover ipad":"BTB(APPLE)","smart case ipad":"BTB(APPLE)","smart case ipad air 1":"BTB(APPLE)","smart case ipad air 2":"BTB(APPLE)","smart case ipad mini 1":"BTB(APPLE)","smart case ipad mini 3":"BTB(APPLE)","smart case mini 1":"BTB(APPLE)","smart case mini 3":"BTB(APPLE)","smart cover air":"BTB(APPLE)","smart cover air 3":"BTB(APPLE)","smart cover ipad 8th gen":"BTB(APPLE)","smart cover ipad mini 4":"BTB(APPLE)","smart cover mini":"BTB(APPLE)","smart cover mini 4":"BTB(APPLE)","smart cover mini 5":"BTB(APPLE)","smart health technology":"3RD","smart home products":"3RD","smart keyboard":"BTB(APPLE)","smart keyboard ipad pro 10.5":"BTB(APPLE)","smart keyboard ipad pro 11":"BTB(APPLE)","smart keyboard ipad pro 12.9":"BTB(APPLE)","smart life style":"3RD","smart watch":"3RD","smarthome gadget":"3RD","solid state drive external (ssd)":"3RD","solid state drive internal (ssd)":"3RD","ssd":"3RD","ssd external":"3RD","stand":"3RD","stand and arm":"3RD","stand mobile and tablet":"3RD","stand notebook":"3RD","stand or pad":"3RD","stylus pen":"3RD","switching hub":"3RD","tablet":"3RD","thunderbolt":"3RD","touch":"Other","toy":"3RD","trad in":"Sim","travelling":"3RD","true wireless":"3RD","universal adapter":"3RD","ups":"3RD","usb adapter":"3RD","usb drive":"3RD","usb on the go (otg)":"3RD","usb-a accessory":"3RD","usb-c accessory":"3RD","utilities":"BTB(APPLE)","video & audio cable":"3RD","wall charger":"3RD","wallets":"BTB(APPLE)","watch":"Apple Watch","watch band":"3RD","watch edition":"Apple Watch","watch sport":"Apple Watch","watch ultra":"Apple Watch","whole home wifi":"3RD","wired network":"3RD","wireless":"3RD","wireless & cloud":"3RD","wireless adaptor":"3RD","wireless charger":"3RD","wireless chargers":"BTB(APPLE)","wireless headphone":"3RD","wireless in ear":"3RD","wireless mouse":"3RD","wireless router":"3RD","x":"3RD","บัตรกำนัล":"Other","iphone 15":"iPhone","iphone 15 plus":"iPhone","iphone 15 pro":"iPhone","iphone 15 pro max":"iPhone","se watch sport cellular - 2nd gen (2023)":"Apple Watch","se watch sport gps - 2nd gen (2023)":"Apple Watch","multifunction ink tank":"3RD","toys":"3RD","apple pencil and ipad magic keyboard":"BTB(APPLE)","airpods & airpods pro":"BTB(APPLE)","earpods":"BTB(APPLE)","true-iphone 15 128gb new899จ่าย963-ลด5400mass":"Sim","aaes mac ลด 3,600 บ.+true - new 699 จ่ายล่วงหน้า1070ลดค่าเครื่อง 4000 บาท ราคาเครื่อง 9,900  บาท ขึ้นไป all product":"Sim","true -existing share plan1399 ไม่มีจ่ายล่วงหน้า ลด6000 บาท ราคาเครื่อง15,900 บาทขึ้นไปall product":"Sim","airpods max":"BTB(APPLE)","microsoft online":"3RD","ipad pro 11 m4 5th gen (2024)":"iPad","ipad air 13 m2 1st gen (2024)":"iPad","ipad air 11 m2 4th gen (2024)":"iPad","ipad pro 13 m4 7th gen (2024)":"iPad","airtags":"BTB(APPLE)","homepod":"BTB(APPLE)","watch ultra 2 (2024)":"Apple Watch","iphone 16":"IPHONE","iphone 16 plus":"IPHONE","iphone 16 pro":"IPHONE","iphone 16 pro max":"IPHONE","se watch sport gps - 2nd gen (2024)":"Apple Watch","watch ultra 2 (2023)":"Apple Watch","casing ipad pro 13 m4 7th gen (2024)":"BTB(APPLE)","apple tv":"BTB(APPLE)","ipad pro 13 m4 5th gen (2024)":"iPad","casing ipad air 11":"BTB(APPLE)","case accessories":"3RD","se watch sport cellular - 2nd gen (2024)":"Apple Watch","iphone 16e":"IPHONE","casing ipad pro 11 m4 5th gen (2024)":"BTB(APPLE)","casing ipad 11th gen (2025)":"BTB(APPLE)","party speaker":"3RD","xiaomi lifestyle":"3RD","smart living products":"3RD","open ear":"BTB(APPLE)","iphone 17":"IPHONE","iphone 17 pro":"IPHONE","iphone 17 pro max":"IPHONE","iphone air":"IPHONE","casing beats iphone air":"BTB(APPLE)","casing beats iphone 17":"BTB(APPLE)","casing beats iphone 17 pro":"BTB(APPLE)","casing beats iphone 17 pro max":"BTB(APPLE)","crossbody strap":"BTB(APPLE)","iphone 17e":"IPHONE","macbook neo":"mac","iphone 18 pro":"IPHONE","iphone 18 pro max":"IPHONE","series 10 watch sport gps":"Apple Watch","ipad air 11 m3 5th gen (2025)":"iPad","ipad 11th gen (2025)":"iPad","ipad air 13 m3 2nd gen (2025)":"iPad","se (2024) gps - 2nd gen":"iPad","ipad mini 7 (2024)":"iPad","series 10 watch cellular":"Apple Watch","smart cover ipad 9th gen":"BTB(APPLE)","acc watch magnatic link":"BTB(APPLE)","casing ipad mini a 17 pro":"BTB(APPLE)","casing ipad pro 11 m4 and m5 5th gen (2024)":"BTB(APPLE)","casing ipad air 11 m2 and m3":"BTB(APPLE)","cc iphone case":"3RD","innovation gadget":"3rd","streaming microphone":"3rd","dual drive":"3RD","console device":"3RD","watch ultra 2":"Apple Watch","series 9 watch cellular":"Apple Watch","series 9 watch sport cellular":"Apple Watch","series 9 watch sport gps":"Apple Watch","se watch sport gps - 2nd gen (2022)":"Apple Watch","normal":"3RD","magnetic magsafe":"3RD","499":"sim","550":"Sim","599":"sim","649":"Sim","699":"sim","749":"Sim","799":"sim","849":"Sim","899":"sim","949":"MNP","999":"Sim","casing iphone 18 pro":"BTB(APPLE)","casing iphone 18 pro max":"BTB(APPLE)","camera base film":"3RD","camera film":"3RD","iphone duo":"iPhone","wrist strap":"BTB(APPLE)","headphone accessory":"BTB(APPLE)","gaming keyboard":"3RD","gaming mouse":"3RD"},"keys":["macU","macS","ipadU","ipadS","iphoneU","iphoneS","awU","awS","smileU","simU","ufundU","pvlU","acU","pencilU","airpodsU","abaS","rdS","serviceS","trueS","insS"]}</script>
+<script>
+(function(){
+"use strict";
+const BASE=JSON.parse(document.getElementById('baseline').textContent);
+const DEFAULT_MAP=BASE.map;
+const KEYS=['macU','macS','ipadU','ipadS','iphoneU','iphoneS','awU','awS','smileU','simU','ufundU','pvlU','acU','pencilU','airpodsU','abaS','rdS','serviceS','trueS','insS'];
+const KI=Object.fromEntries(KEYS.map((k,i)=>[k,i+3]));
+const CATS=[
+  {k:'mac',l:'Mac',a:'macS'},{k:'ipad',l:'iPad',a:'ipadS'},{k:'iphone',l:'iPhone',a:'iphoneS'},
+  {k:'aw',l:'Apple Watch',a:'awS'},{k:'aba',l:'ABA (BTB Apple)',a:'abaS'},{k:'rd',l:'3RD',a:'rdS'},{k:'sim',l:'Sim',a:'simU',unit:true}];
+const SALES_CATS=CATS.filter(c=>!c.unit);
+let state={source:BASE.source,updatedAt:null,staff:BASE.staff,names:BASE.names,settings:BASE.settings,rows:BASE.rows};
+let synced=false;
+const $=s=>document.querySelector(s);
+const fmt=(n,d=0)=>(n||0).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(n,d=1)=>fmt((n||0)*100,d)+'%';
+const money=n=>{ const a=Math.abs(n||0); return (n<0?'-':'')+(a>=1e6?fmt(a/1e6,2)+' ล้าน':fmt(a)); };
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TH_M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const TH_MF=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const thDate=iso=>{ if(!iso) return ''; const [y,m,d]=iso.split('-').map(Number); return d+' '+TH_M[m-1]+' '+(y+543); };
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2600); }
+const LS={get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }};
+
+/* theme */
+function setTheme(t){ document.documentElement.dataset.theme=t; LS.set('mt_theme',t); }
+setTheme(LS.get('mt_theme', (window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'));
+$('#themeBtn').onclick=()=>{ setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'); render(); };
+
+/* ---------- month & days ---------- */
+function monthInfo(){
+  let last=null; for(const r of state.rows) if(!last||r[0]>last) last=r[0];
+  if(!last) return {ym:null,last:null,dim:30,day:0,remain:30,pace:0};
+  const [y,m,d]=last.split('-').map(Number);
+  const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+  const ov=+state.settings.dayOverride; const day=ov>0? Math.min(ov,dim) : d;
+  return {ym:last.slice(0,7),last,y,m,dim,day,remain:Math.max(dim-day,0),pace:day/dim};
+}
+
+/* ---------- aggregation ---------- */
+function blank(){ const o={}; KEYS.forEach(k=>o[k]=0); return o; }
+function sumFor(p,M){ const a=blank(); for(const r of state.rows){ if(r[2]==p.id && r[1]==p.branch && r[0].startsWith(M.ym)) for(const k of KEYS) a[k]+=r[KI[k]]; } return a; }
+function derive(a,tg,M){
+  const total=a.macS+a.ipadS+a.iphoneS+a.awS+a.abaS+a.rdS+a.serviceS+a.trueS+a.insS;
+  const div=(x,y)=>y?x/y:0;
+  const att={smile:div(a.smileU,a.iphoneU), sim:div(a.simU,a.iphoneU+a.ipadU), ufund:div(a.ufundU,a.iphoneU), pvl:div(a.pvlU,a.iphoneU),
+    ac:div(a.acU,a.macU+a.ipadU+a.awU), pencil:div(a.pencilU,a.ipadU), mix:div(a.rdS,total-a.rdS)};
+  const tgSales=SALES_CATS.reduce((s,c)=>s+(+tg[c.k]||0),0);
+  const actSales=SALES_CATS.reduce((s,c)=>s+a[c.a],0);
+  const fcf = M.day? M.dim/M.day : 0;
+  return {total,att,tgSales,actSales,ac:div(actSales,tgSales),fc:actSales*fcf,fcp:div(actSales*fcf,tgSales),fcf};
+}
+function computeAll(){
+  const M=monthInfo();
+  const list=state.staff.map(p=>{ const a=sumFor(p,M); const tg=p.tg||{}; return {...p,a,tg,...derive(a,tg,M)}; });
+  const sa=blank(); list.forEach(p=>KEYS.forEach(k=>sa[k]+=p.a[k]));
+  const stg={}; CATS.forEach(c=>stg[c.k]=list.reduce((s,p)=>s+(+p.tg[c.k]||0),0));
+  const store={a:sa,tg:stg,...derive(sa,stg,M)};
+  const ranked=[...list].sort((x,y)=>y.ac-x.ac); ranked.forEach((p,i)=>p.rank=i+1);
+  return {M,list,store};
+}
+
+/* ---------- photos ---------- */
+function photoUrl(p){ return p&&p.photo ? '/api/photo?id='+encodeURIComponent(p.id)+'&v='+p.photo : null; }
+function initials(n){ n=String(n||'').trim().replace(/^(นาย|นางสาว|นาง|น\.ส\.)/,''); return n? [...n][0] : '?'; }
+function avatar(p,cls=''){ const u=photoUrl(p); const ini=esc(initials(p.name)); return u? `<img class="av ${cls}" src="${u}" alt="" loading="lazy" data-ini="${ini}">` : `<span class="av ${cls}">${ini}</span>`; }
+document.addEventListener('error',e=>{ const t=e.target; if(t.tagName==='IMG'&&t.classList.contains('av')){ const s=document.createElement('span'); s.className=t.className; s.textContent=t.dataset.ini||'?'; t.replaceWith(s); } },true);
+
+/* ---------- tooltip ---------- */
+const tip=$('#tip');
+function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1; const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8), y=Math.max(8,e.clientY-tip.offsetHeight-12); tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.style.opacity=0; }
+document.addEventListener('scroll',hideTip,true);
+
+/* ---------- helpers ---------- */
+const stCls=(ac,pace)=> ac>=Math.max(pace,0.0001)? 'g' : ac>=pace*0.85? 'w' : 'b';
+function track(ac,fcp,pace){ return `<div class="track"><i class="fc" style="width:${Math.min(fcp,1)*100}%"></i><i style="width:${Math.min(ac,1)*100}%"></i><span class="pace" style="left:${Math.min(pace,1)*100}%" data-l="ควรได้ ${fmt(pace*100,0)}%"></span></div>`; }
+function attGood(k,v){ const t=+(state.settings.att||{})[k]||0; if(!t) return ''; return v>=t?'g':'b'; }
+const ATT_L={smile:'Cover Plus',sim:'Sim',ufund:'UFUND',pvl:'PVL',ac:'AC+',pencil:'Pencil',mix:'MIX 3RD'};
+const ATT_D={smile:'Cover Plus ÷ iPhone',sim:'Sim ÷ (iPhone+iPad)',ufund:'UFUND ÷ iPhone',pvl:'PVL ÷ iPhone',ac:'AppleCare ÷ (Mac+iPad+AW)',pencil:'Pencil ÷ iPad',mix:'3RD ÷ ยอดที่ไม่ใช่ 3RD'};
+
+/* ---------- routing ---------- */
+function route(){ const h=location.hash.replace('#','');
+  if(h.startsWith('s')&&/^s\d+$/.test(h)) return {v:'people',id:+h.slice(1)};
+  if(h==='people') return {v:'people',id:null};
+  return {v:'store'}; }
+addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrollTo({top:0}); });
+
+/* ---------- render ---------- */
+let sortKey='ac', sortDir=-1, q='';
+function render(){
+  const D=computeAll(), {M}=D, R=route();
+  $('#vStore').classList.toggle('on',R.v==='store'); $('#vPeople').classList.toggle('on',R.v==='people');
+  $('#tabStore').classList.toggle('on',R.v==='store'); $('#tabPeople').classList.toggle('on',R.v==='people');
+  $('#daybox').innerHTML = M.ym? `<span>เดือน <b>${TH_MF[M.m-1]} ${M.y+543}</b></span><span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${state.settings.dayOverride?' (กำหนดเอง)':''}</span><span>เหลือวันขาย <b>${M.remain}</b> วัน</span>` : '';
+  $('#meta').innerHTML = `${synced?'<span class="pill ok">● ข้อมูลล่าสุด</span>':'<span class="pill off">● ออฟไลน์ (ข้อมูลตั้งต้น)</span>'}${state.updatedAt?' &nbsp;อัปเดต '+new Date(state.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''}`;
+  document.querySelectorAll('.mixT').forEach(e=>e.textContent=pct(state.settings.att.mix||0.07,0));
+  if(R.v==='store') renderStore(D); else renderPeople(D,R.id);
+}
+
+function renderStore(D){
+  const {M,store:S,list}=D;
+  const needAll=Math.max(S.tgSales-S.actSales,0), perDay=M.remain?needAll/M.remain:needAll;
+  const k=[
+    {l:'ยอดขายรวม (7 หมวด)',v:money(S.actSales),u:'บาท',f:`เป้า ${money(S.tgSales)} · ทำได้ <b class="st ${stCls(S.ac,M.pace)}">${pct(S.ac)}</b>`,bar:track(S.ac,S.fcp,M.pace)},
+    {l:'คาดการณ์สิ้นเดือน (FC)',v:pct(S.fcp),f:`${money(S.fc)} บาท ถ้ายังขายในอัตราเดิม`},
+    {l:'ต้องทำเพิ่มเพื่อถึง 100%',v:money(needAll),u:'บาท',f:`เหลือ ${M.remain} วัน · วันละ <b>${money(perDay)}</b>`},
+    {l:'ยอดขายรวมทุกหมวด',v:money(S.total),u:'บาท',f:`MIX 3RD <b class="st ${attGood('mix',S.att.mix)}">${pct(S.att.mix,2)}</b> · Cover+ ${pct(S.att.smile)}`},
+  ];
+  $('#storeKpis').innerHTML=k.map(x=>`<div class="card kpi"><div class="lbl"><span>${x.l}</span></div><div class="bigval num">${x.v}${x.u?`<small>${x.u}</small>`:''}</div>${x.bar||''}<div class="foot" style="margin-top:${x.bar?24:6}px">${x.f}</div></div>`).join('');
+  // categories
+  $('#catGrid').innerHTML=CATS.map(c=>{ const t=S.tg[c.k]||0, a=S.a[c.a], ac=t?a/t:0, fc=a*S.fcf, fcp=t?fc/t:0, need=Math.max(t-a,0), pd=M.remain?need/M.remain:need;
+    const f=v=>c.unit?fmt(v,v%1?1:0)+' เครื่อง':money(v);
+    return `<div class="card cat"><div class="top"><span class="nm">${c.l}</span><span class="pct num st ${stCls(ac,M.pace)}">${pct(ac,0)}</span></div>
+      <div class="sub num">${f(a)} / ${f(t)}</div>${track(ac,fcp,M.pace)}
+      <div class="row2"><span>FC <b class="num">${pct(fcp,0)}</b></span><span>${need>0?`ต้องการอีกวันละ <b class="num">${c.unit?fmt(pd,1):money(pd)}</b>`:'<b class="st g">✓ ถึงเป้าแล้ว</b>'}</span></div></div>`; }).join('');
+  staffTable(D); mixChart(list); dailyChart(D);
+}
+
+function staffTable(D){
+  const {M,list}=D;
+  const cols=[
+    {k:'rank',l:'#',c:'l',v:p=>p.rank},
+    {k:'name',l:'พนักงาน',c:'l',v:p=>p.name},
+    {k:'ac',l:'AC%',v:p=>p.ac,g:'เทียบเป้า'},{k:'fcp',l:'FC%',v:p=>p.fcp,g:'เทียบเป้า'},
+    {k:'total',l:'ยอดรวม',v:p=>p.total},
+    {k:'macS',l:'Mac',u:'macU',v:p=>p.a.macS},{k:'ipadS',l:'iPad',u:'ipadU',v:p=>p.a.ipadS},{k:'iphoneS',l:'iPhone',u:'iphoneU',v:p=>p.a.iphoneS},
+    {k:'awS',l:'AW',u:'awU',v:p=>p.a.awS},{k:'abaS',l:'ABA',v:p=>p.a.abaS},{k:'rdS',l:'3RD',v:p=>p.a.rdS},
+    {k:'smile',l:'Cover+',att:1,u:'smileU',v:p=>p.att.smile},{k:'sim',l:'Sim',att:1,u:'simU',v:p=>p.att.sim},{k:'ufund',l:'UFUND',att:1,u:'ufundU',v:p=>p.att.ufund},
+    {k:'pvl',l:'PVL',att:1,u:'pvlU',v:p=>p.att.pvl},{k:'acp',a:'ac',l:'AC+',att:1,u:'acU',v:p=>p.att.ac},{k:'pencil',l:'Pencil',att:1,u:'pencilU',v:p=>p.att.pencil},
+    {k:'airpodsU',l:'AirPods',v:p=>p.a.airpodsU,units:1},{k:'mix',l:'MIX 3RD',att:1,v:p=>p.att.mix,d:2},
+  ];
+  let rows=list.filter(p=>!q||(p.name+' '+p.id).toLowerCase().includes(q));
+  const col=cols.find(c=>c.k===sortKey)||cols[2];
+  rows.sort((a,b)=>{ const x=col.v(a),y=col.v(b); const r=typeof x==='string'?x.localeCompare(y,'th'):x-y; return r*sortDir||a.rank-b.rank; });
+  const maxBy={}, minBy={}; cols.forEach(c=>{ if(!c.att&&!['rank','name','ac','fcp'].includes(c.k)){ const vs=list.map(c.v).filter(v=>v>0); maxBy[c.k]=Math.max(1,...vs); minBy[c.k]=vs.length?Math.min(...vs):0; } });
+  const dark=document.documentElement.dataset.theme==='dark';
+  const heat=(c,v)=>{ if(!(c.k in maxBy)||!v) return ''; const sp=maxBy[c.k]-minBy[c.k]; const a=0.05+0.25*(sp>0?(v-minBy[c.k])/sp:1); return `background:rgba(${dark?'57,135,229':'42,120,214'},${a.toFixed(3)})`; };
+  let h='<thead><tr>'+cols.map(c=>`<th class="${c.c||''} ${sortKey===c.k?'sorted':''}" data-k="${c.k}">${c.l} <span class="ar">${sortKey===c.k?(sortDir>0?'▲':'▼'):'↕'}</span></th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(p=>{ h+=`<tr data-id="${p.id}">`+cols.map(c=>{ const v=c.v(p);
+    if(c.k==='rank') return `<td class="l"><span class="rk ${v<=3?'r'+v:''}">${v}</span></td>`;
+    if(c.k==='name') return `<td class="l"><div class="person">${avatar(p)}<div class="who"><b>${esc(p.name)}</b><small>${esc(p.id)} · ${esc(p.pos||'')}</small></div></div></td>`;
+    if(c.k==='ac'||c.k==='fcp') return `<td class="num"><span class="chip ${c.k==='ac'?stCls(v,M.pace):(v>=1?'g':v>=.85?'w':'b')}">${pct(v,1)}</span></td>`;
+    if(c.att){ const g=attGood(c.a||c.k,v); return `<td class="num ${v?'':'zero'}">${v?`<span class="${g?'chip '+g:''}">${pct(v,c.d||0)}</span>`:'–'}${c.u?`<span class="u">${fmt(p.a[c.u])} เครื่อง</span>`:''}</td>`; }
+    return `<td class="num heat ${v?'':'zero'}" style="${heat(c,v)}">${v?fmt(v):'–'}${c.u&&v?`<span class="u">${fmt(p.a[c.u])} เครื่อง</span>`:''}</td>`; }).join('')+'</tr>'; });
+  if(!rows.length) h+=`<tr><td colspan="${cols.length}" class="empty">ไม่พบรายชื่อ</td></tr>`;
+  const S=D.store;
+  h+=`</tbody><tfoot><tr><td class="l" colspan="2">รวมทั้งร้าน</td><td class="num">${pct(S.ac)}</td><td class="num">${pct(S.fcp)}</td><td class="num">${fmt(S.total)}</td>`+
+    ['macS','ipadS','iphoneS','awS','abaS','rdS'].map(k=>`<td class="num">${fmt(S.a[k])}</td>`).join('')+
+    ['smile','sim','ufund','pvl','ac','pencil'].map(k=>`<td class="num">${pct(S.att[k],0)}</td>`).join('')+`<td class="num">${fmt(S.a.airpodsU)}</td><td class="num">${pct(S.att.mix,2)}</td></tr></tfoot>`;
+  const t=$('#staffTbl'); t.innerHTML=h;
+  t.querySelectorAll('th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=(k==='rank'||k==='name')?1:-1; } render(); });
+  t.querySelectorAll('tbody tr[data-id]').forEach(tr=>tr.onclick=()=>{ location.hash='s'+tr.dataset.id; });
+}
+$('#search').oninput=e=>{ q=e.target.value.trim().toLowerCase(); render(); };
+
+function niceMax(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); const n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+function shortNum(v){ return v>=1e6? fmt(v/1e6,1)+'M' : v>=1e3? fmt(v/1e3,0)+'K' : fmt(v); }
+function barChart(el,data,opt){
+  const W=560,H=opt.h||220,pl=44,pr=8,pt=10,pb=26;
+  if(!data.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>'; return; }
+  const mx=niceMax(Math.max(...data.map(o=>o.v),opt.line||0));
+  const bw=(W-pl-pr)/data.length, y=v=>pt+(H-pt-pb)*(1-v/mx);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}"><g class="grid">`;
+  for(let i=0;i<=4;i++) s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(mx*i/4)}" y2="${y(mx*i/4)}"/>`;
+  s+='</g><g class="axis">'; for(let i=0;i<=4;i++) s+=`<text x="${pl-6}" y="${y(mx*i/4)+4}" text-anchor="end">${shortNum(mx*i/4)}</text>`;
+  const step=Math.ceil(data.length/12);
+  data.forEach((o,i)=>{ if(i%step===0) s+=`<text x="${pl+bw*i+bw/2}" y="${H-8}" text-anchor="middle">${+o.d.slice(8)}</text>`; }); s+='</g>';
+  data.forEach((o,i)=>{ const x0=pl+bw*i, w=Math.min(bw*0.7,26), cx=x0+bw/2, yy=y(Math.max(o.v,0)), hh=Math.max(H-pb-yy,0);
+    s+=`<g class="hit" data-i="${i}"><rect x="${x0}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent"/>${hh>0?`<path d="M${cx-w/2},${H-pb} V${yy+Math.min(4,hh)} q0,-4 4,-4 h${w-8} q4,0 4,4 V${H-pb} Z" fill="var(--s1)"/>`:''}</g>`; });
+  if(opt.line) s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(opt.line)}" y2="${y(opt.line)}" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 3"/><text x="${W-pr}" y="${y(opt.line)-5}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${opt.lineLabel||''}</text>`;
+  s+=`<line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="var(--line-2)"/></svg>`;
+  el.innerHTML=s; el.querySelectorAll('.hit').forEach(g=>{ const o=data[+g.dataset.i]; g.onmousemove=e=>showTip(e,opt.tip(o)); g.onmouseleave=hideTip; });
+}
+function dailySeries(filter,M){ const m={}; for(const r of state.rows){ if(!r[0].startsWith(M.ym)||!filter(r)) continue; const v=r[KI.macS]+r[KI.ipadS]+r[KI.iphoneS]+r[KI.awS]+r[KI.abaS]+r[KI.rdS]+r[KI.serviceS]+r[KI.trueS]+r[KI.insS]; m[r[0]]=(m[r[0]]||0)+v; } return Object.keys(m).sort().map(d=>({d,v:m[d]})); }
+function dailyChart(D){ const ids=new Set(state.staff.map(p=>p.branch+':'+p.id)); barChart($('#dailyChart'),dailySeries(r=>ids.has(r[1]+':'+r[2]),D.M),{label:'ยอดขายรวมรายวัน',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท`}); }
+function mixChart(list){
+  const g=state.settings.att.mix||0.07, W=560,rowH=24,pl=92,pr=56,H=list.length*rowH+24;
+  const s=[...list].sort((a,b)=>b.att.mix-a.att.mix); const mx=Math.max(g*1.35,...s.map(p=>p.att.mix*1.2),0.01); const x=v=>pl+(W-pl-pr)*v/mx;
+  let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="MIX 3RD"><g class="grid">`; for(let i=0;i<=5;i++) o+=`<line x1="${x(mx*i/5)}" x2="${x(mx*i/5)}" y1="0" y2="${H-20}"/>`;
+  o+='</g><g class="axis">'; for(let i=0;i<=5;i++) o+=`<text x="${x(mx*i/5)}" y="${H-4}" text-anchor="middle">${fmt(mx*i/5*100,mx<0.1?1:0)}%</text>`; o+='</g>';
+  o+=`<line x1="${x(g)}" x2="${x(g)}" y1="0" y2="${H-20}" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  s.forEach((p,i)=>{ const y=i*rowH+4,h=rowH-9,w=Math.max(x(p.att.mix)-pl,0);
+    o+=`<g class="hit" data-i="${i}" style="cursor:pointer"><rect x="0" y="${y-3}" width="${W}" height="${rowH}" fill="transparent"/><text x="${pl-10}" y="${y+h/2+4}" text-anchor="end" font-size="12" fill="var(--text-secondary)">${esc(p.name)}</text>
+    <rect x="${pl}" y="${y}" width="${w}" height="${h}" rx="3" fill="var(--s2)" opacity="${p.att.mix>=g?1:.55}"/><text x="${pl+w+6}" y="${y+h/2+4}" font-size="12" class="num" fill="var(--text-primary)" paint-order="stroke" stroke="var(--surface-1)" stroke-width="4">${pct(p.att.mix,2)}${p.att.mix>=g?' ✓':''}</text></g>`; });
+  o+='</svg>'; const el=$('#mixChart'); el.innerHTML=o;
+  el.querySelectorAll('.hit').forEach(gg=>{ const p=s[+gg.dataset.i]; gg.onmousemove=e=>showTip(e,`<b>${esc(p.name)}</b><br>3RD ${fmt(p.a.rdS)} ÷ ยอดอื่น ${fmt(p.total-p.a.rdS)}<br>= ${pct(p.att.mix,2)} (เป้า ${pct(g,0)})`); gg.onmouseleave=hideTip; gg.onclick=()=>{ location.hash='s'+p.id; }; });
+}
+
+/* ---------- person view ---------- */
+function goalOf(id){ return LS.get('mt_goal_'+id,{all:100,per:{}}); }
+function setGoal(id,g){ LS.set('mt_goal_'+id,g); }
+function renderPeople(D,id){
+  const {M,list}=D;
+  if(id==null){ const last=LS.get('mt_last',null); if(last&&list.some(p=>p.id==last)){ location.replace('#s'+last); return; } }
+  $('#picker').innerHTML=list.map(p=>`<div class="pk ${p.id==id?'on':''}" data-id="${p.id}">${avatar(p,'lg')}<div class="n">${esc(p.name)}</div><div class="p num st ${stCls(p.ac,M.pace)}">${pct(p.ac,0)}</div></div>`).join('');
+  $('#picker').querySelectorAll('.pk').forEach(el=>el.onclick=()=>{ location.hash='s'+el.dataset.id; });
+  const p=list.find(x=>x.id==id);
+  if(!p){ $('#personBody').innerHTML=`<div class="card sec empty" style="padding:40px">👆 เลือกชื่อของคุณด้านบน เพื่อดูยอดและวางแผนปิดเป้า<br><span class="localnote">ลิงก์หน้าส่วนตัวจะเป็น …/#s&lt;รหัสพนักงาน&gt; บุ๊กมาร์กไว้ได้</span></div>`; return; }
+  LS.set('mt_last',p.id);
+  const sel=$('#picker .pk.on'); if(sel) sel.scrollIntoView({block:'nearest',inline:'center'});
+  const G=goalOf(p.id);
+  const gp=c=> (G.per[c.k]!=null? G.per[c.k] : G.all)/100;
+  const rows=CATS.map(c=>{ const t=+p.tg[c.k]||0, a=p.a[c.a], ac=t?a/t:0, fc=a*p.fcf, fcp=t?fc/t:0, g=gp(c), nt=t*g, need=nt-a, pd=M.remain?need/M.remain:need; return {c,t,a,ac,fc,fcp,g,nt,need,pd}; });
+  const S=rows.filter(r=>!r.c.unit);
+  const tot={t:S.reduce((s,r)=>s+r.t,0),a:S.reduce((s,r)=>s+r.a,0),nt:S.reduce((s,r)=>s+r.nt,0)};
+  tot.need=S.reduce((s,r)=>s+Math.max(r.need,0),0); tot.pd=M.remain?tot.need/M.remain:tot.need; tot.ac=tot.t?tot.a/tot.t:0; tot.fc=tot.a*p.fcf; tot.fcp=tot.t?tot.fc/tot.t:0;
+  const R=46,C=2*Math.PI*R, ringCol=`var(--${stCls(p.ac,M.pace)==='g'?'good':stCls(p.ac,M.pace)==='w'?'warn':'bad'})`;
+  const unitF=(r,v)=>r.c.unit? fmt(v,Math.abs(v)%1?1:0) : fmt(v);
+  const presets=[80,90,100,110,120];
+  let h=`<section class="card profile">
+    ${avatar(p,'xl')}
+    <div><h2>${esc(p.name)}</h2><div class="meta2">${esc(p.id)} · ${esc(p.pos||'')} · อันดับ ${p.rank} จาก ${list.length} (ตาม % ยอดเทียบเป้า)</div>
+      <div style="margin-top:12px;max-width:520px">${track(tot.ac,tot.fcp,M.pace)}</div>
+      <div class="meta2" style="margin-top:24px">ยอด 6 หมวด <b class="num" style="color:var(--text-primary)">${fmt(tot.a)}</b> / เป้า ${fmt(tot.t)} บาท · FC สิ้นเดือน ${pct(tot.fcp,0)}</div></div>
+    <div class="ring"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="10"/><circle cx="55" cy="55" r="${R}" fill="none" stroke="${ringCol}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-Math.min(p.ac,1))}"/></svg><div class="c"><div><b class="num">${pct(p.ac,0)}</b><span>ทำได้แล้ว</span></div></div></div>
+  </section>
+  <section class="card goalbar" style="margin-top:12px">
+    <div><b>🎯 อยากปิดยอดที่กี่ %?</b> <span class="localnote">ใช้กับทุกหมวด หรือปรับรายหมวดในตาราง · บันทึกไว้ในเครื่องนี้</span></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="chips" id="gChips">${presets.map(v=>`<button data-v="${v}" class="${G.all==v&&!Object.keys(G.per).length?'on':''}">${v}%</button>`).join('')}</div>
+    <span class="pctin"><button data-d="-5">−</button><input type="number" id="gAll" value="${G.all}"><span>%</span><button data-d="5">+</button></span>
+    ${Object.keys(G.per).length?`<button class="btn sm ghost" id="gReset">ล้างค่ารายหมวด</button>`:''}</div>
+  </section>
+  <div class="sumcards" style="margin-top:12px">
+    <div class="sumcard"><div class="l">ต้องขายเพิ่มอีก (6 หมวด)</div><div class="v num">${tot.need>0?fmt(tot.need):'0'}<small>บาท</small></div><div class="f">เป้าใหม่ ${fmt(tot.nt)} บาท</div></div>
+    <div class="sumcard"><div class="l">เหลือวันขาย</div><div class="v num">${M.remain}<small>วัน</small></div><div class="f">ข้อมูลถึงวันที่ ${M.day} จาก ${M.dim} วัน</div></div>
+    <div class="sumcard"><div class="l">ต้องขายเฉลี่ยต่อวัน</div><div class="v num">${tot.need>0?fmt(tot.pd):'0'}<small>บาท/วัน</small></div><div class="f">${tot.need>0?'ถ้าขายตามนี้ทุกวันจะถึงเป้าที่ตั้งไว้':'🎉 ถึงเป้าที่ตั้งไว้แล้ว'}</div></div>
+  </div>
+  <section class="card sec" style="margin-top:12px">
+    <div class="sechead"><div><h2>แผนรายหมวด</h2><div class="hint">FC = คาดการณ์สิ้นเดือนถ้าขายในอัตราเดิม · Sim นับเป็นเครื่อง</div></div></div>
+    <div class="tablewrap planTbl"><table style="min-width:980px"><thead><tr><th class="l">หมวด</th><th>เป้า</th><th>ทำได้</th><th>AC%</th><th>FC</th><th>FC%</th><th>% ที่อยากปิด</th><th>เป้าใหม่</th><th>ต้องขายอีก</th><th>วันละ</th></tr></thead><tbody>`;
+  rows.forEach(r=>{ const done=r.need<=0; h+=`<tr style="cursor:default"><td class="l"><b>${r.c.l}</b></td><td class="num">${unitF(r,r.t)}</td><td class="num">${unitF(r,r.a)}</td>
+    <td><span class="chip ${stCls(r.ac,M.pace)}">${pct(r.ac,0)}</span></td><td class="num">${unitF(r,r.fc)}</td><td class="num">${pct(r.fcp,0)}</td>
+    <td><span class="pctin"><button data-k="${r.c.k}" data-d="-5">−</button><input type="number" data-k="${r.c.k}" value="${Math.round(r.g*100)}"><span>%</span><button data-k="${r.c.k}" data-d="5">+</button></span></td>
+    <td class="num">${unitF(r,r.nt)}</td><td class="num need ${done?'done':''}">${done?'✓ ถึงแล้ว':unitF(r,r.need)}</td><td class="num need ${done?'done':''}">${done?'–':(r.c.unit?fmt(r.pd,1):fmt(r.pd))}</td></tr>`; });
+  h+=`</tbody><tfoot><tr><td class="l">รวม 6 หมวด (ไม่รวม Sim)</td><td class="num">${fmt(tot.t)}</td><td class="num">${fmt(tot.a)}</td><td class="num">${pct(tot.ac,0)}</td><td class="num">${fmt(tot.fc)}</td><td class="num">${pct(tot.fcp,0)}</td><td></td><td class="num">${fmt(tot.nt)}</td><td class="num">${fmt(tot.need)}</td><td class="num">${fmt(tot.pd)}</td></tr></tfoot></table></div>
+  <div class="planCards">${rows.map(r=>{ const done=r.need<=0; return `<div class="pc"><div class="pc1"><b>${r.c.l}</b><span class="chip ${stCls(r.ac,M.pace)}">${pct(r.ac,0)}</span></div>
+      <div class="pc2">ทำได้ <b class="num">${unitF(r,r.a)}</b> / เป้า ${unitF(r,r.t)} · FC ${pct(r.fcp,0)}</div>
+      <div class="pc3"><span class="pctin"><button data-k="${r.c.k}" data-d="-5">−</button><input type="number" data-k="${r.c.k}" value="${Math.round(r.g*100)}"><span>%</span><button data-k="${r.c.k}" data-d="5">+</button></span>
+      <div class="need ${done?'done':''}" style="text-align:right">${done?'✓ ถึงเป้าแล้ว':`อีก <span class="num">${unitF(r,r.need)}</span><br><small>วันละ <span class="num">${r.c.unit?fmt(r.pd,1):fmt(r.pd)}</span></small>`}</div></div></div>`; }).join('')}</div>
+  </section>
+  <div class="grid2">
+    <section class="card sec"><div class="sechead"><div><h2>ATT ของฉัน</h2><div class="hint">เขียว/แดง เทียบเป้าที่ผู้ดูแลตั้งไว้</div></div></div>
+      <div class="attrow">${Object.keys(ATT_L).map(k=>`<div class="attbox" title="${ATT_D[k]}"><div class="l">${ATT_L[k]}</div><div class="v num ${attGood(k,p.att[k])}">${pct(p.att[k],k==='mix'?2:0)}</div><div class="l">${ATT_D[k]}</div></div>`).join('')}</div>
+      <div class="h4" style="margin-top:18px">📝 Action Plan</div>
+      <textarea class="note" id="note" placeholder="เช่น เน้นเสนอ Cover Plus ทุกครั้งที่ขาย iPhone, ชวนลูกค้า iPad ซื้อ Pencil…">${esc(LS.get('mt_note_'+p.id,''))}</textarea>
+      <div class="localnote">บันทึกอัตโนมัติไว้ในเครื่องนี้เท่านั้น</div></section>
+    <section class="card sec"><div class="sechead"><div><h2>ยอดขายรายวันของฉัน</h2><div class="hint">บาท · ทุกหมวด</div></div></div><div class="chart" id="pDaily"></div></section>
+  </div>`;
+  $('#personBody').innerHTML=h;
+  const avgDay=tot.need>0&&M.remain?tot.pd:0;
+  barChart($('#pDaily'),dailySeries(r=>r[2]==p.id&&r[1]==p.branch,M),{h:200,label:'ยอดขายรายวัน',line:avgDay,lineLabel:avgDay?'ต้องทำวันละ '+shortNum(avgDay):'',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท`});
+  // goal handlers
+  const upd=fn=>{ const g=goalOf(p.id); fn(g); setGoal(p.id,g); render(); };
+  $('#gChips').querySelectorAll('button').forEach(b=>b.onclick=()=>upd(g=>{ g.all=+b.dataset.v; g.per={}; }));
+  const ga=$('#gAll'); ga.onchange=()=>upd(g=>{ g.all=Math.max(0,+ga.value||0); });
+  ga.parentElement.querySelectorAll('button').forEach(b=>b.onclick=()=>upd(g=>{ g.all=Math.max(0,(+g.all||0)+(+b.dataset.d)); }));
+  const gr=$('#gReset'); if(gr) gr.onclick=()=>upd(g=>{ g.per={}; });
+  $('#personBody').querySelectorAll('tbody .pctin, .planCards .pctin').forEach(w=>{ const k=w.querySelector('input').dataset.k;
+    w.querySelector('input').onchange=e=>upd(g=>{ g.per[k]=Math.max(0,+e.target.value||0); });
+    w.querySelectorAll('button').forEach(b=>b.onclick=()=>upd(g=>{ const cur=g.per[k]!=null?g.per[k]:g.all; g.per[k]=Math.max(0,cur+(+b.dataset.d)); })); });
+  const note=$('#note'); let nt; note.oninput=()=>{ clearTimeout(nt); nt=setTimeout(()=>LS.set('mt_note_'+p.id,note.value),300); };
+}
+
+/* ---------- modals ---------- */
+document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('click',e=>{ if(e.target===s||e.target.closest('[data-close]')) s.classList.remove('on'); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.scrim.on').forEach(s=>s.classList.remove('on')); });
+$('#openUpload').onclick=()=>{ $('#upStatus').className='status'; $('#upScrim').classList.add('on'); };
+
+/* settings */
+let draftStaff=[];
+const TGK=['mac','ipad','iphone','aw','aba','rd','sim'];
+function staffRows(){
+  $('#staffBody').innerHTML=draftStaff.map((p,i)=>`<tr><td style="width:112px"><div class="photo-cell">${avatar(p)}<label class="btn sm" title="อัปโหลดรูป">📷<input type="file" accept="image/*" hidden data-photo="${i}"></label>${p.photo?`<button class="btn sm ghost" data-unphoto="${i}" title="ลบรูป">✕</button>`:''}</div></td>
+    <td style="width:80px"><input data-i="${i}" data-f="id" value="${esc(p.id)}" style="text-align:left"></td><td style="min-width:110px"><input data-i="${i}" data-f="name" value="${esc(p.name)}" style="text-align:left"></td><td style="width:70px"><input data-i="${i}" data-f="pos" value="${esc(p.pos||'')}" style="text-align:left"></td>
+    ${TGK.map(k=>`<td><input data-i="${i}" data-t="${k}" value="${p.tg&&p.tg[k]?(k==='sim'?Math.round(p.tg[k]*100)/100:Math.round(p.tg[k])):''}" inputmode="decimal"></td>`).join('')}
+    <td style="width:40px"><button class="btn sm ghost" data-del="${i}" title="ลบ">✕</button></td></tr>`).join('');
+  $('#staffBody').querySelectorAll('input[data-f]').forEach(inp=>inp.oninput=()=>{ const p=draftStaff[+inp.dataset.i]; p[inp.dataset.f]=inp.dataset.f==='id'?(+inp.value||inp.value):inp.value; });
+  $('#staffBody').querySelectorAll('input[data-t]').forEach(inp=>inp.oninput=()=>{ const p=draftStaff[+inp.dataset.i]; p.tg=p.tg||{}; p.tg[inp.dataset.t]=+String(inp.value).replace(/,/g,'')||0; });
+  $('#staffBody').querySelectorAll('[data-photo]').forEach(inp=>inp.onchange=async()=>{ const f=inp.files[0]; if(f) await uploadPhoto(+inp.dataset.photo,f); });
+  $('#staffBody').querySelectorAll('[data-unphoto]').forEach(b=>b.onclick=()=>removePhoto(+b.dataset.unphoto));
+  $('#staffBody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ draftStaff.splice(+b.dataset.del,1); staffRows(); });
+  const have=new Set(draftStaff.map(p=>String(p.id)));
+  const ids=[...new Set(state.rows.map(r=>r[2]))].filter(id=>!have.has(String(id))&&id>1);
+  $('#addFromData').innerHTML='<option value="">+ เพิ่มจากรายชื่อในข้อมูล…</option>'+ids.map(id=>`<option value="${id}">${id} · ${esc(state.names[id]||'')}</option>`).join('');
+}
+const ATT_IN={smile:'#aSmile',mix:'#aMix',ac:'#aAc',sim:'#aSim',ufund:'#aUfund',pvl:'#aPvl',pencil:'#aPencil'};
+$('#openSettings').onclick=()=>{ const S=state.settings; const M=monthInfo();
+  $('#sDay').value=S.dayOverride||''; $('#sDayHelp').textContent=M.last?`อัตโนมัติ = ${+M.last.slice(8)} (วันล่าสุดในข้อมูล) · เดือนนี้มี ${M.dim} วัน`:'';
+  for(const [k,sel] of Object.entries(ATT_IN)) $(sel).value=Math.round(((S.att||{})[k]||0)*1000)/10;
+  draftStaff=state.staff.map(p=>({...p,tg:{...(p.tg||{})}})); staffRows(); $('#setScrim').classList.add('on'); };
+$('#fillAll').onclick=()=>{ document.querySelectorAll('[data-all]').forEach(inp=>{ const v=String(inp.value).replace(/,/g,''); if(v==='') return; draftStaff.forEach(p=>{ p.tg=p.tg||{}; p.tg[inp.dataset.all]=+v||0; }); }); staffRows(); };
+$('#addStaff').onclick=()=>{ const b=draftStaff[0]?draftStaff[0].branch:251; draftStaff.push({branch:b,id:'',pos:'PIA',name:'',tg:{}}); staffRows(); };
+$('#addFromData').onchange=e=>{ const id=+e.target.value; if(!id) return; const r=state.rows.find(r=>r[2]===id); draftStaff.push({branch:r?r[1]:251,id,pos:'PIA',name:state.names[id]||String(id),tg:{}}); staffRows(); };
+$('#saveSettings').onclick=async()=>{
+  const att={}; for(const [k,sel] of Object.entries(ATT_IN)) att[k]=(+$(sel).value||0)/100;
+  const d=+$('#sDay').value; state.settings={...state.settings,dayOverride:d>0?d:null,att};
+  state.staff=draftStaff.filter(p=>p.id!==''&&p.name!=='').map(p=>({...p,id:+p.id,branch:+p.branch||251}));
+  $('#setScrim').classList.remove('on'); render(); await save('บันทึกเป้าและการตั้งค่าแล้ว'); };
+
+/* photos */
+function resizeImage(file,size=320){ return new Promise((res,rej)=>{ const img=new Image(); const u=URL.createObjectURL(file);
+  img.onload=()=>{ const s=Math.min(img.naturalWidth,img.naturalHeight); const sx=(img.naturalWidth-s)/2, sy=(img.naturalHeight-s)*0.35;
+    const c=document.createElement('canvas'); c.width=c.height=size; c.getContext('2d').drawImage(img,sx,Math.max(0,sy),s,s,0,0,size,size);
+    URL.revokeObjectURL(u); c.toBlob(b=>b?res(b):rej(new Error('แปลงรูปไม่สำเร็จ')),'image/jpeg',0.85); };
+  img.onerror=()=>{ URL.revokeObjectURL(u); rej(new Error('อ่านรูปไม่ได้')); }; img.src=u; }); }
+function syncPhoto(p){ const s=state.staff.find(x=>String(x.id)===String(p.id)); if(s){ if(p.photo) s.photo=p.photo; else delete s.photo; } }
+async function uploadPhoto(i,file){ const p=draftStaff[i]; if(!p||p.id===''){ toast('ใส่รหัสพนักงานก่อนอัปโหลดรูป'); return; }
+  try{ toast('กำลังอัปโหลดรูป…'); const blob=await resizeImage(file);
+    const r=await fetch('/api/photo?id='+encodeURIComponent(p.id),{method:'POST',headers:{'content-type':'image/jpeg','x-admin-key':adminKey||''},body:blob});
+    if(!r.ok) throw new Error(r.status===401?'รหัสผู้ดูแลไม่ถูกต้อง':'เซิร์ฟเวอร์ตอบกลับ '+r.status);
+    p.photo=Date.now(); syncPhoto(p); staffRows(); render(); await save('อัปโหลดรูปของ '+p.name+' แล้ว');
+  }catch(e){ toast('อัปโหลดรูปไม่สำเร็จ: '+(e.message||e)); } }
+async function removePhoto(i){ const p=draftStaff[i]; if(!p) return;
+  try{ const r=await fetch('/api/photo?id='+encodeURIComponent(p.id),{method:'DELETE',headers:{'x-admin-key':adminKey||''}}); if(!r.ok&&r.status!==404) throw new Error('เซิร์ฟเวอร์ตอบกลับ '+r.status);
+    delete p.photo; syncPhoto(p); staffRows(); render(); await save('ลบรูปแล้ว'); }catch(e){ toast('ลบรูปไม่สำเร็จ: '+(e.message||e)); } }
+
+/* ---------- upload & parse ---------- */
+const drop=$('#drop');
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
+$('#file').onchange=e=>{ const f=e.target.files[0]; if(f) handleFile(f); e.target.value=''; };
+function status(cls,msg){ const s=$('#upStatus'); s.className='status on '+cls; s.innerHTML=msg; }
+let xlsxLoading=null;
+function loadXLSX(){ if(window.XLSX) return Promise.resolve(); if(xlsxLoading) return xlsxLoading;
+  xlsxLoading=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; sc.onload=res; sc.onerror=()=>{xlsxLoading=null;rej(new Error('โหลดตัวอ่านไฟล์ Excel ไม่สำเร็จ'));}; document.head.appendChild(sc); });
+  return xlsxLoading; }
+function parseDate(v){
+  if(v==null||v==='') return null;
+  if(v instanceof Date) return v.toISOString().slice(0,10);
+  if(typeof v==='number'){ return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10); }
+  const m=String(v).match(/(\d{1,4})[\/-](\d{1,2})[\/-](\d{2,4})/); if(!m) return null;
+  let d,mo,y; if(m[1].length===4){ y=+m[1]; mo=+m[2]; d=+m[3]; } else { d=+m[1]; mo=+m[2]; y=+m[3]; }
+  if(y<100) y+=2000; if(y>2400) y-=543; return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+const PENCIL=new Set(['888462313704','190198893369','195949573101','194253687962','195949133671','195949690433']);
+const PVL=new Set(['blue box','qplus','techpro','titanv']);
+const low=v=>String(v==null?'':v).trim().toLowerCase();
+const num=v=>{ const n=typeof v==='number'?v:parseFloat(String(v==null?'':v).replace(/,/g,'')); return isFinite(n)?n:0; };
+function readTG(wb){
+  const n=wb.SheetNames.find(s=>s.trim().toLowerCase()==='tg'); if(!n) return null;
+  const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,blankrows:false,defval:null,raw:true});
+  const H=(a[0]||[]).map(x=>low(x));
+  const ix=k=>H.findIndex(h=>h===k), ixs=(...ks)=>{ for(const k of ks){ const i=ix(k); if(i>=0) return i; } return -1; };
+  const c={br:H.findIndex(h=>h.startsWith('branch')),id:ix('id'),name:ixs('ชื่อพนักงาน','name'),pos:ixs('position','ตำแหน่ง'),mac:ix('mac'),ipad:ix('ipad'),iphone:ix('iphone'),aw:ixs('apple watch','aw'),aba:ixs('btb(apple)','aba'),rd:ixs('btb','3rd'),sim:ix('sim')};
+  if(c.id<0) return null; const out=[];
+  for(let i=1;i<a.length;i++){ const r=a[i]; const id=num(r[c.id]); if(!id) continue;
+    const tg={}; let any=false; for(const k of TGK){ const v=c[k]>=0?num(r[c[k]]):0; tg[k]=Math.round(v*100)/100; if(v) any=true; }
+    if(!any) continue; out.push({branch:c.br>=0?num(r[c.br])||251:251,id,name:String(r[c.name]||id).trim(),pos:c.pos>=0?String(r[c.pos]||'').trim():'',tg}); }
+  return out.length?out:null;
+}
+async function handleFile(f){
+  try{
+    status('busy','⏳ กำลังอ่านไฟล์ '+esc(f.name)+' …');
+    await loadXLSX(); const buf=await f.arrayBuffer(); await new Promise(r=>setTimeout(r,30));
+    const wb=XLSX.read(buf,{type:'array',dense:true,cellFormula:false,cellHTML:false,cellStyles:false});
+    const need=['Officer (ID)','Number','ราคาขายตามบิล'];
+    const tryS=n=>{ const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,blankrows:false,defval:null,raw:true}); const h=(a[0]||[]).map(x=>String(x==null?'':x).trim()); return need.every(k=>h.includes(k))?a:null; };
+    let sheetName=wb.SheetNames.find(n=>n.toLowerCase()==='data'), aoa=sheetName?tryS(sheetName):null;
+    if(!aoa) for(const n of wb.SheetNames){ aoa=tryS(n); if(aoa){ sheetName=n; break; } }
+    const tg = $('#tgChk').checked ? readTG(wb) : null;
+    if(!aoa && !tg) throw new Error('ไม่พบชีตข้อมูลขาย (ต้องมีคอลัมน์ Officer (ID), Number, ราคาขายตามบิล) หรือชีต TG');
+    let msg=[];
+    if(aoa){
+      const H=aoa[0].map(x=>String(x==null?'':x).trim()); const ix=k=>H.indexOf(k);
+      const subAll=H.map((h,i)=>h==='Sub Category'?i:-1).filter(i=>i>=0);
+      const cN=subAll.length>1?subAll[subAll.length-1]:subAll[0], cKey=subAll.length>1?subAll[0]:-1, cVal=ix('Catee');
+      const c={F:ix('Number'),H:ix('ราคาขายตามบิล'),L:ix('Category (ID)'),M:ix('Category (Name)'),O:ix('Brand'),D:ix('Product (Code)'),AP:ix('Customer (Code)'),Q:ix('Branch (ID)'),AT:ix('Officer (ID)'),AU:ix('Officer (Name)'),U:ix('Doc Date')};
+      for(const k of ['F','H','M','Q','AT','U']) if(c[k]<0) throw new Error('ไม่พบคอลัมน์ที่จำเป็นในไฟล์');
+      if(cN==null) throw new Error('ไม่พบคอลัมน์ Sub Category');
+      const map={...DEFAULT_MAP};
+      if(cKey>=0&&cVal>=0){ const seen=new Set(); for(let i=1;i<aoa.length;i++){ const r=aoa[i], a=r[cKey], b=r[cVal]; if(a==null||b==null||b==='') continue; const k=low(a); if(seen.has(k)) continue; seen.add(k); map[k]=String(b).trim(); } }
+      const agg={}, names={}; let n=0, bad=0;
+      for(let i=1;i<aoa.length;i++){ const r=aoa[i]; const at=r[c.AT]; if(at==null||at==='') continue;
+        const d=parseDate(r[c.U]); if(!d){ bad++; continue; }
+        const o=Math.round(num(at)), b=Math.round(num(r[c.Q])), F=num(r[c.F]), Hh=num(r[c.H]), pos=Hh>0;
+        const M=low(r[c.M]), N=low(r[cN]), O=c.O>=0?low(r[c.O]):'', D=c.D>=0?String(r[c.D]==null?'':r[c.D]).trim():'', AP=c.AP>=0?low(r[c.AP]):'', L=c.L>=0?num(r[c.L]):0;
+        const cate=low(map[N]||'');
+        if(c.AU>=0&&r[c.AU]) names[o]=String(r[c.AU]);
+        const key=d+'|'+b+'|'+o; const a=agg[key]||(agg[key]=[d,b,o].concat(KEYS.map(()=>0)));
+        const add=(k,v)=>{ a[KI[k]]+=v; };
+        if(M==='mac'){ add('macS',Hh); if(pos) add('macU',F); }
+        if(M==='ipad'){ add('ipadS',Hh); if(pos) add('ipadU',F); }
+        if(cate==='iphone'){ add('iphoneS',Hh); if(pos) add('iphoneU',F); }
+        if(M==='apple watch'){ add('awS',Hh); if(pos) add('awU',F); }
+        if(M==='smile'&&pos) add('smileU',F);
+        if(L===84) add('simU',F);
+        if(M==='iphone'&&AP==='ufund personal'&&N!=='iphone promo code') add('ufundU',F);
+        if(PVL.has(O)) add('pvlU',F);
+        if(M==='apple care'&&pos) add('acU',F);
+        if(PENCIL.has(D)) add('pencilU',F);
+        if(N==='airpods & airpods pro'&&pos) add('airpodsU',F);
+        if(cate==='btb(apple)') add('abaS',Hh);
+        if(cate==='3rd') add('rdS',Hh);
+        if(cate==='service') add('serviceS',Hh);
+        if(N==='sim extra avd payment') add('trueS',Hh);
+        if(N==='insurance') add('insS',Hh);
+        n++; }
+      let rows=Object.values(agg).map(a=>a.map((v,j)=>j>2?Math.round(v*100)/100:v));
+      if(!rows.length) throw new Error('ไม่พบรายการขายในไฟล์');
+      if($('#mergeChk').checked){ const nd=new Set(rows.map(r=>r[0])); rows=state.rows.filter(r=>!nd.has(r[0])).concat(rows); }
+      let last=''; rows.forEach(r=>{ if(r[0]>last) last=r[0]; }); const ym=last.slice(0,7);
+      rows=rows.filter(r=>r[0].startsWith(ym)).sort((x,y)=>x[0]<y[0]?-1:x[0]>y[0]?1:x[2]-y[2]);
+      state.rows=rows; state.names={...state.names,...names}; state.source=f.name; state.updatedAt=Date.now();
+      msg.push(`อ่านยอดขาย ${fmt(n)} รายการ ถึงวันที่ ${thDate(last)}${bad?` (ข้ามแถวที่อ่านวันที่ไม่ได้ ${bad} แถว)`:''}`);
+    }
+    if(tg){ const old=new Map(state.staff.map(p=>[String(p.id),p]));
+      state.staff=tg.map(t=>{ const o=old.get(String(t.id)); return o? {...o,tg:t.tg,name:o.name||t.name,pos:t.pos||o.pos} : t; });
+      msg.push(`อัปเดตเป้าจากชีต TG ${tg.length} คน`); }
+    render();
+    const ok=await save();
+    status('ok','✓ '+msg.join(' · ')+(ok?' · บันทึกขึ้นเซิร์ฟเวอร์แล้ว ทุกคนที่เปิดลิงก์จะเห็นข้อมูลนี้':' · <b>ยังไม่ได้บันทึกขึ้นเซิร์ฟเวอร์</b>'));
+  }catch(err){ console.error(err); status('err','✕ '+esc(err.message||err)); }
+}
+
+/* ---------- persistence (Netlify Function + Blobs) ---------- */
+const API='/api/data';
+let adminKey=LS.get('mt_key',null);
+function setAdmin(on){ document.body.classList.toggle('admin',!!on); $('#loginBtn').hidden = on || location.hash!=='#admin'; }
+function payload(){ return {v:1,savedAt:Date.now(),source:state.source,updatedAt:state.updatedAt,staff:state.staff,names:state.names,settings:state.settings,rows:state.rows}; }
+let lastStamp=null;
+async function save(msg){
+  if(!adminKey){ toast('ต้องเข้าสู่โหมดผู้ดูแลก่อน'); return false; }
+  try{ const body=JSON.stringify(payload());
+    const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json','x-admin-key':adminKey},body});
+    if(r.status===401){ adminKey=null; LS.set('mt_key',null); setAdmin(false); throw new Error('รหัสผู้ดูแลไม่ถูกต้อง'); }
+    if(!r.ok) throw new Error('เซิร์ฟเวอร์ตอบกลับ '+r.status);
+    lastStamp=JSON.parse(body).savedAt; synced=true; render(); if(msg) toast(msg); return true;
+  }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+(e.message||e)); return false; } }
+function apply(d){ if(!d||!Array.isArray(d.rows)) return false;
+  state.source=d.source; state.updatedAt=d.updatedAt; state.staff=d.staff||state.staff; state.names=d.names||state.names;
+  state.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; state.rows=d.rows; return true; }
+async function load(){
+  try{ const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
+    if(d&&d.savedAt!==lastStamp&&apply(d)) lastStamp=d.savedAt; }catch(e){ synced=false; }
+  render(); }
+$('#loginBtn').onclick=()=>{ $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); setTimeout(()=>$('#keyInp').focus(),50); };
+$('#keyInp').onkeydown=e=>{ if(e.key==='Enter') $('#loginGo').click(); };
+$('#loginGo').onclick=async()=>{ const k=$('#keyInp').value.trim(); if(!k) return; const s=$('#loginStatus');
+  try{ const r=await fetch(API+'?auth=1',{headers:{'x-admin-key':k},cache:'no-store'});
+    if(r.status===204||r.ok){ adminKey=k; LS.set('mt_key',k); setAdmin(true); $('#loginScrim').classList.remove('on'); toast('เข้าสู่โหมดผู้ดูแลแล้ว'); }
+    else { s.className='status on err'; s.textContent='✕ รหัสไม่ถูกต้อง'; } }catch(e){ s.className='status on err'; s.textContent='✕ ติดต่อเซิร์ฟเวอร์ไม่ได้'; } };
+$('#logoutBtn').onclick=()=>{ adminKey=null; LS.set('mt_key',null); setAdmin(false); toast('ออกจากโหมดผู้ดูแลแล้ว'); };
+
+setAdmin(!!adminKey);
+render(); load();
+setInterval(()=>{ if(!document.hidden) load(); },5*60*1000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
