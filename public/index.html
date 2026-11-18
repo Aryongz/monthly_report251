@@ -274,6 +274,17 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
 .tgtbl input{width:100%;min-width:84px;border:1px solid var(--line);background:var(--surface-1);border-radius:8px;padding:5px 6px;text-align:right}
 .tgtbl td,.tgtbl th{padding:5px 4px}
 .modal.xl{max-width:1180px}
+.daystrip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.dchip{flex:none;width:58px;border:1px solid var(--line);border-radius:12px;padding:6px 4px;text-align:center;background:var(--surface-1);cursor:pointer;transition:.12s}
+.dchip:hover{border-color:var(--text-muted)}
+.dchip .dw{font-size:11px;color:var(--text-muted)}
+.dchip .dd{font-family:Prompt;font-weight:600;font-size:18px;line-height:1.2}
+.dchip .dp{font-size:10.5px;font-weight:600}
+.dchip.on{background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary)}
+.dchip.on .dw{color:inherit;opacity:.7}
+.dchip.empty{opacity:.4;cursor:default}
+.dchip .dp.g{color:var(--good)}.dchip .dp.w{color:var(--warn)}.dchip .dp.b{color:var(--bad)}
+.dchip.on .dp{color:inherit}
 .planCards{display:none}
 .pc{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
 .pc1{display:flex;justify-content:space-between;align-items:center}
@@ -305,7 +316,7 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
   </header>
 
   <div class="bar">
-    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#people" id="tabPeople">รายบุคคล</a></nav>
+    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#day" id="tabDay">รายวัน</a><a href="#people" id="tabPeople">รายบุคคล</a></nav>
     <div class="daybox" id="daybox"></div>
     <div class="meta" id="meta"></div>
   </div>
@@ -334,6 +345,25 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
         <div class="chart" id="dailyChart"></div>
       </section>
     </div>
+  </section>
+
+  <!-- ================= DAY ================= -->
+  <section class="view" id="vDay">
+    <section class="card sec">
+      <div class="sechead" style="margin-bottom:8px"><div><h2>เลือกวันที่</h2><div class="hint">ยอดของวันที่เลือกเท่านั้น (จากข้อมูลดิบรายบิลของวันนั้น)</div></div>
+        <div style="display:flex;gap:6px"><button class="btn sm" id="dPrev">◀ วันก่อน</button><button class="btn sm" id="dNext">วันถัดไป ▶</button></div></div>
+      <div class="daystrip" id="dayStrip"></div>
+    </section>
+    <div class="kpis4" id="dayKpis" style="margin-top:12px"></div>
+    <section class="card sec" style="margin-top:12px">
+      <div class="sechead"><div><h2 id="dayCatTitle">ยอดตามหมวด</h2><div class="hint">เทียบเป้าเฉลี่ยต่อวัน (เป้าเดือน ÷ จำนวนวันของเดือน) · ตัวเลข "ต้องทำวันนั้น" = ยอดที่ยังขาด ณ ต้นวัน ÷ วันที่เหลือรวมวันนั้น</div></div></div>
+      <div class="catgrid" id="dayCats"></div>
+    </section>
+    <section class="card sec" style="margin-top:12px">
+      <div class="sechead"><div><h2 id="dayTblTitle">อันดับประจำวัน</h2><div class="hint">เรียงตาม % ยอดของวันเทียบเป้าเฉลี่ยต่อวัน · คลิกชื่อเพื่อดูแผนรายบุคคล</div></div></div>
+      <div class="podium" id="dayPodium" style="margin-bottom:16px"></div>
+      <div class="tablewrap"><table id="dayTbl" style="min-width:1250px"></table></div>
+    </section>
   </section>
 
   <!-- ================= PERSON ================= -->
@@ -488,6 +518,8 @@ const ATT_D={smile:'Cover Plus ÷ iPhone',sim:'Sim ÷ (iPhone+iPad)',ufund:'UFUN
 function route(){ const h=location.hash.replace('#','');
   if(h.startsWith('s')&&/^s\d+$/.test(h)) return {v:'people',id:+h.slice(1)};
   if(h==='people') return {v:'people',id:null};
+  if(h==='day') return {v:'day',date:null};
+  if(/^d-\d{4}-\d{2}-\d{2}$/.test(h)) return {v:'day',date:h.slice(2)};
   return {v:'store'}; }
 addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrollTo({top:0}); });
 
@@ -495,12 +527,11 @@ addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrol
 let sortKey='ac', sortDir=-1, q='';
 function render(){
   const D=computeAll(), {M}=D, R=route();
-  $('#vStore').classList.toggle('on',R.v==='store'); $('#vPeople').classList.toggle('on',R.v==='people');
-  $('#tabStore').classList.toggle('on',R.v==='store'); $('#tabPeople').classList.toggle('on',R.v==='people');
+  for(const [v,id] of [['store','Store'],['people','People'],['day','Day']]){ $('#v'+id).classList.toggle('on',R.v===v); $('#tab'+id).classList.toggle('on',R.v===v); }
   $('#daybox').innerHTML = M.ym? `<span>เดือน <b>${TH_MF[M.m-1]} ${M.y+543}</b></span><span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${state.settings.dayOverride?' (กำหนดเอง)':''}</span><span>เหลือวันขาย <b>${M.remain}</b> วัน</span>` : '';
   $('#meta').innerHTML = `${synced?'<span class="pill ok">● ข้อมูลล่าสุด</span>':'<span class="pill off">● ออฟไลน์ (ข้อมูลตั้งต้น)</span>'}${state.updatedAt?' &nbsp;อัปเดต '+new Date(state.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''}`;
   document.querySelectorAll('.mixT').forEach(e=>e.textContent=pct(state.settings.att.mix||0.07,0));
-  if(R.v==='store') renderStore(D); else renderPeople(D,R.id);
+  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else renderPeople(D,R.id);
 }
 
 function renderStore(D){
@@ -590,6 +621,75 @@ function mixChart(list){
     <rect x="${pl}" y="${y}" width="${w}" height="${h}" rx="3" fill="var(--s2)" opacity="${p.att.mix>=g?1:.55}"/><text x="${pl+w+6}" y="${y+h/2+4}" font-size="12" class="num" fill="var(--text-primary)" paint-order="stroke" stroke="var(--surface-1)" stroke-width="4">${pct(p.att.mix,2)}${p.att.mix>=g?' ✓':''}</text></g>`; });
   o+='</svg>'; const el=$('#mixChart'); el.innerHTML=o;
   el.querySelectorAll('.hit').forEach(gg=>{ const p=s[+gg.dataset.i]; gg.onmousemove=e=>showTip(e,`<b>${esc(p.name)}</b><br>3RD ${fmt(p.a.rdS)} ÷ ยอดอื่น ${fmt(p.total-p.a.rdS)}<br>= ${pct(p.att.mix,2)} (เป้า ${pct(g,0)})`); gg.onmouseleave=hideTip; gg.onclick=()=>{ location.hash='s'+p.id; }; });
+}
+
+/* ---------- day view ---------- */
+const TH_WD=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+function daySum(p,date,before){ const a=blank(); for(const r of state.rows){ if(r[2]!=p.id||r[1]!=p.branch) continue; if(before? (r[0]<date && r[0].startsWith(date.slice(0,7))) : r[0]===date) for(const k of KEYS) a[k]+=r[KI[k]]; } return a; }
+function renderDay(D,date){
+  const {M,list}=D;
+  const daysWithData=new Set(state.rows.filter(r=>r[0].startsWith(M.ym)).map(r=>r[0]));
+  if(!date||!date.startsWith(M.ym||'x')){ date=M.last; if(date){ history.replaceState(null,'','#d-'+date); } }
+  if(!date){ $('#dayKpis').innerHTML=''; $('#dayCats').innerHTML='<div class="empty">ยังไม่มีข้อมูล</div>'; return; }
+  const day=+date.slice(8), remainIncl=Math.max(M.dim-day+1,1);
+  // per staff for the day
+  const P=list.map(p=>{ const a=daySum(p,date,false), b=daySum(p,date,true), x=derive(a,p.tg,M);
+    const dtg={}, need={}; CATS.forEach(c=>{ const t=+p.tg[c.k]||0; dtg[c.k]=t/M.dim; need[c.k]=Math.max(t-b[c.a],0)/remainIncl; });
+    const dT=SALES_CATS.reduce((s,c)=>s+dtg[c.k],0), nT=SALES_CATS.reduce((s,c)=>s+need[c.k],0);
+    return {...p,a,b,...x,dtg,need,dT,nT,dp:dT?x.actSales/dT:0}; });
+  P.sort((x,y)=>y.dp-x.dp||y.actSales-x.actSales).forEach((p,i)=>p.drank=i+1);
+  const S={a:blank(),dtg:{},need:{}}; P.forEach(p=>KEYS.forEach(k=>S.a[k]+=p.a[k]));
+  CATS.forEach(c=>{ S.dtg[c.k]=P.reduce((s,p)=>s+p.dtg[c.k],0); S.need[c.k]=P.reduce((s,p)=>s+p.need[c.k],0); });
+  Object.assign(S,derive(S.a,Object.fromEntries(CATS.map(c=>[c.k,S.dtg[c.k]])),M));
+  S.dT=SALES_CATS.reduce((s,c)=>s+S.dtg[c.k],0); S.nT=SALES_CATS.reduce((s,c)=>s+S.need[c.k],0); S.dp=S.dT?S.actSales/S.dT:0;
+  // strip
+  const ids=new Set(state.staff.map(p=>p.branch+':'+p.id)); const dayTot={};
+  for(const r of state.rows){ if(!r[0].startsWith(M.ym)||!ids.has(r[1]+':'+r[2])) continue; dayTot[r[0]]=(dayTot[r[0]]||0)+SALES_CATS.reduce((s,c)=>s+r[KI[c.a]],0); }
+  const avgDayTot=S.dT; let strip='';
+  for(let d=1; d<=M.dim; d++){ const iso=M.ym+'-'+String(d).padStart(2,'0'); const has=daysWithData.has(iso); const wd=TH_WD[new Date(iso+'T00:00:00Z').getUTCDay()];
+    const pp=has&&avgDayTot?dayTot[iso]/avgDayTot:0; const cls=pp>=1?'g':pp>=.85?'w':'b';
+    strip+=`<div class="dchip ${iso===date?'on':''} ${has?'':'empty'}" ${has?`data-d="${iso}"`:''}><div class="dw">${wd}</div><div class="dd">${d}</div><div class="dp ${has?cls:''}">${has?fmt(pp*100,0)+'%':'–'}</div></div>`; }
+  $('#dayStrip').innerHTML=strip;
+  $('#dayStrip').querySelectorAll('[data-d]').forEach(el=>el.onclick=()=>{ location.hash='d-'+el.dataset.d; });
+  const on=$('#dayStrip .dchip.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
+  const sorted=[...daysWithData].sort(); const ix=sorted.indexOf(date);
+  $('#dPrev').disabled=ix<=0; $('#dNext').disabled=ix<0||ix>=sorted.length-1;
+  $('#dPrev').onclick=()=>{ if(ix>0) location.hash='d-'+sorted[ix-1]; }; $('#dNext').onclick=()=>{ if(ix<sorted.length-1) location.hash='d-'+sorted[ix+1]; };
+  const label=`${TH_WD[new Date(date+'T00:00:00Z').getUTCDay()]} ${thDate(date)}`;
+  // KPIs
+  const prevIso=sorted[ix-1]; const prevTot=prevIso?dayTot[prevIso]:null; const avgActual=sorted.length?sorted.reduce((s,d)=>s+(dayTot[d]||0),0)/sorted.length:0;
+  const diffTxt=(v,base)=>{ if(base==null||!base) return ''; const r=(v-base)/base; return `<b class="st ${r>=0?'g':'b'}">${r>=0?'▲':'▼'} ${pct(Math.abs(r),0)}</b>`; };
+  const k=[
+    {l:'ยอดขายของวัน (6 หมวด)',v:money(S.actSales),u:'บาท',f:`${label}`},
+    {l:'เทียบเป้าเฉลี่ยต่อวัน',v:pct(S.dp,0),f:`เป้าเฉลี่ย ${money(S.dT)} บาท/วัน`,bar:`<div class="track"><i style="width:${Math.min(S.dp,1)*100}%"></i></div>`},
+    {l:'ต้องทำวันนั้น (ตามยอดที่ขาด)',v:money(S.nT),u:'บาท',f:`ทำได้ ${pct(S.nT?S.actSales/S.nT:0,0)} ของยอดที่ต้องทำ`},
+    {l:'เทียบวันก่อน / ค่าเฉลี่ยเดือน',v:prevTot!=null?diffTxt(S.actSales,prevTot):'–',f:`วันก่อน ${prevTot!=null?money(prevTot):'–'} · เฉลี่ยต่อวัน ${money(avgActual)} ${diffTxt(S.actSales,avgActual)}`},
+  ];
+  $('#dayKpis').innerHTML=k.map(x=>`<div class="card kpi"><div class="lbl"><span>${x.l}</span></div><div class="bigval num">${x.v}${x.u?`<small>${x.u}</small>`:''}</div>${x.bar||''}<div class="foot" style="margin-top:${x.bar?12:6}px">${x.f}</div></div>`).join('');
+  $('#dayCatTitle').textContent='ยอดตามหมวด · '+label;
+  $('#dayCats').innerHTML=CATS.map(c=>{ const t=S.dtg[c.k], a=S.a[c.a], r=t?a/t:0, nd=S.need[c.k]; const f=v=>c.unit?fmt(v,v%1?1:0)+' เครื่อง':money(v);
+    return `<div class="card cat"><div class="top"><span class="nm">${c.l}</span><span class="pct num st ${r>=1?'g':r>=.85?'w':'b'}">${pct(r,0)}</span></div>
+      <div class="sub num">${f(a)} / เป้าเฉลี่ย ${f(t)}</div><div class="track"><i style="width:${Math.min(r,1)*100}%"></i></div>
+      <div class="row2" style="margin-top:12px"><span>ต้องทำวันนั้น</span><b class="num">${c.unit?fmt(nd,1):money(nd)}</b></div></div>`; }).join('');
+  // podium + table
+  $('#dayTblTitle').textContent='อันดับประจำวัน · '+label;
+  const top=P.filter(p=>p.actSales>0).slice(0,3); const order=[top[1],top[0],top[2]];
+  $('#dayPodium').innerHTML=top.length?order.map((p,i)=>p?`<div class="pod p${[2,1,3][i]}" data-id="${p.id}"><div class="avwrap">${avatar(p,i===1?'xl':'lg')}<div class="medal">${p.drank}</div></div><div class="nm">${esc(p.name)}</div><div class="sc num">${pct(p.dp,0)}<small> ของเป้าวัน</small></div><div class="mini">${money(p.actSales)} บาท</div></div>`:'<div></div>').join(''):'<div class="empty" style="grid-column:1/-1">ยังไม่มียอดขายในวันนั้น</div>';
+  $('#dayPodium').onclick=e=>{ const el=e.target.closest('.pod'); if(el) location.hash='s'+el.dataset.id; };
+  const dark=document.documentElement.dataset.theme==='dark';
+  const cells=['macS','ipadS','iphoneS','awS','abaS','rdS']; const mx={}; cells.forEach(kk=>mx[kk]=Math.max(1,...P.map(p=>p.a[kk])));
+  const heat=(kk,v)=> v>0?`background:rgba(${dark?'57,135,229':'42,120,214'},${(0.05+0.25*v/mx[kk]).toFixed(3)})`:'';
+  let h=`<thead><tr><th class="l">#</th><th class="l">พนักงาน</th><th>ยอดของวัน</th><th>% เป้าวัน</th><th>ต้องทำวันนั้น</th><th>Mac</th><th>iPad</th><th>iPhone</th><th>AW</th><th>ABA</th><th>3RD</th><th>Sim</th><th>Cover+</th><th>AC+</th><th>Pencil</th><th>AirPods</th><th>MIX 3RD</th></tr></thead><tbody>`;
+  P.forEach(p=>{ const z=v=>v?fmt(v):'–';
+    h+=`<tr data-id="${p.id}"><td class="l"><span class="rk ${p.drank<=3&&p.actSales>0?'r'+p.drank:''}">${p.drank}</span></td>
+    <td class="l"><div class="person">${avatar(p)}<div class="who"><b>${esc(p.name)}</b><small>${esc(p.id)} · ${esc(p.pos||'')}</small></div></div></td>
+    <td class="num"><b>${z(p.actSales)}</b></td><td><span class="chip ${p.dp>=1?'g':p.dp>=.85?'w':'b'}">${pct(p.dp,0)}</span></td><td class="num">${fmt(p.nT)}</td>
+    ${cells.map(kk=>{ const u={macS:'macU',ipadS:'ipadU',iphoneS:'iphoneU',awS:'awU'}[kk]; return `<td class="num ${p.a[kk]?'':'zero'}" style="${heat(kk,p.a[kk])}">${z(p.a[kk])}${u&&p.a[kk]?`<span class="u">${fmt(p.a[u])} เครื่อง</span>`:''}</td>`; }).join('')}
+    <td class="num ${p.a.simU?'':'zero'}">${z(p.a.simU)}</td>
+    ${['smile','ac','pencil'].map(kk=>{ const v=p.att[kk], u={smile:'smileU',ac:'acU',pencil:'pencilU'}[kk], g=attGood(kk,v); return `<td class="num ${v?'':'zero'}">${v?`<span class="${g?'chip '+g:''}">${pct(v,0)}</span>`:'–'}${p.a[u]?`<span class="u">${fmt(p.a[u])} เครื่อง</span>`:''}</td>`; }).join('')}
+    <td class="num ${p.a.airpodsU?'':'zero'}">${z(p.a.airpodsU)}</td><td class="num ${p.att.mix?'':'zero'}">${p.att.mix?`<span class="${attGood('mix',p.att.mix)?'chip '+attGood('mix',p.att.mix):''}">${pct(p.att.mix,1)}</span>`:'–'}</td></tr>`; });
+  h+=`</tbody><tfoot><tr><td class="l" colspan="2">รวมทั้งร้าน</td><td class="num">${fmt(S.actSales)}</td><td class="num">${pct(S.dp,0)}</td><td class="num">${fmt(S.nT)}</td>${cells.map(kk=>`<td class="num">${fmt(S.a[kk])}</td>`).join('')}<td class="num">${fmt(S.a.simU)}</td><td class="num">${pct(S.att.smile,0)}</td><td class="num">${pct(S.att.ac,0)}</td><td class="num">${pct(S.att.pencil,0)}</td><td class="num">${fmt(S.a.airpodsU)}</td><td class="num">${pct(S.att.mix,1)}</td></tr></tfoot>`;
+  const t=$('#dayTbl'); t.innerHTML=h; t.querySelectorAll('tbody tr[data-id]').forEach(tr=>tr.onclick=()=>{ location.hash='s'+tr.dataset.id; });
 }
 
 /* ---------- person view ---------- */
