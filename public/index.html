@@ -204,7 +204,9 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 
 /* ---- tracker additions ---- */
 .tabs{display:inline-flex;background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:4px;gap:2px}
-.tabs a{padding:8px 16px;border-radius:9px;text-decoration:none;color:var(--text-secondary);font-weight:500;font-size:14px}
+.tabs a{padding:8px 16px;border-radius:9px;text-decoration:none;color:var(--text-secondary);font-weight:500;font-size:14px;white-space:nowrap}
+.tabs{max-width:100%;overflow-x:auto;scrollbar-width:none}
+@media (max-width:640px){.tabs a{padding:8px 11px;font-size:13.5px}}
 .tabs a.on{background:var(--text-primary);color:var(--surface-1)}
 .view{display:none}.view.on{display:block}
 .daybox{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--text-secondary)}
@@ -274,6 +276,65 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
 .tgtbl input{width:100%;min-width:84px;border:1px solid var(--line);background:var(--surface-1);border-radius:8px;padding:5px 6px;text-align:right}
 .tgtbl td,.tgtbl th{padding:5px 4px}
 .modal.xl{max-width:1180px}
+body.mgr #logoutBtn{display:inline-flex!important}
+.muted{color:var(--text-muted)}.small{font-size:12px}
+.loginCard{max-width:520px;margin:0 auto}
+.profnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.statcard{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:22px;background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff;border:0}
+.statcard .muted{color:rgba(255,255,255,.7)}
+.statcard h2{font-family:Prompt;font-size:26px;margin:0;font-weight:600}
+.sc-left{display:flex;gap:18px;align-items:center}
+.statcard .chip{background:rgba(255,255,255,.15);color:#fff}
+.sc-ovr{text-align:center;min-width:130px;padding:10px 16px;border-radius:18px;border:2px solid var(--tc,#fff);background:rgba(255,255,255,.06)}
+.sc-ovr .big{font-family:Prompt;font-size:52px;font-weight:700;line-height:1}
+.sc-ovr .lbl{font-size:12px;letter-spacing:2px;opacity:.75}
+.sc-ovr .tier{font-weight:600;margin-top:4px;color:var(--tc,#fff)}
+.radarwrap{display:flex;justify-content:center}.radarwrap svg{max-width:380px;width:100%}
+.sbar{display:grid;grid-template-columns:150px 1fr 36px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.sbar:last-of-type{border-bottom:0}
+.sbl{display:flex;flex-direction:column;line-height:1.3}
+.sbt{height:10px;background:var(--surface-2);border-radius:99px;position:relative}
+.sbt i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--s1)}
+.sbt span{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text-muted);border-radius:2px}
+.sbv{text-align:right;font-family:Prompt}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:500}
+.logform{background:var(--surface-2);border-radius:14px;padding:14px;margin-bottom:12px}
+.logform select{width:100%;border:1px solid var(--line-2);background:var(--surface-1);border-radius:10px;padding:8px 10px;font:inherit;color:inherit}
+.logi{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.logi:last-child{border-bottom:0}
+.logi.void .logt{text-decoration:line-through;opacity:.6}
+.logic{width:38px;height:38px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:18px;flex:none}
+.logic.g{background:var(--good-soft)}.logic.w{background:var(--warn-soft)}.logic.b{background:var(--bad-soft)}
+.logb{flex:1;min-width:0}.logt{margin:4px 0}
+.ack{margin-top:6px;background:var(--good-soft);color:var(--good);border-radius:10px;padding:6px 10px;font-size:13px}
+.ack div{color:var(--text-primary)}
+.ackform{display:flex;gap:8px;align-items:flex-end;margin-top:8px}.ackform textarea{min-height:40px}
+.logact{margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.warnrow{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;cursor:pointer}
+.warnrow:hover{background:var(--surface-2)}
+.chips2{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.pcard{border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;transition:.15s;background:var(--surface-1)}
+.pcard:hover{border-color:var(--text-muted);transform:translateY(-1px)}
+.pcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.ovr{font-family:Prompt;font-weight:700;font-size:26px;line-height:1;text-align:center;color:var(--tc,var(--text-primary))}
+.ovr small{display:block;font-size:10px;letter-spacing:1.5px;color:var(--text-muted);font-weight:500}
+.mrow{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.mrow span{flex:1}
+#printArea{display:none}
+@media (max-width:640px){.statcard{flex-direction:column;align-items:flex-start}.sc-left{flex-direction:column;align-items:flex-start}.sbar{grid-template-columns:110px 1fr 30px}.ackform{flex-direction:column;align-items:stretch}}
+@media print{
+  body{background:#fff!important;color:#000}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;font-size:12px;color:#000}
+  #printArea h1{font-size:18px;margin:0 0 6px}#printArea h3{font-size:14px;margin:16px 0 6px}
+  #printArea table{width:100%;border-collapse:collapse;min-width:0}
+  #printArea th,#printArea td{border:1px solid #999;padding:4px 6px;text-align:left;white-space:normal;position:static;background:#fff;color:#000;font-size:11.5px}
+  .pv-lines div{border-bottom:1px dotted #777;height:26px}
+  .pv-sign{display:flex;justify-content:space-around;margin-top:40px;text-align:center;line-height:2}
+  @page{size:A4;margin:14mm}
+}
 .daystrip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
 .dchip{flex:none;width:58px;border:1px solid var(--line);border-radius:12px;padding:6px 4px;text-align:center;background:var(--surface-1);cursor:pointer;transition:.12s}
 .dchip:hover{border-color:var(--text-muted)}
@@ -316,7 +377,7 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
   </header>
 
   <div class="bar">
-    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#day" id="tabDay">รายวัน</a><a href="#people" id="tabPeople">รายบุคคล</a></nav>
+    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#day" id="tabDay">รายวัน</a><a href="#people" id="tabPeople">รายบุคคล</a><a href="#profile" id="tabProfile">โปรไฟล์ 🔐</a></nav>
     <div class="daybox" id="daybox"></div>
     <div class="meta" id="meta"></div>
   </div>
@@ -371,8 +432,9 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
     <div class="picker" id="picker"></div>
     <div id="personBody"></div>
   </section>
-</div>
 
+  <section class="view" id="vProfile"><div id="profileBody"></div></section>
+</div>
 <!-- upload -->
 <div class="scrim" id="upScrim"><div class="modal">
   <header><h3>อัปเดตข้อมูลยอดขาย</h3><button class="x" data-close>×</button></header>
@@ -410,13 +472,23 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
     </div>
     <div class="help" style="margin-top:4px">ช่องเป้า ATT ที่เป็น 0 = ไม่ระบายสีเขียว/แดง</div>
     <div class="h4">พนักงาน & เป้ายอดขายรายเดือน (บาท · Sim เป็นจำนวนเครื่อง)</div>
-    <div class="tablewrap" style="margin:0"><table class="stafftbl tgtbl" style="min-width:1080px"><thead><tr><th>รูป</th><th>รหัส</th><th>ชื่อ</th><th>ตำแหน่ง</th><th>Mac</th><th>iPad</th><th>iPhone</th><th>AW</th><th>ABA</th><th>3RD</th><th>Sim</th><th></th></tr></thead><tbody id="staffBody"></tbody>
+    <div class="tablewrap" style="margin:0"><table class="stafftbl tgtbl" style="min-width:1080px"><thead><tr><th>รูป</th><th>รหัส</th><th>ชื่อ</th><th>ตำแหน่ง</th><th>Mac</th><th>iPad</th><th>iPhone</th><th>AW</th><th>ABA</th><th>3RD</th><th>Sim</th><th>PIN</th><th></th></tr></thead><tbody id="staffBody"></tbody>
     <tfoot><tr><td colspan="4" style="text-align:right;font-weight:500;background:transparent">เติมเป้าเท่ากันทุกคน →</td>
-      <td><input data-all="mac"></td><td><input data-all="ipad"></td><td><input data-all="iphone"></td><td><input data-all="aw"></td><td><input data-all="aba"></td><td><input data-all="rd"></td><td><input data-all="sim"></td><td><button class="btn sm" id="fillAll">เติม</button></td></tr></tfoot></table></div>
+      <td><input data-all="mac"></td><td><input data-all="ipad"></td><td><input data-all="iphone"></td><td><input data-all="aw"></td><td><input data-all="aba"></td><td><input data-all="rd"></td><td><input data-all="sim"></td><td></td><td><button class="btn sm" id="fillAll">เติม</button></td></tr></tfoot></table></div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
       <button class="btn sm" id="addStaff">+ เพิ่มพนักงาน</button>
       <select class="btn sm" id="addFromData"><option value="">+ เพิ่มจากรายชื่อในข้อมูล…</option></select>
     </div>
+    <div class="h4">หัวหน้าร้าน (รหัสแยกรายคน)</div>
+    <div class="help">หัวหน้าร้านเข้าระบบด้วยรหัสของตัวเองที่ลิงก์ …/#admin · เห็นโปรไฟล์และแฟ้มประวัติทุกคน และบันทึกพฤติกรรมได้ แต่อัปโหลดข้อมูลหรือแก้เป้าไม่ได้</div>
+    <div id="mgrList" style="margin-top:8px"></div>
+    <div class="form" style="grid-template-columns:1fr 1fr auto;align-items:end;margin-top:8px">
+      <div class="field"><label>ชื่อหัวหน้าร้าน</label><input id="mgrName"></div>
+      <div class="field"><label>รหัสเข้าระบบ (อย่างน้อย 6 ตัว)</label><input id="mgrKey" autocomplete="off"></div>
+      <button class="btn" id="mgrAdd">+ เพิ่ม</button></div>
+    <div class="h4">ประวัติรายเดือนที่เก็บไว้</div>
+    <div class="help">ทุกครั้งที่อัปโหลด ระบบจะเก็บยอดแยกตามเดือนอัตโนมัติ · อัปไฟล์เดือนเก่าเพื่อเติมประวัติย้อนหลังได้ (ยอดของวันที่ซ้ำจะถูกแทนที่ ไม่บวกซ้ำ)</div>
+    <div id="monthList" style="margin-top:8px"></div>
   </div>
   <footer><button class="btn" data-close>ยกเลิก</button><button class="btn primary" id="saveSettings">บันทึก</button></footer>
 </div></div>
@@ -429,6 +501,15 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
   <footer><button class="btn" data-close>ยกเลิก</button><button class="btn primary" id="loginGo">เข้าสู่ระบบ</button></footer>
 </div></div>
 
+<div class="scrim" id="pinScrim"><div class="modal" style="max-width:420px">
+  <header><h3>ตั้ง PIN พนักงาน</h3><button class="x" data-close>×</button></header>
+  <div class="body"><div class="muted" id="pinWho" style="margin-bottom:10px"></div>
+    <div class="field"><label>PIN · <b>5 ตัวท้ายเลขบัตรประชาชน</b></label><input type="password" inputmode="numeric" maxlength="8" id="pinInp" autocomplete="new-password"></div>
+    <div class="help" style="margin-top:6px">ระบบเก็บแบบเข้ารหัส ไม่มีใครเปิดดูตัวเลขย้อนหลังได้ · พนักงานเปลี่ยน PIN เองได้ภายหลัง</div>
+    <div class="status" id="pinSt"></div></div>
+  <footer><button class="btn ghost" id="pinClear">ล้าง PIN</button><div style="flex:1"></div><button class="btn" data-close>ยกเลิก</button><button class="btn primary" id="pinSave">บันทึก</button></footer>
+</div></div>
+<div id="printArea"></div>
 <div class="tip" id="tip"></div>
 <div class="toast" id="toast"></div>
 
@@ -519,6 +600,8 @@ function route(){ const h=location.hash.replace('#','');
   if(h.startsWith('s')&&/^s\d+$/.test(h)) return {v:'people',id:+h.slice(1)};
   if(h==='people') return {v:'people',id:null};
   if(h==='day') return {v:'day',date:null};
+  if(h==='profile') return {v:'profile',id:null};
+  if(/^p\d+$/.test(h)) return {v:'profile',id:+h.slice(1)};
   if(/^d-\d{4}-\d{2}-\d{2}$/.test(h)) return {v:'day',date:h.slice(2)};
   return {v:'store'}; }
 addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrollTo({top:0}); });
@@ -527,11 +610,11 @@ addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrol
 let sortKey='ac', sortDir=-1, q='';
 function render(){
   const D=computeAll(), {M}=D, R=route();
-  for(const [v,id] of [['store','Store'],['people','People'],['day','Day']]){ $('#v'+id).classList.toggle('on',R.v===v); $('#tab'+id).classList.toggle('on',R.v===v); }
+  for(const [v,id] of [['store','Store'],['people','People'],['day','Day'],['profile','Profile']]){ $('#v'+id).classList.toggle('on',R.v===v); $('#tab'+id).classList.toggle('on',R.v===v); }
   $('#daybox').innerHTML = M.ym? `<span>เดือน <b>${TH_MF[M.m-1]} ${M.y+543}</b></span><span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${state.settings.dayOverride?' (กำหนดเอง)':''}</span><span>เหลือวันขาย <b>${M.remain}</b> วัน</span>` : '';
   $('#meta').innerHTML = `${synced?'<span class="pill ok">● ข้อมูลล่าสุด</span>':'<span class="pill off">● ออฟไลน์ (ข้อมูลตั้งต้น)</span>'}${state.updatedAt?' &nbsp;อัปเดต '+new Date(state.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''}`;
   document.querySelectorAll('.mixT').forEach(e=>e.textContent=pct(state.settings.att.mix||0.07,0));
-  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else renderPeople(D,R.id);
+  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else if(R.v==='profile') renderProfile(D,R); else renderPeople(D,R.id);
 }
 
 function renderStore(D){
@@ -767,6 +850,400 @@ function renderPeople(D,id){
   const note=$('#note'); let nt; note.oninput=()=>{ clearTimeout(nt); nt=setTimeout(()=>LS.set('mt_note_'+p.id,note.value),300); };
 }
 
+/* =====================================================================
+   PROFILE MODULE — monthly history, stat card, behaviour log, roles
+   ===================================================================== */
+let mgrKey=LS.get('mt_mkey',null), mgrName=LS.get('mt_mname','');
+let staffAuth=(()=>{ try{ return JSON.parse(sessionStorage.getItem('mt_staff')||'null')||LS.get('mt_staff',null); }catch(e){ return LS.get('mt_staff',null); } })();
+function isMgrRole(){ return !!(adminKey||mgrKey); }
+async function api(path,opt={},as){
+  const h={...(opt.headers||{})};
+  const role=as||(adminKey?'admin':mgrKey?'manager':staffAuth?'staff':null);
+  if(role==='admin'&&adminKey) h['x-admin-key']=adminKey;
+  else if(role==='manager'&&mgrKey) h['x-manager-key']=mgrKey;
+  else if(role==='staff'&&staffAuth){ h['x-staff-id']=staffAuth.id; h['x-staff-pin']=staffAuth.pin; }
+  let b=opt.body; if(b!=null&&typeof b!=='string'){ h['content-type']='application/json'; b=JSON.stringify(b); }
+  const r=await fetch('/api/'+path,{method:opt.method||'GET',headers:h,body:b,cache:'no-store'});
+  let d=null; try{ d=await r.json(); }catch(e){}
+  if(!r.ok){ const err=new Error((d&&d.error)||('HTTP '+r.status)); err.status=r.status; err.data=d; throw err; }
+  return d;
+}
+const r2=v=>Math.round((v||0)*100)/100;
+function median(arr){ const s=arr.filter(v=>isFinite(v)).sort((a,b)=>a-b); if(!s.length) return 0; const h=s.length>>1; return s.length%2?s[h]:(s[h-1]+s[h])/2; }
+
+/* ---------- month summaries (computed by admin at upload/save) ---------- */
+function summarizeMonth(ym,rows,tgMap,staffList,source){
+  const [y,m]=ym.split('-').map(Number); const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+  let last=0; rows.forEach(r=>{ const d=+r[0].slice(8); if(d>last) last=d; });
+  const M={ym,dim,day:last||1,remain:dim-last,pace:last/dim};
+  const staff={}, list=[];
+  for(const p of staffList){
+    const tg=tgMap[p.id]||tgMap[String(p.id)]||{}; const a=blank(); const daily={};
+    for(const r of rows){ if(r[2]!=p.id||(p.branch&&r[1]!=p.branch)) continue; for(const k of KEYS) a[k]+=r[KI[k]]; daily[r[0]]=(daily[r[0]]||0)+SALES_CATS.reduce((s,c)=>s+r[KI[c.a]],0); }
+    const x=derive(a,tg,M); if(!x.tgSales&&!x.total) continue;
+    const dT=x.tgSales/dim, dv=Object.values(daily), daysSales=dv.filter(v=>v>0).length, daysHit=dT?dv.filter(v=>v>=dT).length:0;
+    const cat={}; CATS.forEach(c=>{ const t=+tg[c.k]||0, av=a[c.a]; cat[c.k]={t:r2(t),a:r2(av),fcp:t?av*x.fcf/t:0}; });
+    const aa={}; KEYS.forEach(k=>aa[k]=r2(a[k]));
+    const o={id:p.id,name:p.name,pos:p.pos||'',tgSales:r2(x.tgSales),actSales:r2(x.actSales),total:r2(x.total),ac:x.ac,fcp:x.fcp,att:x.att,cat,a:aa,daysSales,daysHit,cons:daysSales?daysHit/daysSales:0,rank:null};
+    staff[p.id]=o; list.push(o);
+  }
+  const L=list.filter(o=>o.tgSales>0); L.sort((a,b)=>b.fcp-a.fcp).forEach((o,i)=>o.rank=i+1);
+  const team={n:L.length,med:{fcp:median(L.map(o=>o.fcp)),smile:median(L.map(o=>o.att.smile)),mix:median(L.map(o=>o.att.mix)),aba:median(L.map(o=>o.cat.aba.fcp)),cons:median(L.map(o=>o.cons))}};
+  return {ym,dim,last,updatedAt:Date.now(),source:source||'',staff,team};
+}
+const staffLite=list=>list.map(p=>({id:p.id,name:p.name,pos:p.pos||'',branch:p.branch||251}));
+const tgMapOf=list=>Object.fromEntries(list.map(p=>[p.id,p.tg||{}]));
+async function postMonth(ym,rows,tgMap,staffList,source){
+  const summary=summarizeMonth(ym,rows,tgMap,staffList,source);
+  await api('months',{method:'POST',body:{months:[{ym,rows,tg:tgMap,staff:staffLite(staffList),summary,source}]}},'admin');
+  return summary;
+}
+async function syncCurrentMonth(){
+  if(!adminKey||!state.rows.length) return false;
+  const M=monthInfo(); if(!M.ym) return false;
+  try{ await postMonth(M.ym,state.rows,tgMapOf(state.staff),state.staff,state.source); profCache.all=null; return true; }
+  catch(e){ console.error(e); toast('บันทึกประวัติรายเดือนไม่สำเร็จ: '+e.message); return false; }
+}
+/* called by the upload handler: store every month found in the file */
+async function storeUploadedMonths(rowsAll,tgList,source,merge){
+  const byM={}; rowsAll.forEach(r=>{ (byM[r[0].slice(0,7)] ||= []).push(r); });
+  const yms=Object.keys(byM).sort(); const out=[];
+  for(const ym of yms){
+    let existing=null; try{ existing=await api('months?ym='+ym,{},'admin'); }catch(e){}
+    let rows=byM[ym];
+    if(merge&&existing&&existing.rows){ const nd=new Set(rows.map(r=>r[0])); rows=existing.rows.filter(r=>!nd.has(r[0])).concat(rows); }
+    rows.sort((x,y)=>x[0]<y[0]?-1:x[0]>y[0]?1:x[2]-y[2]);
+    let tgMap, staffList, tgFrom;
+    if(tgList){ tgMap=tgMapOf(tgList); staffList=tgList; tgFrom='ชีต TG ในไฟล์'; }
+    else if(existing&&existing.tg&&Object.keys(existing.tg).length){ tgMap=existing.tg; staffList=existing.staff&&existing.staff.length?existing.staff:state.staff; tgFrom='เป้าเดิมของเดือนนี้'; }
+    else { tgMap=tgMapOf(state.staff); staffList=state.staff; tgFrom='เป้าปัจจุบัน'; }
+    await postMonth(ym,rows,tgMap,staffList,source);
+    out.push({ym,rows,tgMap,staffList,tgFrom});
+  }
+  profCache.all=null;
+  return out;
+}
+
+/* ---------- profile data cache ---------- */
+const profCache={all:null,allAt:0,own:null,loading:false,err:null};
+async function loadProfiles(force){
+  if(profCache.loading) return;
+  if(!force&&((isMgrRole()&&profCache.all)||(!isMgrRole()&&profCache.own))) return;
+  profCache.loading=true; profCache.err=null;
+  try{
+    if(isMgrRole()){ profCache.all=await api('profiles'); }
+    else if(staffAuth){ profCache.own=await api('profile',{},'staff'); }
+  }catch(e){ profCache.err=e; if(e.status===401&&!isMgrRole()){ staffLogout(true); } }
+  profCache.loading=false; render();
+}
+function monthsFor(id){
+  if(isMgrRole()&&profCache.all){ return profCache.all.months.filter(s=>s.staff&&s.staff[id]).map(s=>({ym:s.ym,dim:s.dim,last:s.last,me:s.staff[id],team:s.team})); }
+  if(profCache.own&&String(profCache.own.id)===String(id)) return profCache.own.months;
+  return [];
+}
+function logsFor(id){
+  if(isMgrRole()&&profCache.all) return (profCache.all.logs[id]||[]).slice();
+  if(profCache.own&&String(profCache.own.id)===String(id)) return profCache.own.logs.slice();
+  return [];
+}
+
+/* ---------- stats ---------- */
+const STATS=[{k:'sales',l:'ยอดขาย',d:'FC% ยอดรวม 6 หมวดเทียบเป้า'},{k:'attach',l:'Attach',d:'Cover+ ATT เทียบเป้า'},{k:'mix',l:'MIX 3RD',d:'MIX 3RD เทียบเป้า'},
+  {k:'aba',l:'ABA',d:'FC% ของ BTB Apple'},{k:'cons',l:'สม่ำเสมอ',d:'วันที่ถึงเป้าเฉลี่ย ÷ วันที่มียอดขาย'},{k:'growth',l:'พัฒนาการ',d:'เทียบค่าเฉลี่ยเดือนก่อนหน้า (50 = เท่าเดิม)'}];
+const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+function goals(){ const a=state.settings.att||{}; return {smile:a.smile||0.25,mix:a.mix||0.07}; }
+function statsOf(me,prev){
+  const g=goals();
+  const prevAvg=prev.length?prev.reduce((s,x)=>s+x.fcp,0)/prev.length:null;
+  return {sales:clamp(me.fcp*100),attach:clamp(me.att.smile/g.smile*100),mix:clamp(me.att.mix/g.mix*100),aba:clamp((me.cat&&me.cat.aba?me.cat.aba.fcp:0)*100),
+    cons:clamp(me.cons*100),growth:prevAvg==null?50:clamp(50+(me.fcp-prevAvg)*100)};
+}
+function teamStatsOf(t){ const g=goals(), m=(t&&t.med)||{}; return {sales:clamp((m.fcp||0)*100),attach:clamp((m.smile||0)/g.smile*100),mix:clamp((m.mix||0)/g.mix*100),aba:clamp((m.aba||0)*100),cons:clamp((m.cons||0)*100),growth:50}; }
+function avgStats(list){ const o={}; STATS.forEach(s=>o[s.k]=list.length?list.reduce((a,x)=>a+x[s.k],0)/list.length:0); return o; }
+const ovrOf=s=>Math.round(STATS.reduce((a,x)=>a+s[x.k],0)/STATS.length);
+function tierOf(v){ return v>=85?{t:'Diamond',i:'💎',c:'#4aa3df'}:v>=70?{t:'Gold',i:'🥇',c:'#c9961a'}:v>=55?{t:'Silver',i:'🥈',c:'#8d97a3'}:{t:'Bronze',i:'🥉',c:'#b06a3b'}; }
+const ymLabel=ym=>{ const [y,m]=ym.split('-').map(Number); return TH_M[m-1]+' '+String((y+543)%100).padStart(2,'0'); };
+const ymLong=ym=>{ const [y,m]=ym.split('-').map(Number); return TH_MF[m-1]+' '+(y+543); };
+
+/* ---------- warnings for managers ---------- */
+const NEG_TYPES=new Set(['attendance','verbal','written','complaint']);
+function warningsFor(id){
+  const ms=monthsFor(id), logs=logsFor(id).filter(e=>!e.voided), out=[];
+  const last2=ms.slice(-2); if(last2.length===2&&last2.every(m=>m.me.fcp<0.7)) out.push({c:'b',t:'ยอดต่ำกว่า 70% ติดกัน 2 เดือน'});
+  const last3=ms.slice(-3); if(last3.length===3&&last3.every(m=>m.me.rank)&&last3[0].me.rank<last3[1].me.rank&&last3[1].me.rank<last3[2].me.rank) out.push({c:'w',t:'อันดับลดลงต่อเนื่อง 3 เดือน'});
+  const since=new Date(Date.now()-90*864e5).toISOString().slice(0,10);
+  const neg=logs.filter(e=>NEG_TYPES.has(e.type)&&e.date>=since);
+  if(neg.length>=3) out.push({c:'b',t:`บันทึกเชิงลบ ${neg.length} ครั้งใน 90 วัน`});
+  if(neg.some(e=>e.type==='written')) out.push({c:'b',t:'มีตักเตือนเป็นลายลักษณ์อักษรใน 90 วัน'});
+  return out;
+}
+
+/* ---------- charts ---------- */
+function radarSVG(me,team){
+  const W=340,H=300,cx=170,cy=150,R=105,n=STATS.length;
+  const pt=(i,v)=>{ const a=-Math.PI/2+i*2*Math.PI/n; return [cx+Math.cos(a)*R*v/100, cy+Math.sin(a)*R*v/100]; };
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟเรดาร์ 6 ด้าน">`;
+  [25,50,75,100].forEach(l=>{ s+=`<polygon points="${STATS.map((_,i)=>pt(i,l).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`; });
+  STATS.forEach((st,i)=>{ const [x,y]=pt(i,100), [lx,ly]=pt(i,122); s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/><text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="12" fill="var(--text-secondary)">${st.l}</text>`; });
+  if(team) s+=`<polygon points="${STATS.map((st,i)=>pt(i,team[st.k]).join(',')).join(' ')}" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  s+=`<polygon points="${STATS.map((st,i)=>pt(i,me[st.k]).join(',')).join(' ')}" fill="var(--s1)" fill-opacity=".22" stroke="var(--s1)" stroke-width="2"/>`;
+  STATS.forEach((st,i)=>{ const [x,y]=pt(i,me[st.k]); s+=`<circle cx="${x}" cy="${y}" r="4" fill="var(--s1)" stroke="var(--surface-1)" stroke-width="2"/>`; });
+  return s+'</svg>';
+}
+function lineChart(el,pts,opt){
+  const W=Math.max(340,Math.min(1200,el.clientWidth||560)),H=W<500?200:240,pl=44,pr=14,pt=14,pb=28;
+  if(!pts.length){ el.innerHTML='<div class="empty">ยังไม่มีข้อมูลย้อนหลัง</div>'; return; }
+  const vals=pts.flatMap(p=>[p.v,p.t].filter(v=>v!=null)).concat(opt.goal?[opt.goal]:[]);
+  const mx=Math.max(niceMax(Math.max(...vals)*1.1),0.01), n=pts.length;
+  const x=i=>n===1?(pl+W-pr)/2:pl+(W-pl-pr)*i/(n-1), y=v=>pt+(H-pt-pb)*(1-v/mx);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}"><g class="grid">`;
+  for(let i=0;i<=4;i++) s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(mx*i/4)}" y2="${y(mx*i/4)}"/>`;
+  s+='</g><g class="axis">'; for(let i=0;i<=4;i++) s+=`<text x="${pl-6}" y="${y(mx*i/4)+4}" text-anchor="end">${opt.fmt(mx*i/4)}</text>`;
+  pts.forEach((p,i)=>{ s+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${ymLabel(p.ym)}</text>`; }); s+='</g>';
+  if(opt.goal) s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(opt.goal)}" y2="${y(opt.goal)}" stroke="var(--good)" stroke-width="1.2" stroke-dasharray="2 4"/><text x="${W-pr}" y="${y(opt.goal)-5}" text-anchor="end" font-size="11" fill="var(--good)">เป้า ${opt.fmt(opt.goal)}</text>`;
+  const path=k=>pts.map((p,i)=>p[k]==null?'':`${i&&pts[i-1][k]!=null?'L':'M'}${x(i)},${y(p[k])}`).join(' ');
+  s+=`<path d="${path('t')}" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  s+=`<path d="${path('v')}" fill="none" stroke="var(--s1)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  pts.forEach((p,i)=>{ s+=`<g class="hit" data-i="${i}"><rect x="${x(i)-22}" y="${pt}" width="44" height="${H-pt-pb}" fill="transparent"/><circle cx="${x(i)}" cy="${y(p.v)}" r="5" fill="var(--s1)" stroke="var(--surface-1)" stroke-width="2"/></g>`; });
+  s+='</svg>'; el.innerHTML=s;
+  el.querySelectorAll('.hit').forEach(g=>{ const p=pts[+g.dataset.i]; g.onmousemove=e=>showTip(e,`<b>${ymLong(p.ym)}</b><br>ของฉัน ${opt.fmt(p.v)}<br>ค่ากลางทีม ${p.t==null?'–':opt.fmt(p.t)}${p.note?'<br>'+p.note:''}`); g.onmouseleave=hideTip; });
+}
+
+/* ---------- log helpers ---------- */
+const LOG_T={praise:{i:'👍',l:'ชมเชย',c:'g'},attendance:{i:'⏰',l:'การมาทำงาน',c:'w'},verbal:{i:'💬',l:'ตักเตือนด้วยวาจา',c:'w'},written:{i:'📄',l:'ตักเตือนเป็นลายลักษณ์อักษร',c:'b'},
+  complaint:{i:'😠',l:'ลูกค้าร้องเรียน',c:'b'},meeting:{i:'🤝',l:'สรุปการพูดคุย',c:''},other:{i:'📝',l:'อื่นๆ',c:''}};
+const SEV={low:'ต่ำ',mid:'กลาง',high:'สูง'};
+function logItem(e,mode){
+  const T=LOG_T[e.type]||LOG_T.other;
+  return `<div class="logi ${e.voided?'void':''}" data-eid="${e.eid}">
+    <div class="logic ${T.c}">${T.i}</div>
+    <div class="logb"><div class="logh"><b>${T.l}</b> <span class="muted">· ${thDate(e.date)}${e.severity&&e.type!=='praise'&&e.type!=='meeting'?` · ความรุนแรง${SEV[e.severity]||''}`:''}</span>
+      ${mode!=='staff'&&!e.visible?'<span class="pill off" style="margin-left:6px">🔒 โน้ตส่วนตัว</span>':''}${e.voided?'<span class="pill off" style="margin-left:6px">ยกเลิกแล้ว</span>':''}</div>
+      <div class="logt">${esc(e.text).replace(/\n/g,'<br>')}</div>
+      <div class="muted small">บันทึกโดย ${esc(e.by||'')} · ${new Date(e.at).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</div>
+      ${e.voided?`<div class="muted small">ยกเลิกโดย ${esc(e.voided.by)}: ${esc(e.voided.reason||'')}</div>`:''}
+      ${e.ack?`<div class="ack">✓ พนักงานรับทราบแล้ว ${new Date(e.ack.at).toLocaleDateString('th-TH',{dateStyle:'medium'})}${e.ack.text?`<div>“${esc(e.ack.text)}”</div>`:''}</div>`:''}
+      ${mode==='staff'&&!e.ack?`<div class="ackform"><textarea class="note" rows="2" placeholder="ชี้แจงเพิ่มเติม (ถ้ามี)"></textarea><button class="btn sm primary" data-ack="${e.eid}">รับทราบ</button></div>`:''}
+      ${mode!=='staff'&&!e.voided?`<div class="logact">${!e.visible?`<button class="btn sm" data-show="${e.eid}">แจ้งพนักงาน</button>`:(e.ack?'':'<span class="muted small">รอพนักงานรับทราบ</span>')}${adminKey?` <button class="btn sm ghost" data-void="${e.eid}">ยกเลิกรายการ</button>`:''}</div>`:''}
+    </div></div>`;
+}
+
+/* ---------- main render ---------- */
+let profPeriod=LS.get('mt_period',6), profMetric='fcp', profMgrQ='', lastPrintHTML='';
+function renderProfile(D,R){
+  const el=$('#profileBody');
+  if(!isMgrRole()&&!staffAuth){ el.innerHTML=loginCard(); bindLogin(); return; }
+  if(!profCache.all&&!profCache.own){ if(!profCache.err) loadProfiles(); el.innerHTML=profCache.err?`<div class="card sec empty">โหลดข้อมูลไม่สำเร็จ: ${esc(profCache.err.message)} <button class="btn sm" id="profRetry">ลองใหม่</button></div>`:'<div class="card sec empty">⏳ กำลังโหลดโปรไฟล์…</div>'; const rb=$('#profRetry'); if(rb) rb.onclick=()=>loadProfiles(true); return; }
+  let id=R.id;
+  if(!isMgrRole()) id=staffAuth.id;
+  if(isMgrRole()&&id==null){ el.innerHTML=mgrOverview(D); bindOverview(); return; }
+  el.innerHTML=profilePage(D,id); bindProfile(id);
+}
+function loginCard(){
+  return `<section class="card sec loginCard">
+    <h2>🔐 เข้าดูโปรไฟล์ของฉัน</h2><div class="hint">ผลงานสะสมรายเดือนและแฟ้มประวัติของคุณ เห็นได้เฉพาะตัวคุณ ผู้ดูแล และหัวหน้าร้าน</div>
+    <div class="form" style="grid-template-columns:1fr;margin-top:14px;max-width:360px">
+      <div class="field"><label>รหัสพนักงาน</label><input id="stId" inputmode="numeric" autocomplete="username" placeholder="เช่น 7700"></div>
+      <div class="field"><label>PIN · <b>5 ตัวท้ายเลขบัตรประชาชน</b></label><input id="stPin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password" placeholder="•••••"></div>
+      <label class="chk"><input type="checkbox" id="stRemember"> จำไว้ในเครื่องนี้ (อย่าติ๊กถ้าเป็นเครื่องที่ใช้ร่วมกัน)</label>
+      <button class="btn primary" id="stGo" style="justify-content:center">เข้าสู่ระบบ</button>
+      <div class="status" id="stStatus"></div>
+    </div>
+    <div class="muted small" style="margin-top:12px">ยังไม่มี PIN หรือลืม PIN? แจ้งผู้ดูแลเพื่อตั้งใหม่ · หัวหน้าร้าน/ผู้ดูแล <a href="#" id="mgrLoginLink">เข้าสู่ระบบที่นี่</a></div>
+  </section>`;
+}
+function bindLogin(){
+  $('#mgrLoginLink').onclick=e=>{ e.preventDefault(); $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); };
+  const go=async()=>{ const id=$('#stId').value.trim().replace(/\D/g,''), pin=$('#stPin').value.trim(); const s=$('#stStatus');
+    if(!id||!pin){ s.className='status on err'; s.textContent='กรอกรหัสพนักงานและ PIN'; return; }
+    s.className='status on busy'; s.textContent='กำลังตรวจสอบ…';
+    try{ const prev=staffAuth; staffAuth={id,pin}; const w=await api('whoami',{},'staff');
+      if(w.role!=='staff'){ staffAuth=prev; throw new Error('x'); }
+      try{ sessionStorage.setItem('mt_staff',JSON.stringify(staffAuth)); }catch(e){}
+      if($('#stRemember').checked) LS.set('mt_staff',staffAuth); else LS.set('mt_staff',null);
+      profCache.own=null; loadProfiles(true); render();
+    }catch(e){ staffAuth=null; const d=e.data||{};
+      s.className='status on err';
+      s.textContent= e.status===423? `ใส่ PIN ผิดเกิน 5 ครั้ง ลองใหม่หลัง ${new Date(d.until).toLocaleTimeString('th-TH',{timeStyle:'short'})}` :
+        d.noPin? 'รหัสพนักงานนี้ยังไม่ได้ตั้ง PIN — ติดต่อผู้ดูแล' :
+        d.until? `ใส่ PIN ผิดเกิน 5 ครั้ง ลองใหม่หลัง ${new Date(d.until).toLocaleTimeString('th-TH',{timeStyle:'short'})}` :
+        e.status===401? `PIN ไม่ถูกต้อง${d.left!=null?` (เหลืออีก ${d.left} ครั้ง)`:''}` : 'ติดต่อเซิร์ฟเวอร์ไม่ได้'; } };
+  $('#stGo').onclick=go; $('#stPin').onkeydown=e=>{ if(e.key==='Enter') go(); };
+}
+function staffLogout(expired){ staffAuth=null; try{ sessionStorage.removeItem('mt_staff'); }catch(e){} LS.set('mt_staff',null); profCache.own=null; if(expired) toast('PIN ถูกเปลี่ยนหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่'); render(); }
+
+function mgrOverview(D){
+  const all=profCache.all; const ids=new Map();
+  state.staff.forEach(p=>ids.set(String(p.id),p));
+  all.months.forEach(s=>Object.values(s.staff||{}).forEach(o=>{ if(!ids.has(String(o.id))) ids.set(String(o.id),{id:o.id,name:o.name,pos:o.pos}); }));
+  const people=[...ids.values()].filter(p=>!profMgrQ||(p.name+' '+p.id).toLowerCase().includes(profMgrQ));
+  const rows=people.map(p=>{ const ms=monthsFor(p.id); const lastM=ms[ms.length-1]; const w=warningsFor(p.id); const lg=logsFor(p.id).filter(e=>!e.voided);
+    const st=ms.length?avgStats(ms.slice(-profPeriod).map((m,i,arr)=>statsOf(m.me,ms.slice(0,ms.indexOf(m)).slice(-3).map(x=>x.me)))):null;
+    return {p,ms,lastM,w,lg,ovr:st?ovrOf(st):null}; }).sort((a,b)=>b.w.length-a.w.length||(b.ovr||0)-(a.ovr||0));
+  const flagged=rows.filter(r=>r.w.length);
+  return `<section class="card sec">
+    <div class="sechead"><div><h2>⚠️ สัญญาณที่ควรดู</h2><div class="hint">ระบบเตือนเพื่อช่วยเลือกว่าจะดึงแฟ้มของใครมาดู · ไม่ใช่การตัดสิน</div></div><button class="btn sm" id="profReload">↻ รีเฟรช</button></div>
+    ${flagged.length?flagged.map(r=>`<div class="warnrow" data-id="${r.p.id}">${avatar(r.p)}<div style="flex:1"><b>${esc(r.p.name)}</b> <span class="muted small">${esc(r.p.id)}</span><div class="chips2">${r.w.map(x=>`<span class="chip ${x.c}">${x.t}</span>`).join('')}</div></div><span class="muted">เปิดแฟ้ม ›</span></div>`).join(''):'<div class="empty" style="padding:16px">✓ ไม่มีสัญญาณเตือนในตอนนี้</div>'}
+  </section>
+  <section class="card sec" style="margin-top:12px">
+    <div class="sechead"><div><h2>โปรไฟล์พนักงานทั้งหมด</h2><div class="hint">OVR = คะแนนเฉลี่ย 6 ด้านในช่วง ${profPeriod>=99?'ทั้งหมด':profPeriod+' เดือนล่าสุด'} · คลิกเพื่อเปิดแฟ้ม</div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${periodChips()}<input class="search" id="profQ" placeholder="ค้นหาชื่อ / รหัส" value="${esc(profMgrQ)}"></div></div>
+    <div class="pgrid">${rows.map(r=>{ const tr=r.ovr!=null?tierOf(r.ovr):null; return `<div class="pcard" data-id="${r.p.id}">
+      <div class="pcard-top">${avatar(r.p,'lg')}<div class="ovr" style="${tr?`--tc:${tr.c}`:''}">${r.ovr!=null?r.ovr:'–'}<small>OVR</small></div></div>
+      <b>${esc(r.p.name)}</b><div class="muted small">${esc(r.p.id)} · ${esc(r.p.pos||'')}</div>
+      <div class="muted small" style="margin-top:4px">${r.ms.length} เดือน · บันทึก ${r.lg.length} รายการ${r.w.length?` · <span class="st b">⚠ ${r.w.length}</span>`:''}</div></div>`; }).join('')}</div>
+  </section>`;
+}
+function periodChips(){ return `<div class="chips" id="perChips">${[[3,'3 เดือน'],[6,'6 เดือน'],[12,'12 เดือน'],[99,'ทั้งหมด']].map(([v,l])=>`<button data-v="${v}" class="${profPeriod==v?'on':''}">${l}</button>`).join('')}</div>`; }
+function bindPeriod(){ document.querySelectorAll('#perChips button').forEach(b=>b.onclick=()=>{ profPeriod=+b.dataset.v; LS.set('mt_period',profPeriod); render(); }); }
+function bindOverview(){
+  bindPeriod(); $('#profReload').onclick=()=>loadProfiles(true);
+  document.querySelectorAll('#profileBody [data-id]').forEach(el=>el.onclick=()=>{ location.hash='p'+el.dataset.id; });
+  const q=$('#profQ'); q.oninput=()=>{ profMgrQ=q.value.trim().toLowerCase(); const pos=q.selectionStart; render(); const q2=$('#profQ'); q2.focus(); q2.setSelectionRange(pos,pos); };
+}
+
+function profilePage(D,id){
+  const ms=monthsFor(id); const logs=logsFor(id).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.at-a.at);
+  const p=state.staff.find(x=>String(x.id)===String(id))||(ms.length?{id,name:ms[ms.length-1].me.name,pos:ms[ms.length-1].me.pos}:{id,name:String(id),pos:''});
+  const mode=isMgrRole()?'mgr':'staff';
+  const win=ms.slice(-profPeriod);
+  const perMonth=ms.map((m,i)=>({...m,st:statsOf(m.me,ms.slice(Math.max(0,i-3),i).map(x=>x.me)),tst:teamStatsOf(m.team)}));
+  const pw=perMonth.slice(-profPeriod);
+  const S=avgStats(pw.map(x=>x.st)), T=avgStats(pw.map(x=>x.tst)); const ovr=ms.length?ovrOf(S):null; const tier=ovr!=null?tierOf(ovr):null;
+  const g=goals();
+  // badges
+  const B=[]; const full=ms;
+  const hit=full.filter(m=>m.me.fcp>=1).length; if(hit) B.push(['🎯',`ถึงเป้า ${hit} เดือน`]);
+  const top3=full.filter(m=>m.me.rank&&m.me.rank<=3).length; if(top3) B.push(['🏆',`Top 3 รวม ${top3} เดือน`]);
+  let sk=0,best=0; full.forEach(m=>{ sk=m.me.rank&&m.me.rank<=3?sk+1:0; best=Math.max(best,sk); }); if(best>=2) B.push(['🔥',`Top 3 ติดกัน ${best} เดือน`]);
+  if(full.length>=2&&full[full.length-1].me.fcp>=Math.max(...full.slice(0,-1).map(m=>m.me.fcp))) B.push(['📈','สถิติสูงสุดของตัวเอง (เดือนล่าสุด)']);
+  const cv=full.filter(m=>m.me.att.smile>=g.smile).length; if(cv) B.push(['🛡️',`Cover+ ถึงเป้า ${cv} เดือน`]);
+  const mx=full.filter(m=>m.me.att.mix>=g.mix).length; if(mx) B.push(['🧩',`MIX 3RD ถึงเป้า ${mx} เดือน`]);
+  const praise=logs.filter(e=>e.type==='praise'&&!e.voided).length; if(praise) B.push(['👍',`คำชม ${praise} ครั้ง`]);
+  const W=mode==='mgr'?warningsFor(id):[];
+  const metricDef={fcp:{l:'ยอดขาย (FC%)',v:m=>m.me.fcp,t:m=>m.team.med.fcp,goal:1,fmt:v=>pct(v,0)},smile:{l:'Cover+ ATT',v:m=>m.me.att.smile,t:m=>m.team.med.smile,goal:g.smile,fmt:v=>pct(v,0)},
+    mix:{l:'MIX 3RD',v:m=>m.me.att.mix,t:m=>m.team.med.mix,goal:g.mix,fmt:v=>pct(v,1)},aba:{l:'ABA (FC%)',v:m=>m.me.cat.aba.fcp,t:m=>m.team.med.aba,goal:1,fmt:v=>pct(v,0)},
+    cons:{l:'สม่ำเสมอ',v:m=>m.me.cons,t:m=>m.team.med.cons,goal:0,fmt:v=>pct(v,0)}};
+  const lastM=ms[ms.length-1];
+  let h=`<div class="profnav">${mode==='mgr'?'<a href="#profile" class="btn sm">‹ รายชื่อทั้งหมด</a>':''}<div style="flex:1"></div>${periodChips()}
+    ${mode==='mgr'?'<button class="btn sm" id="printBtn">🖨 พิมพ์สรุปสำหรับนัดคุย</button>':'<button class="btn sm" id="chgPinBtn">เปลี่ยน PIN</button><button class="btn sm ghost" id="stLogout">ออกจากระบบ</button>'}</div>
+  ${W.length?`<div class="watch" style="margin:0 0 12px"><span>⚠</span><div><b>สัญญาณที่ควรดู:</b> ${W.map(x=>x.t).join(' · ')}</div></div>`:''}
+  <div id="pinForm"></div>
+  <section class="card statcard">
+    <div class="sc-left">${avatar(p,'xl')}<div><h2>${esc(p.name)}</h2><div class="muted">${esc(p.id)} · ${esc(p.pos||'')}</div>
+      <div class="muted small" style="margin-top:4px">มีข้อมูล ${ms.length} เดือน${ms.length?` (${ymLong(ms[0].ym)} – ${ymLong(lastM.ym)})`:''}</div>
+      ${lastM&&lastM.me.rank?`<div style="margin-top:8px"><span class="chip ${lastM.me.rank<=3?'g':''}">อันดับ ${lastM.me.rank}/${lastM.team.n} · ${ymLong(lastM.ym)}</span></div>`:''}</div></div>
+    <div class="sc-ovr" style="${tier?`--tc:${tier.c}`:''}"><div class="big">${ovr!=null?ovr:'–'}</div><div class="lbl">OVR</div>${tier?`<div class="tier">${tier.i} ${tier.t}</div>`:''}<div class="muted small">ค่าเฉลี่ย ${profPeriod>=99?'ทั้งหมด':profPeriod+' เดือนล่าสุด'}</div></div>
+  </section>`;
+  if(!ms.length){ h+=`<section class="card sec empty" style="margin-top:12px">ยังไม่มีประวัติรายเดือน — ข้อมูลจะเริ่มสะสมเมื่อผู้ดูแลอัปโหลดยอดขาย</section>`; }
+  else {
+    h+=`<div class="grid2">
+      <section class="card sec"><div class="sechead"><div><h2>สถิติ 6 ด้าน</h2><div class="hint">เส้นทึบ = ของฉัน · เส้นประ = ค่ากลางทีม · เต็ม 100</div></div></div>
+        <div class="radarwrap">${radarSVG(S,T)}</div></section>
+      <section class="card sec"><div class="sechead"><div><h2>รายละเอียดแต่ละด้าน</h2><div class="hint">ขีดเทา = ค่ากลางทีมในช่วงเดียวกัน</div></div></div>
+        ${STATS.map(st=>`<div class="sbar"><div class="sbl"><b>${st.l}</b><span class="muted small">${st.d}</span></div><div class="sbt"><i style="width:${S[st.k]}%"></i><span style="left:${T[st.k]}%"></span></div><b class="num sbv">${Math.round(S[st.k])}</b></div>`).join('')}
+        ${B.length?`<div class="h4" style="margin-top:16px">เหรียญที่ได้</div><div class="badges">${B.map(b=>`<span class="badge">${b[0]} ${b[1]}</span>`).join('')}</div>`:''}
+      </section></div>
+    <section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>แนวโน้มรายเดือน</h2><div class="hint">เส้นทึบ = ของฉัน · เส้นประ = ค่ากลางทีม · เดือนที่ยังไม่จบใช้ค่าคาดการณ์ (FC)</div></div>
+      <div class="chips" id="metChips">${Object.entries(metricDef).map(([k,d])=>`<button data-k="${k}" class="${profMetric===k?'on':''}">${d.l}</button>`).join('')}</div></div>
+      <div class="chart" id="trendChart"></div></section>
+    <section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>ผลงานรายเดือน</h2><div class="hint">FC% = คาดการณ์สิ้นเดือน (เดือนที่จบแล้ว = ผลจริง)</div></div></div>
+      <div class="tablewrap"><table style="min-width:900px"><thead><tr><th class="l">เดือน</th><th>ยอด 6 หมวด</th><th>เป้า</th><th>FC%</th><th>ค่ากลางทีม</th><th>อันดับ</th><th>Cover+</th><th>MIX 3RD</th><th>ABA</th><th>สม่ำเสมอ</th><th>OVR</th></tr></thead><tbody>
+      ${perMonth.slice().reverse().map(m=>{ const inProg=m.last<m.dim; return `<tr style="cursor:default"><td class="l"><b>${ymLong(m.ym)}</b>${inProg?`<div class="muted small">ข้อมูลถึงวันที่ ${m.last}</div>`:''}</td>
+        <td class="num">${fmt(m.me.actSales)}</td><td class="num">${fmt(m.me.tgSales)}</td><td><span class="chip ${m.me.fcp>=1?'g':m.me.fcp>=.85?'w':'b'}">${pct(m.me.fcp,0)}</span></td><td class="num muted">${pct(m.team.med.fcp,0)}</td>
+        <td class="num">${m.me.rank?`${m.me.rank}/${m.team.n}`:'–'}</td><td class="num">${pct(m.me.att.smile,0)}</td><td class="num">${pct(m.me.att.mix,1)}</td><td class="num">${pct(m.me.cat.aba.fcp,0)}</td>
+        <td class="num">${m.me.daysHit}/${m.me.daysSales} วัน</td><td class="num"><b>${ovrOf(m.st)}</b></td></tr>`; }).join('')}
+      </tbody></table></div></section>`;
+  }
+  // behaviour log
+  h+=`<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>📁 แฟ้มประวัติ</h2><div class="hint">${mode==='mgr'?'บันทึกเฉพาะเมื่อมีเหตุการณ์ · ใช้ข้อเท็จจริง · บันทึกแล้วแก้ไม่ได้ (ถ้าผิดให้บันทึกรายการใหม่เพื่อแก้ไข)':'บันทึกจากหัวหน้าร้าน · กด "รับทราบ" และชี้แจงเพิ่มเติมได้'}</div></div></div>
+    ${mode==='mgr'?`<div class="logform">
+      <div class="form" style="grid-template-columns:1.2fr .8fr .8fr">
+        <div class="field"><label>ประเภท</label><select id="lgType">${Object.entries(LOG_T).map(([k,t])=>`<option value="${k}">${t.i} ${t.l}</option>`).join('')}</select></div>
+        <div class="field"><label>วันที่เกิดเหตุ</label><input type="date" id="lgDate" value="${new Date(Date.now()+7*3600e3).toISOString().slice(0,10)}"></div>
+        <div class="field"><label>ความรุนแรง</label><select id="lgSev"><option value="low">ต่ำ</option><option value="mid">กลาง</option><option value="high">สูง</option></select></div>
+      </div>
+      <div class="field" style="margin-top:8px"><label>รายละเอียด (ข้อเท็จจริง: เกิดอะไร เมื่อไร ผลกระทบ)</label><textarea class="note" id="lgText" rows="3"></textarea></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <label class="chk"><input type="checkbox" id="lgVis" checked> แจ้งพนักงาน (ไม่ติ๊ก = เก็บเป็นโน้ตส่วนตัวของหัวหน้า)</label>
+        <button class="btn primary" id="lgAdd">บันทึก</button></div>
+    </div>`:''}
+    <div class="loglist">${logs.length?logs.map(e=>logItem(e,mode)).join(''):'<div class="empty" style="padding:16px">ยังไม่มีบันทึก</div>'}</div>
+  </section>`;
+  lastPrintHTML=printView(p,perMonth.slice(-profPeriod),S,T,ovr,logs.filter(e=>!e.voided&&e.visible));
+  return h;
+}
+function printView(p,pm,S,T,ovr,logs){
+  const from=pm.length?pm[0].ym+'-01':'0000';
+  const L=logs.filter(e=>e.date>=from);
+  return `<h1>สรุปข้อมูลพนักงานสำหรับการพูดคุย</h1>
+  <div class="pv-meta"><b>${esc(p.name)}</b> · รหัส ${esc(p.id)} · ${esc(p.pos||'')}<br>ช่วงข้อมูล: ${pm.length?ymLong(pm[0].ym)+' – '+ymLong(pm[pm.length-1].ym):'–'} · พิมพ์เมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'})}</div>
+  <h3>สถิติ 6 ด้าน (OVR ${ovr!=null?ovr:'–'})</h3>
+  <table><tr>${STATS.map(s=>`<th>${s.l}</th>`).join('')}</tr><tr>${STATS.map(s=>`<td>${Math.round(S[s.k])} <small>(ทีม ${Math.round(T[s.k])})</small></td>`).join('')}</tr></table>
+  <h3>ผลงานรายเดือน</h3>
+  <table><tr><th>เดือน</th><th>ยอด 6 หมวด</th><th>เป้า</th><th>FC%</th><th>ค่ากลางทีม</th><th>อันดับ</th><th>Cover+</th><th>MIX 3RD</th><th>สม่ำเสมอ</th></tr>
+  ${pm.map(m=>`<tr><td>${ymLong(m.ym)}${m.last<m.dim?' *':''}</td><td>${fmt(m.me.actSales)}</td><td>${fmt(m.me.tgSales)}</td><td>${pct(m.me.fcp,0)}</td><td>${pct(m.team.med.fcp,0)}</td><td>${m.me.rank?m.me.rank+'/'+m.team.n:'–'}</td><td>${pct(m.me.att.smile,0)}</td><td>${pct(m.me.att.mix,1)}</td><td>${m.me.daysHit}/${m.me.daysSales}</td></tr>`).join('')}</table>
+  <div class="small">* เดือนที่ยังไม่จบ ใช้ค่าคาดการณ์สิ้นเดือน</div>
+  <h3>บันทึกในช่วงเดียวกัน (${L.length} รายการ · ไม่รวมโน้ตส่วนตัว)</h3>
+  ${L.length?`<table><tr><th>วันที่</th><th>ประเภท</th><th>รายละเอียด</th><th>สถานะ</th></tr>${L.map(e=>`<tr><td>${thDate(e.date)}</td><td>${(LOG_T[e.type]||LOG_T.other).l}${e.visible?'':' (โน้ตส่วนตัว)'}</td><td>${esc(e.text)}${e.ack&&e.ack.text?`<br><i>ชี้แจง: ${esc(e.ack.text)}</i>`:''}</td><td>${e.ack?'รับทราบแล้ว':(e.visible?'ยังไม่รับทราบ':'–')}</td></tr>`).join('')}</table>`:'<div>ไม่มีบันทึก</div>'}
+  <h3>สรุปผลการพูดคุย / สิ่งที่ตกลงร่วมกัน</h3>
+  <div class="pv-lines">${'<div></div>'.repeat(6)}</div>
+  <div class="pv-sign"><div>ลงชื่อ ............................................<br>พนักงาน<br>วันที่ ......../......../........</div><div>ลงชื่อ ............................................<br>หัวหน้าร้าน / ผู้ดูแล<br>วันที่ ......../......../........</div></div>`;
+}
+function bindProfile(id){
+  bindPeriod();
+  const ms=monthsFor(id); const g=goals();
+  const metricDef={fcp:{l:'ยอดขาย (FC%)',v:m=>m.me.fcp,t:m=>m.team.med.fcp,goal:1,fmt:v=>pct(v,0)},smile:{l:'Cover+ ATT',v:m=>m.me.att.smile,t:m=>m.team.med.smile,goal:g.smile,fmt:v=>pct(v,0)},
+    mix:{l:'MIX 3RD',v:m=>m.me.att.mix,t:m=>m.team.med.mix,goal:g.mix,fmt:v=>pct(v,1)},aba:{l:'ABA (FC%)',v:m=>m.me.cat.aba.fcp,t:m=>m.team.med.aba,goal:1,fmt:v=>pct(v,0)},
+    cons:{l:'สม่ำเสมอ',v:m=>m.me.cons,t:m=>m.team.med.cons,goal:0,fmt:v=>pct(v,0)}};
+  const tc=$('#trendChart');
+  if(tc){ const d=metricDef[profMetric]||metricDef.fcp; const win=ms.slice(-profPeriod);
+    lineChart(tc,win.map(m=>({ym:m.ym,v:d.v(m),t:d.t(m),note:m.last<m.dim?`(ข้อมูลถึงวันที่ ${m.last} · ค่าคาดการณ์)`:''})),{label:d.l,goal:d.goal,fmt:d.fmt});
+    document.querySelectorAll('#metChips button').forEach(b=>b.onclick=()=>{ profMetric=b.dataset.k; render(); }); }
+  $('#printArea').innerHTML=lastPrintHTML;
+  const pb=$('#printBtn'); if(pb) pb.onclick=()=>window.print();
+  const lo=$('#stLogout'); if(lo) lo.onclick=()=>staffLogout(false);
+  const cp=$('#chgPinBtn'); if(cp) cp.onclick=()=>{ $('#pinForm').innerHTML=`<section class="card sec" style="margin-bottom:12px"><b>เปลี่ยน PIN</b><div class="form" style="grid-template-columns:1fr 1fr auto;align-items:end;margin-top:8px">
+      <div class="field"><label>PIN ใหม่ (ตัวเลข 4–8 หลัก)</label><input type="password" inputmode="numeric" id="np1" maxlength="8"></div><div class="field"><label>ยืนยัน PIN ใหม่</label><input type="password" inputmode="numeric" id="np2" maxlength="8"></div>
+      <button class="btn primary" id="npGo">บันทึก</button></div><div class="status" id="npSt"></div></section>`;
+    $('#npGo').onclick=async()=>{ const a=$('#np1').value.trim(), b=$('#np2').value.trim(), s=$('#npSt');
+      if(!/^\d{4,8}$/.test(a)){ s.className='status on err'; s.textContent='PIN ต้องเป็นตัวเลข 4–8 หลัก'; return; }
+      if(a!==b){ s.className='status on err'; s.textContent='PIN ทั้งสองช่องไม่ตรงกัน'; return; }
+      try{ await api('pin/change',{method:'POST',body:{newPin:a}},'staff'); staffAuth={...staffAuth,pin:a}; try{ sessionStorage.setItem('mt_staff',JSON.stringify(staffAuth)); }catch(e){} if(LS.get('mt_staff',null)) LS.set('mt_staff',staffAuth);
+        $('#pinForm').innerHTML=''; toast('เปลี่ยน PIN แล้ว'); }catch(e){ s.className='status on err'; s.textContent='เปลี่ยนไม่สำเร็จ: '+e.message; } }; };
+  const add=$('#lgAdd'); if(add) add.onclick=async()=>{ const text=$('#lgText').value.trim(); if(!text){ toast('กรอกรายละเอียดก่อนบันทึก'); return; }
+    add.disabled=true; try{ await api('log',{method:'POST',body:{id,type:$('#lgType').value,date:$('#lgDate').value,severity:$('#lgSev').value,text,visible:$('#lgVis').checked}}); toast('บันทึกแล้ว'); await loadProfiles(true); }
+    catch(e){ toast('บันทึกไม่สำเร็จ: '+e.message); add.disabled=false; } };
+  document.querySelectorAll('[data-show]').forEach(b=>b.onclick=async()=>{ try{ await api('log/show',{method:'POST',body:{id,eid:b.dataset.show}}); toast('แจ้งพนักงานแล้ว'); loadProfiles(true); }catch(e){ toast(e.message); } });
+  document.querySelectorAll('[data-void]').forEach(b=>b.onclick=()=>{ const box=b.closest('.logact'); box.innerHTML=`<input class="search" style="width:260px" placeholder="เหตุผลที่ยกเลิก" id="vr-${b.dataset.void}"> <button class="btn sm" id="vg-${b.dataset.void}">ยืนยันยกเลิก</button>`;
+    $('#vg-'+b.dataset.void).onclick=async()=>{ const reason=$('#vr-'+b.dataset.void).value.trim(); if(!reason){ toast('ใส่เหตุผลก่อน'); return; } try{ await api('log/void',{method:'POST',body:{id,eid:b.dataset.void,reason}},'admin'); toast('ยกเลิกรายการแล้ว'); loadProfiles(true); }catch(e){ toast(e.message); } }; });
+  document.querySelectorAll('[data-ack]').forEach(b=>b.onclick=async()=>{ const t=b.parentElement.querySelector('textarea').value; b.disabled=true;
+    try{ await api('log/ack',{method:'POST',body:{eid:b.dataset.ack,text:t}},'staff'); toast('รับทราบแล้ว'); loadProfiles(true); }catch(e){ toast(e.message); b.disabled=false; } });
+}
+
+/* ---------- admin settings: PIN, managers, months ---------- */
+let pinStatus={pins:{},locks:{}};
+async function loadAdminExtras(){
+  if(!adminKey) return;
+  try{ pinStatus=await api('pin',{},'admin'); }catch(e){ pinStatus={pins:{},locks:{}}; }
+  staffRows();
+  try{ const ms=await api('managers',{},'admin'); $('#mgrList').innerHTML=ms.length?ms.map(m=>`<div class="mrow"><b>${esc(m.name)}</b><span class="muted small">เพิ่มเมื่อ ${new Date(m.at).toLocaleDateString('th-TH',{dateStyle:'medium'})}</span><button class="btn sm ghost" data-delm="${m.mid}">ลบ</button></div>`).join(''):'<div class="muted small">ยังไม่มีหัวหน้าร้าน</div>';
+    document.querySelectorAll('[data-delm]').forEach(b=>b.onclick=async()=>{ await api('managers?mid='+b.dataset.delm,{method:'DELETE'},'admin'); toast('ลบรหัสหัวหน้าร้านแล้ว'); loadAdminExtras(); }); }catch(e){}
+  try{ const idx=await api('months',{},'admin'); $('#monthList').innerHTML=idx.length?`<table class="stafftbl" style="min-width:0"><thead><tr><th>เดือน</th><th>ข้อมูลถึงวันที่</th><th>พนักงาน</th><th>อัปเดตล่าสุด</th><th>ไฟล์</th><th></th></tr></thead><tbody>${idx.slice().reverse().map(e=>`<tr><td><b>${ymLong(e.ym)}</b></td><td>${e.last}/${e.dim}</td><td>${e.n} คน</td><td>${new Date(e.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</td><td class="muted small">${esc(e.source||'')}</td><td><button class="btn sm ghost" data-delym="${e.ym}">ลบ</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">ยังไม่มีประวัติรายเดือน</div>';
+    document.querySelectorAll('[data-delym]').forEach(b=>b.onclick=async()=>{ if(b.dataset.c!=='1'){ b.dataset.c='1'; b.textContent='กดอีกครั้งเพื่อยืนยัน'; return; } await api('months?ym='+b.dataset.delym,{method:'DELETE'},'admin'); toast('ลบเดือนแล้ว'); profCache.all=null; loadAdminExtras(); }); }catch(e){}
+}
+function pinCell(p,i){ const st=pinStatus.pins[String(p.id)], lk=pinStatus.locks[String(p.id)];
+  return `<button class="btn sm ${st?'':'primary'}" data-pin="${i}" title="${st?(st.bySelf?'พนักงานเปลี่ยน PIN เองแล้ว':'ตั้งโดยผู้ดูแล'):''}">${lk?'🔒 ถูกล็อก':st?'✓ ตั้งแล้ว':'ตั้ง PIN'}</button>`; }
+function bindPinButtons(){
+  document.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{ const p=draftStaff[+b.dataset.pin]; if(!p||p.id===''){ toast('ใส่รหัสพนักงานก่อน'); return; }
+    $('#pinWho').textContent=`${p.name} (${p.id})`; $('#pinInp').value=''; $('#pinSt').className='status'; $('#pinScrim').dataset.id=p.id; $('#pinScrim').dataset.name=p.name; $('#pinScrim').classList.add('on'); setTimeout(()=>$('#pinInp').focus(),50); }); }
+async function savePin(clear){
+  const id=$('#pinScrim').dataset.id, pin=$('#pinInp').value.trim(), s=$('#pinSt');
+  if(!clear&&!/^\d{4,8}$/.test(pin)){ s.className='status on err'; s.textContent='PIN ต้องเป็นตัวเลข 4–8 หลัก (5 ตัวท้ายเลขบัตรประชาชน)'; return; }
+  try{ await api('pin',{method:'POST',body:{id,pin:clear?null:pin,name:$('#pinScrim').dataset.name}},'admin'); $('#pinScrim').classList.remove('on'); toast(clear?'ล้าง PIN แล้ว':'ตั้ง PIN แล้ว'); loadAdminExtras(); }
+  catch(e){ s.className='status on err'; s.textContent='ไม่สำเร็จ: '+e.message; }
+}
+
 /* ---------- modals ---------- */
 document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('click',e=>{ if(e.target===s||e.target.closest('[data-close]')) s.classList.remove('on'); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.scrim.on').forEach(s=>s.classList.remove('on')); });
@@ -779,7 +1256,8 @@ function staffRows(){
   $('#staffBody').innerHTML=draftStaff.map((p,i)=>`<tr><td style="width:112px"><div class="photo-cell">${avatar(p)}<label class="btn sm" title="อัปโหลดรูป">📷<input type="file" accept="image/*" hidden data-photo="${i}"></label>${p.photo?`<button class="btn sm ghost" data-unphoto="${i}" title="ลบรูป">✕</button>`:''}</div></td>
     <td style="width:80px"><input data-i="${i}" data-f="id" value="${esc(p.id)}" style="text-align:left"></td><td style="min-width:110px"><input data-i="${i}" data-f="name" value="${esc(p.name)}" style="text-align:left"></td><td style="width:70px"><input data-i="${i}" data-f="pos" value="${esc(p.pos||'')}" style="text-align:left"></td>
     ${TGK.map(k=>`<td><input data-i="${i}" data-t="${k}" value="${p.tg&&p.tg[k]?(k==='sim'?Math.round(p.tg[k]*100)/100:Math.round(p.tg[k])):''}" inputmode="decimal"></td>`).join('')}
-    <td style="width:40px"><button class="btn sm ghost" data-del="${i}" title="ลบ">✕</button></td></tr>`).join('');
+    <td style="width:96px">${pinCell(p,i)}</td><td style="width:40px"><button class="btn sm ghost" data-del="${i}" title="ลบ">✕</button></td></tr>`).join('');
+  bindPinButtons();
   $('#staffBody').querySelectorAll('input[data-f]').forEach(inp=>inp.oninput=()=>{ const p=draftStaff[+inp.dataset.i]; p[inp.dataset.f]=inp.dataset.f==='id'?(+inp.value||inp.value):inp.value; });
   $('#staffBody').querySelectorAll('input[data-t]').forEach(inp=>inp.oninput=()=>{ const p=draftStaff[+inp.dataset.i]; p.tg=p.tg||{}; p.tg[inp.dataset.t]=+String(inp.value).replace(/,/g,'')||0; });
   $('#staffBody').querySelectorAll('[data-photo]').forEach(inp=>inp.onchange=async()=>{ const f=inp.files[0]; if(f) await uploadPhoto(+inp.dataset.photo,f); });
@@ -793,7 +1271,9 @@ const ATT_IN={smile:'#aSmile',mix:'#aMix',ac:'#aAc',sim:'#aSim',ufund:'#aUfund',
 $('#openSettings').onclick=()=>{ const S=state.settings; const M=monthInfo();
   $('#sDay').value=S.dayOverride||''; $('#sDayHelp').textContent=M.last?`อัตโนมัติ = ${+M.last.slice(8)} (วันล่าสุดในข้อมูล) · เดือนนี้มี ${M.dim} วัน`:'';
   for(const [k,sel] of Object.entries(ATT_IN)) $(sel).value=Math.round(((S.att||{})[k]||0)*1000)/10;
-  draftStaff=state.staff.map(p=>({...p,tg:{...(p.tg||{})}})); staffRows(); $('#setScrim').classList.add('on'); };
+  draftStaff=state.staff.map(p=>({...p,tg:{...(p.tg||{})}})); staffRows(); $('#setScrim').classList.add('on'); loadAdminExtras(); };
+$('#pinSave').onclick=()=>savePin(false); $('#pinClear').onclick=()=>savePin(true); $('#pinInp').onkeydown=e=>{ if(e.key==='Enter') savePin(false); };
+$('#mgrAdd').onclick=async()=>{ const name=$('#mgrName').value.trim(), key=$('#mgrKey').value; try{ await api('managers',{method:'POST',body:{name,key}},'admin'); $('#mgrName').value=''; $('#mgrKey').value=''; toast('เพิ่มหัวหน้าร้านแล้ว'); loadAdminExtras(); }catch(e){ toast('เพิ่มไม่สำเร็จ: '+e.message); } };
 $('#fillAll').onclick=()=>{ document.querySelectorAll('[data-all]').forEach(inp=>{ const v=String(inp.value).replace(/,/g,''); if(v==='') return; draftStaff.forEach(p=>{ p.tg=p.tg||{}; p.tg[inp.dataset.all]=+v||0; }); }); staffRows(); };
 $('#addStaff').onclick=()=>{ const b=draftStaff[0]?draftStaff[0].branch:251; draftStaff.push({branch:b,id:'',pos:'PIA',name:'',tg:{}}); staffRows(); };
 $('#addFromData').onchange=e=>{ const id=+e.target.value; if(!id) return; const r=state.rows.find(r=>r[2]===id); draftStaff.push({branch:r?r[1]:251,id,pos:'PIA',name:state.names[id]||String(id),tg:{}}); staffRows(); };
@@ -801,7 +1281,7 @@ $('#saveSettings').onclick=async()=>{
   const att={}; for(const [k,sel] of Object.entries(ATT_IN)) att[k]=(+$(sel).value||0)/100;
   const d=+$('#sDay').value; state.settings={...state.settings,dayOverride:d>0?d:null,att};
   state.staff=draftStaff.filter(p=>p.id!==''&&p.name!=='').map(p=>({...p,id:+p.id,branch:+p.branch||251}));
-  $('#setScrim').classList.remove('on'); render(); await save('บันทึกเป้าและการตั้งค่าแล้ว'); };
+  $('#setScrim').classList.remove('on'); render(); const ok=await save('บันทึกเป้าและการตั้งค่าแล้ว'); if(ok) syncCurrentMonth(); };
 
 /* photos */
 function resizeImage(file,size=320){ return new Promise((res,rej)=>{ const img=new Image(); const u=URL.createObjectURL(file);
@@ -865,7 +1345,8 @@ async function handleFile(f){
     if(!aoa) for(const n of wb.SheetNames){ aoa=tryS(n); if(aoa){ sheetName=n; break; } }
     const tg = $('#tgChk').checked ? readTG(wb) : null;
     if(!aoa && !tg) throw new Error('ไม่พบชีตข้อมูลขาย (ต้องมีคอลัมน์ Officer (ID), Number, ราคาขายตามบิล) หรือชีต TG');
-    let msg=[];
+    let msg=[], upd=false;
+    const applyTG=list=>{ const old=new Map(state.staff.map(p=>[String(p.id),p])); state.staff=list.map(t=>{ const o=old.get(String(t.id)); return o? {...o,tg:t.tg,name:o.name||t.name,pos:t.pos||o.pos} : t; }); };
     if(aoa){
       const H=aoa[0].map(x=>String(x==null?'':x).trim()); const ix=k=>H.indexOf(k);
       const subAll=H.map((h,i)=>h==='Sub Category'?i:-1).filter(i=>i>=0);
@@ -903,17 +1384,20 @@ async function handleFile(f){
         n++; }
       let rows=Object.values(agg).map(a=>a.map((v,j)=>j>2?Math.round(v*100)/100:v));
       if(!rows.length) throw new Error('ไม่พบรายการขายในไฟล์');
-      if($('#mergeChk').checked){ const nd=new Set(rows.map(r=>r[0])); rows=state.rows.filter(r=>!nd.has(r[0])).concat(rows); }
-      let last=''; rows.forEach(r=>{ if(r[0]>last) last=r[0]; }); const ym=last.slice(0,7);
-      rows=rows.filter(r=>r[0].startsWith(ym)).sort((x,y)=>x[0]<y[0]?-1:x[0]>y[0]?1:x[2]-y[2]);
-      state.rows=rows; state.names={...state.names,...names}; state.source=f.name; state.updatedAt=Date.now();
-      msg.push(`อ่านยอดขาย ${fmt(n)} รายการ ถึงวันที่ ${thDate(last)}${bad?` (ข้ามแถวที่อ่านวันที่ไม่ได้ ${bad} แถว)`:''}`);
-    }
-    if(tg){ const old=new Map(state.staff.map(p=>[String(p.id),p]));
-      state.staff=tg.map(t=>{ const o=old.get(String(t.id)); return o? {...o,tg:t.tg,name:o.name||t.name,pos:t.pos||o.pos} : t; });
-      msg.push(`อัปเดตเป้าจากชีต TG ${tg.length} คน`); }
+      state.names={...state.names,...names};
+      status('busy','⏳ กำลังบันทึกประวัติรายเดือน…');
+      const stored=await storeUploadedMonths(rows,tg,f.name,$('#mergeChk').checked);
+      const curYm=monthInfo().ym; const latest=stored[stored.length-1];
+      if(!state.rows.length||!curYm||latest.ym>=curYm){ state.rows=latest.rows; state.source=f.name; state.updatedAt=Date.now(); upd=true;
+        if(tg){ applyTG(tg); } }
+      msg.push(`อ่านยอดขาย ${fmt(n)} รายการ${bad?` (ข้ามแถวที่อ่านวันที่ไม่ได้ ${bad} แถว)`:''}`);
+      msg.push('เก็บประวัติ: '+stored.map(s=>`${ymLong(s.ym)} ถึงวันที่ ${+s.rows.reduce((m,r)=>r[0]>m?r[0]:m,'').slice(8)} (เป้า: ${s.tgFrom})`).join(', '));
+      if(latest.ym<curYm) msg.push(`หน้าหลักยังแสดง ${ymLong(curYm)} ตามเดิม เพราะไฟล์นี้เป็นเดือนเก่า`);
+    } else if(tg){ applyTG(tg); upd=true; }
+    if(tg&&upd) msg.push(`อัปเดตเป้าจากชีต TG ${tg.length} คน`);
     render();
-    const ok=await save();
+    const ok=upd? await save() : true;
+    if(ok&&upd&&!aoa) await syncCurrentMonth();
     status('ok','✓ '+msg.join(' · ')+(ok?' · บันทึกขึ้นเซิร์ฟเวอร์แล้ว ทุกคนที่เปิดลิงก์จะเห็นข้อมูลนี้':' · <b>ยังไม่ได้บันทึกขึ้นเซิร์ฟเวอร์</b>'));
   }catch(err){ console.error(err); status('err','✕ '+esc(err.message||err)); }
 }
@@ -921,7 +1405,7 @@ async function handleFile(f){
 /* ---------- persistence (Netlify Function + Blobs) ---------- */
 const API='/api/data';
 let adminKey=LS.get('mt_key',null);
-function setAdmin(on){ document.body.classList.toggle('admin',!!on); $('#loginBtn').hidden = on || location.hash!=='#admin'; }
+function setAdmin(on){ document.body.classList.toggle('admin',!!on); document.body.classList.toggle('mgr',!!(on||mgrKey)); $('#loginBtn').hidden = !!(on||mgrKey) || location.hash!=='#admin'; const lb=$('#logoutBtn'); if(lb) lb.textContent=mgrKey&&!on?'ออก ('+mgrName+')':'ออก'; }
 function payload(){ return {v:1,savedAt:Date.now(),source:state.source,updatedAt:state.updatedAt,staff:state.staff,names:state.names,settings:state.settings,rows:state.rows}; }
 let lastStamp=null;
 async function save(msg){
@@ -943,12 +1427,15 @@ $('#loginBtn').onclick=()=>{ $('#loginStatus').className='status'; $('#keyInp').
 $('#keyInp').onkeydown=e=>{ if(e.key==='Enter') $('#loginGo').click(); };
 $('#loginGo').onclick=async()=>{ const k=$('#keyInp').value.trim(); if(!k) return; const s=$('#loginStatus');
   try{ const r=await fetch(API+'?auth=1',{headers:{'x-admin-key':k},cache:'no-store'});
-    if(r.status===204||r.ok){ adminKey=k; LS.set('mt_key',k); setAdmin(true); $('#loginScrim').classList.remove('on'); toast('เข้าสู่โหมดผู้ดูแลแล้ว'); }
-    else { s.className='status on err'; s.textContent='✕ รหัสไม่ถูกต้อง'; } }catch(e){ s.className='status on err'; s.textContent='✕ ติดต่อเซิร์ฟเวอร์ไม่ได้'; } };
-$('#logoutBtn').onclick=()=>{ adminKey=null; LS.set('mt_key',null); setAdmin(false); toast('ออกจากโหมดผู้ดูแลแล้ว'); };
+    if(r.status===204||r.ok){ adminKey=k; LS.set('mt_key',k); mgrKey=null; LS.set('mt_mkey',null); setAdmin(true); $('#loginScrim').classList.remove('on'); toast('เข้าสู่โหมดผู้ดูแลแล้ว'); profCache.all=null; ensureMonthHistory(); render(); return; }
+    const r2=await fetch('/api/whoami',{headers:{'x-manager-key':k},cache:'no-store'});
+    if(r2.ok){ const w=await r2.json(); mgrKey=k; mgrName=w.name; LS.set('mt_mkey',k); LS.set('mt_mname',w.name); setAdmin(false); $('#loginScrim').classList.remove('on'); toast('เข้าสู่ระบบหัวหน้าร้าน: '+w.name); profCache.all=null; if(!location.hash.startsWith('#p')) location.hash='profile'; render(); return; }
+    s.className='status on err'; s.textContent='✕ รหัสไม่ถูกต้อง'; }catch(e){ s.className='status on err'; s.textContent='✕ ติดต่อเซิร์ฟเวอร์ไม่ได้'; } };
+$('#logoutBtn').onclick=()=>{ adminKey=null; LS.set('mt_key',null); mgrKey=null; LS.set('mt_mkey',null); profCache.all=null; setAdmin(false); toast('ออกจากระบบแล้ว'); render(); };
+async function ensureMonthHistory(){ if(!adminKey||!state.rows.length) return; try{ const idx=await api('months',{},'admin'); const ym=monthInfo().ym; if(ym&&!idx.some(e=>e.ym===ym)) await syncCurrentMonth(); }catch(e){} }
 
 setAdmin(!!adminKey);
-render(); load();
+render(); load().then(()=>ensureMonthHistory());
 setInterval(()=>{ if(!document.hidden) load(); },5*60*1000);
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(); });
 })();
