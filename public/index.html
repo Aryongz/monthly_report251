@@ -276,6 +276,31 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
 .tgtbl input{width:100%;min-width:84px;border:1px solid var(--line);background:var(--surface-1);border-radius:8px;padding:5px 6px;text-align:right}
 .tgtbl td,.tgtbl th{padding:5px 4px}
 .modal.xl{max-width:1180px}
+.shlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-secondary);margin-bottom:10px}
+.shlegend span{display:inline-flex;gap:6px;align-items:center}
+.shc{width:20px;height:20px;border-radius:6px;border:1px solid var(--line-2);display:inline-grid;place-items:center;font-style:normal;font-size:11px;font-weight:600;background:var(--surface-1)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--s1);display:inline-block}
+.sh-off{background:var(--surface-2)!important;color:var(--text-muted)}
+.sh-leave{background:var(--s1-soft)!important;color:var(--s1)}
+.sh-abs{background:var(--bad-soft)!important;color:var(--bad)}
+table.shgrid{min-width:0;width:auto;border-collapse:separate;border-spacing:2px}
+.shgrid th{position:static;padding:4px 2px;font-size:11px;text-align:center;min-width:26px;line-height:1.2;cursor:default;background:transparent}
+.shgrid th span{display:block;font-size:10px;color:var(--text-muted)}
+.shgrid th.we span{color:var(--s2)}
+.shgrid td{padding:0;border:0;text-align:center;font-size:12px;font-weight:600}
+.shgrid td.shname{position:sticky;left:0;background:var(--surface-1);padding:4px 10px 4px 0;min-width:130px;z-index:1;text-align:left;font-weight:400}
+.shgrid td.shname small{display:block;color:var(--text-muted);font-size:11px}
+.shgrid .shname b{font-weight:600}
+.shcell{width:28px;height:30px;border-radius:7px;background:var(--surface-1);border:1px solid var(--line)!important;cursor:pointer;user-select:none;transition:background .1s}
+body.mgr .shcell:hover{border-color:var(--text-muted)!important}
+.shgrid tbody tr{cursor:default}.shgrid tbody tr:hover{background:transparent}
+.shc-n{min-width:34px;padding:0 6px!important;color:var(--text-secondary)}
+.mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:620px}
+.mcal .cw{font-size:12px;color:var(--text-muted);text-align:center}
+.mcal .cd{height:58px;border:1px solid var(--line);border-radius:10px;padding:5px 7px;display:flex;flex-direction:column;justify-content:space-between;background:var(--surface-1)}
+.mcal .cd span{font-size:12px;color:var(--text-secondary)}
+.mcal .cd em{font-style:normal;font-size:12.5px;font-weight:600}
+.mcal .cd.shcell{width:auto;height:58px;cursor:pointer}
 body.mgr #logoutBtn{display:inline-flex!important}
 .muted{color:var(--text-muted)}.small{font-size:12px}
 .loginCard{max-width:520px;margin:0 auto}
@@ -884,12 +909,13 @@ function summarizeMonth(ym,rows,tgMap,staffList,source){
     const dT=x.tgSales/dim, dv=Object.values(daily), daysSales=dv.filter(v=>v>0).length, daysHit=dT?dv.filter(v=>v>=dT).length:0;
     const cat={}; CATS.forEach(c=>{ const t=+tg[c.k]||0, av=a[c.a]; cat[c.k]={t:r2(t),a:r2(av),fcp:t?av*x.fcf/t:0}; });
     const aa={}; KEYS.forEach(k=>aa[k]=r2(a[k]));
-    const o={id:p.id,name:p.name,pos:p.pos||'',tgSales:r2(x.tgSales),actSales:r2(x.actSales),total:r2(x.total),ac:x.ac,fcp:x.fcp,att:x.att,cat,a:aa,daysSales,daysHit,cons:daysSales?daysHit/daysSales:0,rank:null};
+    const dly={}; Object.entries(daily).forEach(([d,v])=>{ dly[String(+d.slice(8))]=r2(v); });
+    const o={id:p.id,name:p.name,pos:p.pos||'',tgSales:r2(x.tgSales),actSales:r2(x.actSales),total:r2(x.total),ac:x.ac,fcp:x.fcp,att:x.att,cat,a:aa,daysSales,daysHit,cons:daysSales?daysHit/daysSales:0,rank:null,daily:dly,dT:r2(dT)};
     staff[p.id]=o; list.push(o);
   }
   const L=list.filter(o=>o.tgSales>0); L.sort((a,b)=>b.fcp-a.fcp).forEach((o,i)=>o.rank=i+1);
   const team={n:L.length,med:{fcp:median(L.map(o=>o.fcp)),smile:median(L.map(o=>o.att.smile)),mix:median(L.map(o=>o.att.mix)),aba:median(L.map(o=>o.cat.aba.fcp)),cons:median(L.map(o=>o.cons))}};
-  return {ym,dim,last,updatedAt:Date.now(),source:source||'',staff,team};
+  return {sv:2,ym,dim,last,updatedAt:Date.now(),source:source||'',staff,team};
 }
 const staffLite=list=>list.map(p=>({id:p.id,name:p.name,pos:p.pos||'',branch:p.branch||251}));
 const tgMapOf=list=>Object.fromEntries(list.map(p=>[p.id,p.tg||{}]));
@@ -949,7 +975,7 @@ function logsFor(id){
 
 /* ---------- stats ---------- */
 const STATS=[{k:'sales',l:'ยอดขาย',d:'FC% ยอดรวม 6 หมวดเทียบเป้า'},{k:'attach',l:'Attach',d:'Cover+ ATT เทียบเป้า'},{k:'mix',l:'MIX 3RD',d:'MIX 3RD เทียบเป้า'},
-  {k:'aba',l:'ABA',d:'FC% ของ BTB Apple'},{k:'cons',l:'สม่ำเสมอ',d:'วันที่ถึงเป้าเฉลี่ย ÷ วันที่มียอดขาย'},{k:'growth',l:'พัฒนาการ',d:'เทียบค่าเฉลี่ยเดือนก่อนหน้า (50 = เท่าเดิม)'}];
+  {k:'aba',l:'ABA',d:'FC% ของ BTB Apple'},{k:'cons',l:'สม่ำเสมอ',d:'วันที่ถึงเป้าเฉลี่ย ÷ วันทำงาน (ตามปฏิทินกะ)'},{k:'growth',l:'พัฒนาการ',d:'เทียบค่าเฉลี่ยเดือนก่อนหน้า (50 = เท่าเดิม)'}];
 const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
 function goals(){ const a=state.settings.att||{}; return {smile:a.smile||0.25,mix:a.mix||0.07}; }
 function statsOf(me,prev){
@@ -1028,6 +1054,73 @@ function logItem(e,mode){
     </div></div>`;
 }
 
+/* ---------- shift calendar (หยุด / ลา / ขาด) ---------- */
+const SH={off:{l:'หยุด',s:'ห',c:'sh-off'},leave:{l:'ลา',s:'ล',c:'sh-leave'},absent:{l:'ขาด',s:'ข',c:'sh-abs'}};
+const SH_NEXT={'':'off',off:'leave',leave:'absent',absent:''};
+let shiftYm=null, shiftRefreshT=null;
+function shiftOf(ym,id){
+  if(isMgrRole()) return (((profCache.all&&profCache.all.shifts)||{})[ym]||{})[String(id)]||{};
+  return (profCache.own&&profCache.own.shifts&&profCache.own.shifts[ym])||{};
+}
+function setShiftLocal(ym,id,day,st){ const all=profCache.all.shifts||(profCache.all.shifts={}); const m=all[ym]||(all[ym]={}); const p=m[String(id)]||(m[String(id)]={}); if(st) p[day]=st; else delete p[day]; }
+function shiftMonths(){ const set=new Set(); const M=monthInfo(); if(M.ym) set.add(M.ym); ((profCache.all&&profCache.all.months)||(profCache.own&&profCache.own.months)||[]).forEach(s=>set.add(s.ym)); return [...set].sort(); }
+function dimOf(ym){ const [y,m]=ym.split('-').map(Number); return new Date(Date.UTC(y,m,0)).getUTCDate(); }
+function dailySalesFor(ym,id){
+  if(ym===monthInfo().ym){ const o={}; const p=state.staff.find(x=>String(x.id)===String(id));
+    for(const r of state.rows){ if(r[2]!=id||!r[0].startsWith(ym)) continue; if(p&&p.branch&&r[1]!=p.branch) continue; const d=String(+r[0].slice(8)); o[d]=(o[d]||0)+SALES_CATS.reduce((s,c)=>s+r[KI[c.a]],0); } return o; }
+  const s=((profCache.all&&profCache.all.months)||[]).find(x=>x.ym===ym); if(s&&s.staff[id]) return s.staff[id].daily||{};
+  const own=profCache.own&&profCache.own.months.find(x=>x.ym===ym); return (own&&own.me.daily)||{};
+}
+function shCounts(marks,upto){ const c={off:0,leave:0,absent:0}; Object.entries(marks).forEach(([d,s])=>{ if((!upto||+d<=upto)&&c[s]!=null) c[s]++; }); return c; }
+function shLegend(){ return `<div class="shlegend"><span><i class="shc"></i>ทำงาน</span><span><i class="shc sh-off">ห</i>หยุด</span><span><i class="shc sh-leave">ล</i>ลา</span><span><i class="shc sh-abs">ข</i>ขาด</span><span><i class="shc"><b class="dot"></b></i>มียอดขาย</span></div>`; }
+function monthChipsSh(){ return `<div class="chips" id="shMonths">${shiftMonths().map(ym=>`<button data-ym="${ym}" class="${ym===shiftYm?'on':''}">${ymLabel(ym)}</button>`).join('')}</div>`; }
+function teamShiftGrid(){
+  const yms=shiftMonths(); if(!yms.length) return '';
+  if(!shiftYm||!yms.includes(shiftYm)) shiftYm=yms[yms.length-1];
+  const ym=shiftYm, dim=dimOf(ym);
+  const sum=((profCache.all&&profCache.all.months)||[]).find(x=>x.ym===ym);
+  const people= ym===monthInfo().ym||!sum ? state.staff : Object.values(sum.staff).map(o=>({id:o.id,name:o.name,pos:o.pos}));
+  let h=`<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>📅 ปฏิทินกะงานทั้งทีม · ${ymLong(ym)}</h2><div class="hint">คลิกช่องเพื่อเปลี่ยน: ทำงาน → หยุด → ลา → ขาด → ทำงาน · บันทึกทันที · ใช้คิดด้าน "สม่ำเสมอ" (ขาด = นับเป็นวันทำงานที่ไม่ถึงเป้า)</div></div>${monthChipsSh()}</div>${shLegend()}
+  <div class="tablewrap"><table class="shgrid"><thead><tr><th class="l shname">พนักงาน</th>`;
+  for(let d=1; d<=dim; d++){ const wd=new Date(Date.UTC(+ym.slice(0,4),+ym.slice(5)-1,d)).getUTCDay(); h+=`<th class="${wd===0||wd===6?'we':''}"><span>${TH_WD[wd].replace('.','')}</span>${d}</th>`; }
+  h+=`<th>หยุด</th><th>ลา</th><th>ขาด</th></tr></thead><tbody>`;
+  people.forEach(p=>{ const mk=shiftOf(ym,p.id), ds=dailySalesFor(ym,p.id), c=shCounts(mk);
+    h+=`<tr><td class="l shname"><b>${esc(p.name)}</b><small>${esc(p.id)}</small></td>`;
+    for(let d=1; d<=dim; d++){ const st=mk[String(d)]||'', sold=(ds[String(d)]||0)>0; h+=`<td class="shcell ${st?SH[st].c:''}" data-id="${p.id}" data-d="${d}" title="${d} ${ymLong(ym)}${sold?' · มียอด '+fmt(ds[String(d)]):''}">${st?SH[st].s:(sold?'<b class="dot"></b>':'')}</td>`; }
+    h+=`<td class="num shc-n" data-n="off">${c.off||''}</td><td class="num shc-n" data-n="leave">${c.leave||''}</td><td class="num shc-n" data-n="absent">${c.absent||''}</td></tr>`; });
+  return h+`</tbody></table></div></section>`;
+}
+function personShiftCal(id){
+  const yms=shiftMonths(); if(!yms.length) return '';
+  if(!shiftYm||!yms.includes(shiftYm)) shiftYm=yms[yms.length-1];
+  const ym=shiftYm, dim=dimOf(ym), mk=shiftOf(ym,id), ds=dailySalesFor(ym,id), c=shCounts(mk);
+  const first=new Date(Date.UTC(+ym.slice(0,4),+ym.slice(5)-1,1)).getUTCDay();
+  const editable=isMgrRole();
+  let g=['อา','จ','อ','พ','พฤ','ศ','ส'].map(w=>`<div class="cw">${w}</div>`).join('')+'<div></div>'.repeat(first);
+  for(let d=1; d<=dim; d++){ const st=mk[String(d)]||'', sold=(ds[String(d)]||0)>0;
+    g+=`<div class="cd ${st?SH[st].c:''} ${editable?'shcell':''}" data-id="${id}" data-d="${d}"><span>${d}</span>${st?`<em>${SH[st].l}</em>`:(sold?'<b class="dot"></b>':'')}</div>`; }
+  const anyMark=Object.keys(mk).length>0;
+  return `<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>📅 ปฏิทินกะงาน</h2><div class="hint">${editable?'คลิกวันเพื่อเปลี่ยน: ทำงาน → หยุด → ลา → ขาด':'หัวหน้าร้านเป็นผู้ลงปฏิทิน'} · ${anyMark?'ด้าน "สม่ำเสมอ" ของเดือนนี้คิดจากวันทำงานตามปฏิทิน':'ยังไม่ได้ลงปฏิทินเดือนนี้: ด้าน "สม่ำเสมอ" คิดจากวันที่มียอดขาย'}</div></div>${monthChipsSh()}</div>
+    ${shLegend()}<div class="mcal">${g}</div>
+    <div class="muted small" style="margin-top:8px">${ymLong(ym)}: หยุด ${c.off} วัน · ลา ${c.leave} วัน · ขาด ${c.absent} วัน</div></section>`;
+}
+function bindShifts(){
+  document.querySelectorAll('#shMonths button').forEach(b=>b.onclick=()=>{ shiftYm=b.dataset.ym; render(); });
+  if(!isMgrRole()) return;
+  document.querySelectorAll('.shcell').forEach(td=>td.onclick=async()=>{
+    const id=td.dataset.id, d=td.dataset.d, ym=shiftYm; const cur=shiftOf(ym,id)[d]||''; const nx=SH_NEXT[cur];
+    setShiftLocal(ym,id,d,nx); paintCell(td,ym,id,d);
+    try{ await api('shifts',{method:'POST',body:{id,ym,day:+d,status:nx||'work'}}); clearTimeout(shiftRefreshT); shiftRefreshT=setTimeout(()=>loadProfiles(true),2500); }
+    catch(e){ setShiftLocal(ym,id,d,cur); paintCell(td,ym,id,d); toast('บันทึกปฏิทินไม่สำเร็จ: '+e.message); }
+  });
+}
+function paintCell(td,ym,id,d){
+  const st=shiftOf(ym,id)[d]||'', sold=(dailySalesFor(ym,id)[d]||0)>0;
+  td.classList.remove('sh-off','sh-leave','sh-abs'); if(st) td.classList.add(SH[st].c);
+  if(td.classList.contains('cd')) td.innerHTML=`<span>${d}</span>${st?`<em>${SH[st].l}</em>`:(sold?'<b class="dot"></b>':'')}`;
+  else { td.innerHTML=st?SH[st].s:(sold?'<b class="dot"></b>':''); const tr=td.parentElement; const c=shCounts(shiftOf(ym,id)); tr.querySelectorAll('[data-n]').forEach(x=>x.textContent=c[x.dataset.n]||''); }
+}
+
 /* ---------- main render ---------- */
 let profPeriod=LS.get('mt_period',6), profMetric='fcp', profMgrQ='', lastPrintHTML='';
 function renderProfile(D,R){
@@ -1085,6 +1178,7 @@ function mgrOverview(D){
     <div class="sechead"><div><h2>⚠️ สัญญาณที่ควรดู</h2><div class="hint">ระบบเตือนเพื่อช่วยเลือกว่าจะดึงแฟ้มของใครมาดู · ไม่ใช่การตัดสิน</div></div><button class="btn sm" id="profReload">↻ รีเฟรช</button></div>
     ${flagged.length?flagged.map(r=>`<div class="warnrow" data-id="${r.p.id}">${avatar(r.p)}<div style="flex:1"><b>${esc(r.p.name)}</b> <span class="muted small">${esc(r.p.id)}</span><div class="chips2">${r.w.map(x=>`<span class="chip ${x.c}">${x.t}</span>`).join('')}</div></div><span class="muted">เปิดแฟ้ม ›</span></div>`).join(''):'<div class="empty" style="padding:16px">✓ ไม่มีสัญญาณเตือนในตอนนี้</div>'}
   </section>
+  ${teamShiftGrid()}
   <section class="card sec" style="margin-top:12px">
     <div class="sechead"><div><h2>โปรไฟล์พนักงานทั้งหมด</h2><div class="hint">OVR = คะแนนเฉลี่ย 6 ด้านในช่วง ${profPeriod>=99?'ทั้งหมด':profPeriod+' เดือนล่าสุด'} · คลิกเพื่อเปิดแฟ้ม</div></div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${periodChips()}<input class="search" id="profQ" placeholder="ค้นหาชื่อ / รหัส" value="${esc(profMgrQ)}"></div></div>
@@ -1097,8 +1191,8 @@ function mgrOverview(D){
 function periodChips(){ return `<div class="chips" id="perChips">${[[3,'3 เดือน'],[6,'6 เดือน'],[12,'12 เดือน'],[99,'ทั้งหมด']].map(([v,l])=>`<button data-v="${v}" class="${profPeriod==v?'on':''}">${l}</button>`).join('')}</div>`; }
 function bindPeriod(){ document.querySelectorAll('#perChips button').forEach(b=>b.onclick=()=>{ profPeriod=+b.dataset.v; LS.set('mt_period',profPeriod); render(); }); }
 function bindOverview(){
-  bindPeriod(); $('#profReload').onclick=()=>loadProfiles(true);
-  document.querySelectorAll('#profileBody [data-id]').forEach(el=>el.onclick=()=>{ location.hash='p'+el.dataset.id; });
+  bindPeriod(); bindShifts(); $('#profReload').onclick=()=>loadProfiles(true);
+  document.querySelectorAll('#profileBody .warnrow[data-id], #profileBody .pcard[data-id]').forEach(el=>el.onclick=()=>{ location.hash='p'+el.dataset.id; });
   const q=$('#profQ'); q.oninput=()=>{ profMgrQ=q.value.trim().toLowerCase(); const pos=q.selectionStart; render(); const q2=$('#profQ'); q2.focus(); q2.setSelectionRange(pos,pos); };
 }
 
@@ -1152,9 +1246,10 @@ function profilePage(D,id){
       ${perMonth.slice().reverse().map(m=>{ const inProg=m.last<m.dim; return `<tr style="cursor:default"><td class="l"><b>${ymLong(m.ym)}</b>${inProg?`<div class="muted small">ข้อมูลถึงวันที่ ${m.last}</div>`:''}</td>
         <td class="num">${fmt(m.me.actSales)}</td><td class="num">${fmt(m.me.tgSales)}</td><td><span class="chip ${m.me.fcp>=1?'g':m.me.fcp>=.85?'w':'b'}">${pct(m.me.fcp,0)}</span></td><td class="num muted">${pct(m.team.med.fcp,0)}</td>
         <td class="num">${m.me.rank?`${m.me.rank}/${m.team.n}`:'–'}</td><td class="num">${pct(m.me.att.smile,0)}</td><td class="num">${pct(m.me.att.mix,1)}</td><td class="num">${pct(m.me.cat.aba.fcp,0)}</td>
-        <td class="num">${m.me.daysHit}/${m.me.daysSales} วัน</td><td class="num"><b>${ovrOf(m.st)}</b></td></tr>`; }).join('')}
+        <td class="num">${m.me.daysHit}/${m.me.daysSales} วัน${m.me.consMode==='cal'?'':'<span class="u">ประมาณจากวันที่มียอด</span>'}</td><td class="num"><b>${ovrOf(m.st)}</b></td></tr>`; }).join('')}
       </tbody></table></div></section>`;
   }
+  h+=personShiftCal(id);
   // behaviour log
   h+=`<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>📁 แฟ้มประวัติ</h2><div class="hint">${mode==='mgr'?'บันทึกเฉพาะเมื่อมีเหตุการณ์ · ใช้ข้อเท็จจริง · บันทึกแล้วแก้ไม่ได้ (ถ้าผิดให้บันทึกรายการใหม่เพื่อแก้ไข)':'บันทึกจากหัวหน้าร้าน · กด "รับทราบ" และชี้แจงเพิ่มเติมได้'}</div></div></div>
     ${mode==='mgr'?`<div class="logform">
@@ -1181,8 +1276,8 @@ function printView(p,pm,S,T,ovr,logs){
   <h3>สถิติ 6 ด้าน (OVR ${ovr!=null?ovr:'–'})</h3>
   <table><tr>${STATS.map(s=>`<th>${s.l}</th>`).join('')}</tr><tr>${STATS.map(s=>`<td>${Math.round(S[s.k])} <small>(ทีม ${Math.round(T[s.k])})</small></td>`).join('')}</tr></table>
   <h3>ผลงานรายเดือน</h3>
-  <table><tr><th>เดือน</th><th>ยอด 6 หมวด</th><th>เป้า</th><th>FC%</th><th>ค่ากลางทีม</th><th>อันดับ</th><th>Cover+</th><th>MIX 3RD</th><th>สม่ำเสมอ</th></tr>
-  ${pm.map(m=>`<tr><td>${ymLong(m.ym)}${m.last<m.dim?' *':''}</td><td>${fmt(m.me.actSales)}</td><td>${fmt(m.me.tgSales)}</td><td>${pct(m.me.fcp,0)}</td><td>${pct(m.team.med.fcp,0)}</td><td>${m.me.rank?m.me.rank+'/'+m.team.n:'–'}</td><td>${pct(m.me.att.smile,0)}</td><td>${pct(m.me.att.mix,1)}</td><td>${m.me.daysHit}/${m.me.daysSales}</td></tr>`).join('')}</table>
+  <table><tr><th>เดือน</th><th>ยอด 6 หมวด</th><th>เป้า</th><th>FC%</th><th>ค่ากลางทีม</th><th>อันดับ</th><th>Cover+</th><th>MIX 3RD</th><th>สม่ำเสมอ</th><th>หยุด/ลา/ขาด</th></tr>
+  ${pm.map(m=>`<tr><td>${ymLong(m.ym)}${m.last<m.dim?' *':''}</td><td>${fmt(m.me.actSales)}</td><td>${fmt(m.me.tgSales)}</td><td>${pct(m.me.fcp,0)}</td><td>${pct(m.team.med.fcp,0)}</td><td>${m.me.rank?m.me.rank+'/'+m.team.n:'–'}</td><td>${pct(m.me.att.smile,0)}</td><td>${pct(m.me.att.mix,1)}</td><td>${m.me.daysHit}/${m.me.daysSales}</td><td>${m.me.marks?`${m.me.marks.off}/${m.me.marks.leave}/${m.me.marks.absent}`:'–'}</td></tr>`).join('')}</table>
   <div class="small">* เดือนที่ยังไม่จบ ใช้ค่าคาดการณ์สิ้นเดือน</div>
   <h3>บันทึกในช่วงเดียวกัน (${L.length} รายการ · ไม่รวมโน้ตส่วนตัว)</h3>
   ${L.length?`<table><tr><th>วันที่</th><th>ประเภท</th><th>รายละเอียด</th><th>สถานะ</th></tr>${L.map(e=>`<tr><td>${thDate(e.date)}</td><td>${(LOG_T[e.type]||LOG_T.other).l}${e.visible?'':' (โน้ตส่วนตัว)'}</td><td>${esc(e.text)}${e.ack&&e.ack.text?`<br><i>ชี้แจง: ${esc(e.ack.text)}</i>`:''}</td><td>${e.ack?'รับทราบแล้ว':(e.visible?'ยังไม่รับทราบ':'–')}</td></tr>`).join('')}</table>`:'<div>ไม่มีบันทึก</div>'}
@@ -1191,7 +1286,7 @@ function printView(p,pm,S,T,ovr,logs){
   <div class="pv-sign"><div>ลงชื่อ ............................................<br>พนักงาน<br>วันที่ ......../......../........</div><div>ลงชื่อ ............................................<br>หัวหน้าร้าน / ผู้ดูแล<br>วันที่ ......../......../........</div></div>`;
 }
 function bindProfile(id){
-  bindPeriod();
+  bindPeriod(); bindShifts();
   const ms=monthsFor(id); const g=goals();
   const metricDef={fcp:{l:'ยอดขาย (FC%)',v:m=>m.me.fcp,t:m=>m.team.med.fcp,goal:1,fmt:v=>pct(v,0)},smile:{l:'Cover+ ATT',v:m=>m.me.att.smile,t:m=>m.team.med.smile,goal:g.smile,fmt:v=>pct(v,0)},
     mix:{l:'MIX 3RD',v:m=>m.me.att.mix,t:m=>m.team.med.mix,goal:g.mix,fmt:v=>pct(v,1)},aba:{l:'ABA (FC%)',v:m=>m.me.cat.aba.fcp,t:m=>m.team.med.aba,goal:1,fmt:v=>pct(v,0)},
@@ -1432,7 +1527,7 @@ $('#loginGo').onclick=async()=>{ const k=$('#keyInp').value.trim(); if(!k) retur
     if(r2.ok){ const w=await r2.json(); mgrKey=k; mgrName=w.name; LS.set('mt_mkey',k); LS.set('mt_mname',w.name); setAdmin(false); $('#loginScrim').classList.remove('on'); toast('เข้าสู่ระบบหัวหน้าร้าน: '+w.name); profCache.all=null; if(!location.hash.startsWith('#p')) location.hash='profile'; render(); return; }
     s.className='status on err'; s.textContent='✕ รหัสไม่ถูกต้อง'; }catch(e){ s.className='status on err'; s.textContent='✕ ติดต่อเซิร์ฟเวอร์ไม่ได้'; } };
 $('#logoutBtn').onclick=()=>{ adminKey=null; LS.set('mt_key',null); mgrKey=null; LS.set('mt_mkey',null); profCache.all=null; setAdmin(false); toast('ออกจากระบบแล้ว'); render(); };
-async function ensureMonthHistory(){ if(!adminKey||!state.rows.length) return; try{ const idx=await api('months',{},'admin'); const ym=monthInfo().ym; if(ym&&!idx.some(e=>e.ym===ym)) await syncCurrentMonth(); }catch(e){} }
+async function ensureMonthHistory(){ if(!adminKey||!state.rows.length) return; try{ const idx=await api('months',{},'admin'); const ym=monthInfo().ym; const e=idx.find(x=>x.ym===ym); if(ym&&(!e||(e.sv||1)<2)) await syncCurrentMonth(); }catch(e){} }
 
 setAdmin(!!adminKey);
 render(); load().then(()=>ensureMonthHistory());
