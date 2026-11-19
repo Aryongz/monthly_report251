@@ -35,6 +35,33 @@ const cleanId = (v) => String(v ?? "").replace(/[^0-9A-Za-z_-]/g, "");
 const YM = /^\d{4}-\d{2}$/;
 const MAX_PHOTO = 1_500_000;
 const LOG_TYPES = ["praise", "attendance", "verbal", "written", "complaint", "meeting", "other"];
+const SHIFT_ST = ["off", "leave", "absent"];
+const median = (arr) => { const s = arr.filter((v) => Number.isFinite(v)).sort((a, b) => a - b); if (!s.length) return 0; const h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+/* Recompute the "consistency" stat from the shift calendar.
+   Work days = days 1..last, minus days marked off/leave (sales on those days still count in totals, not in consistency).
+   Absent days count as work days that missed the target. No marks for a person-month = fall back to days with sales. */
+function applyShifts(sum, shifts) {
+  const sm = (shifts || {})[sum.ym] || {};
+  const L = [];
+  for (const o of Object.values(sum.staff || {})) {
+    const marks = sm[String(o.id)] || {};
+    const cnt = { off: 0, leave: 0, absent: 0 };
+    for (const [d, st] of Object.entries(marks)) if (+d <= sum.last && cnt[st] != null) cnt[st]++;
+    o.marks = cnt;
+    if (o.daily && Object.keys(marks).length) {
+      let work = 0, hit = 0;
+      for (let d = 1; d <= sum.last; d++) {
+        const st = marks[String(d)], s = o.daily[String(d)] || 0;
+        if (st === "off" || st === "leave") continue;
+        work++; if (o.dT > 0 && s >= o.dT) hit++;
+      }
+      o.daysHit = hit; o.daysSales = work; o.cons = work ? hit / work : 0; o.consMode = "cal";
+    } else o.consMode = "sales";
+    if (o.tgSales > 0) L.push(o);
+  }
+  if (sum.team && sum.team.med) sum.team.med.cons = median(L.map((o) => o.cons));
+  return sum;
+}
 
 export default async (req) => {
   const store = getStore({ name: "w7-dashboard", consistency: "strong" });
@@ -147,7 +174,7 @@ export default async (req) => {
         if (!m || !YM.test(m.ym) || !Array.isArray(m.rows) || !m.summary) return json({ error: "bad month" }, 400);
         await store.setJSON(`mrows-${m.ym}`, { ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [], source: m.source || "", updatedAt: Date.now() });
         await store.setJSON(`msum-${m.ym}`, m.summary);
-        const e = { ym: m.ym, last: m.summary.last, dim: m.summary.dim, source: m.source || "", updatedAt: Date.now(), n: Object.keys(m.summary.staff || {}).length };
+        const e = { ym: m.ym, last: m.summary.last, dim: m.summary.dim, source: m.source || "", updatedAt: Date.now(), n: Object.keys(m.summary.staff || {}).length, sv: m.summary.sv || 1 };
         const i = idx.findIndex((x) => x.ym === m.ym); if (i >= 0) idx[i] = e; else idx.push(e);
       }
       idx.sort((a, b2) => (a.ym < b2.ym ? -1 : 1));
@@ -178,14 +205,17 @@ export default async (req) => {
     const id = cleanId(url.searchParams.get("id") || w.staffId);
     if (!id) return json({ error: "missing id" }, 400);
     if (w.role === "staff" && id !== w.staffId) return json({ error: "forbidden" }, 403);
-    const sums = await loadSummaries();
+    const shifts = await getJ("shifts", {});
+    const sums = (await loadSummaries()).map((s) => applyShifts(s, shifts));
+    const myShifts = {}; for (const [ym, m] of Object.entries(shifts)) if (m[id]) myShifts[ym] = m[id];
     const months = sums.filter((s) => s.staff && s.staff[id]).map((s) => ({ ym: s.ym, dim: s.dim, last: s.last, me: s.staff[id], team: s.team }));
     const logs = await getJ("logs", {});
-    return json({ id, months, logs: visibleLogs(logs[id], w.role) });
+    return json({ id, months, logs: visibleLogs(logs[id], w.role), shifts: myShifts });
   }
   if (route === "profiles" && method === "GET") {
     if (!isMgr) return json({ error: "forbidden" }, 403);
-    return json({ months: await loadSummaries(), logs: await getJ("logs", {}) });
+    const shifts = await getJ("shifts", {});
+    return json({ months: (await loadSummaries()).map((s) => applyShifts(s, shifts)), logs: await getJ("logs", {}), shifts });
   }
 
   // ----- behaviour log -----
@@ -229,6 +259,25 @@ export default async (req) => {
       await store.setJSON("logs", logs); return json({ ok: true, ack: e.ack });
     }
     return json({ error: "not found" }, 404);
+  }
+
+  // ----- shift calendar -----
+  if (route === "shifts" && method === "POST") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const b = (await body()) || {};
+    const id = cleanId(b.id), ym = String(b.ym || ""), day = Number(b.day);
+    const changes = Array.isArray(b.changes) ? b.changes : [{ id, ym, day, status: b.status }];
+    const shifts = await getJ("shifts", {});
+    for (const c of changes) {
+      const cid = cleanId(c.id), cym = String(c.ym || ""), cd = Number(c.day);
+      if (!cid || !YM.test(cym) || !(cd >= 1 && cd <= 31)) return json({ error: "bad change" }, 400);
+      const m = (shifts[cym] ||= {}); const p = (m[cid] ||= {});
+      if (SHIFT_ST.includes(c.status)) p[String(cd)] = c.status; else delete p[String(cd)];
+      if (!Object.keys(p).length) delete m[cid];
+      if (!Object.keys(m).length) delete shifts[cym];
+    }
+    await store.setJSON("shifts", shifts);
+    return json({ ok: true });
   }
 
   // ----- PIN -----
