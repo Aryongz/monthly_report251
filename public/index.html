@@ -276,6 +276,11 @@ textarea.note{width:100%;min-height:90px;border:1px solid var(--line-2);border-r
 .tgtbl input{width:100%;min-width:84px;border:1px solid var(--line);background:var(--surface-1);border-radius:8px;padding:5px 6px;text-align:right}
 .tgtbl td,.tgtbl th{padding:5px 4px}
 .modal.xl{max-width:1180px}
+.monthsel{border:1px solid var(--line-2);background:var(--surface-1);border-radius:10px;padding:8px 12px;font:inherit;font-weight:600;color:var(--text-primary);cursor:pointer}
+body.viewpast .monthsel{border-color:var(--s2);box-shadow:0 0 0 2px var(--s2-soft)}
+.pastpill{background:var(--s2-soft);color:var(--s2);padding:3px 10px;border-radius:99px;font-weight:600}
+#backLive{color:var(--s1);font-weight:500;text-decoration:none}
+body.viewpast .admin-only{display:none!important}
 .shlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-secondary);margin-bottom:10px}
 .shlegend span{display:inline-flex;gap:6px;align-items:center}
 .shc{width:20px;height:20px;border-radius:6px;border:1px solid var(--line-2);display:inline-grid;place-items:center;font-style:normal;font-size:11px;font-weight:600;background:var(--surface-1)}
@@ -403,6 +408,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
 
   <div class="bar">
     <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#day" id="tabDay">รายวัน</a><a href="#people" id="tabPeople">รายบุคคล</a><a href="#profile" id="tabProfile">โปรไฟล์ 🔐</a></nav>
+    <select id="monthSel" class="monthsel" hidden aria-label="เลือกเดือน"></select>
     <div class="daybox" id="daybox"></div>
     <div class="meta" id="meta"></div>
   </div>
@@ -411,7 +417,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
   <section class="view" id="vStore">
     <div class="kpis4" id="storeKpis"></div>
     <section class="card sec" style="margin-top:12px">
-      <div class="sechead"><div><h2>ยอดขายตามหมวด เทียบเป้าเดือนนี้</h2><div class="hint">แถบทึบ = ทำได้แล้ว · เส้นประ = คาดการณ์สิ้นเดือน (FC) · ขีดดำ = ควรอยู่ตรงนี้ตามจำนวนวันที่ผ่านไป</div></div></div>
+      <div class="sechead"><div><h2>ยอดขายตามหมวด เทียบเป้าของเดือน</h2><div class="hint">แถบทึบ = ทำได้แล้ว · เส้นประ = คาดการณ์สิ้นเดือน (FC) · ขีดดำ = ควรอยู่ตรงนี้ตามจำนวนวันที่ผ่านไป</div></div></div>
       <div class="catgrid" id="catGrid"></div>
     </section>
     <section class="card sec" style="margin-top:12px">
@@ -631,12 +637,44 @@ function route(){ const h=location.hash.replace('#','');
   return {v:'store'}; }
 addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrollTo({top:0}); });
 
+/* ---------- month history view (dashboard tabs) ---------- */
+let viewYm=null, liveBackup=null, histIndex=[], histLoading=false;
+async function loadHistoryIndex(){ try{ const r=await fetch('/api/history',{cache:'no-store'}); if(r.ok){ histIndex=await r.json(); renderMonthSel(); } }catch(e){} }
+function liveYm(){ const rows=(viewYm?liveBackup.rows:state.rows); let l=''; rows.forEach(r=>{ if(r[0]>l) l=r[0]; }); return l.slice(0,7); }
+function renderMonthSel(){
+  const el=$('#monthSel'); if(!el) return; const cur=liveYm();
+  const yms=[...new Set([cur,...histIndex.map(e=>e.ym)].filter(Boolean))].sort().reverse();
+  if(!yms.length){ el.hidden=true; return; }
+  el.hidden=false; const sel=viewYm||cur;
+  el.innerHTML=yms.map(ym=>{ const [y,m]=ym.split('-').map(Number); return `<option value="${ym}" ${ym===sel?'selected':''}>${TH_MF[m-1]} ${y+543}${ym===cur?' (ปัจจุบัน)':''}</option>`; }).join('');
+}
+function restoreLive(){ if(liveBackup){ Object.assign(state,liveBackup); liveBackup=null; } viewYm=null; document.body.classList.remove('viewpast'); }
+async function viewMonth(ym){
+  if(!ym||ym===liveYm()){ restoreLive(); renderMonthSel(); render(); return; }
+  if(histLoading) return; histLoading=true; toast('กำลังโหลด '+ym+' …');
+  try{ const r=await fetch('/api/history?ym='+ym,{cache:'no-store'}); if(!r.ok) throw new Error(r.status===404?'ไม่พบข้อมูลเดือนนี้':'HTTP '+r.status); const d=await r.json();
+    if(!liveBackup) liveBackup={rows:state.rows,staff:state.staff,settings:state.settings,source:state.source,updatedAt:state.updatedAt,names:state.names};
+    const live=new Map(liveBackup.staff.map(p=>[String(p.id),p]));
+    const list=(d.staff&&d.staff.length?d.staff:liveBackup.staff);
+    state.rows=d.rows; state.staff=list.map(p=>{ const lp=live.get(String(p.id))||{}; return {...lp,...p,photo:lp.photo,tg:(d.tg||{})[p.id]||(d.tg||{})[String(p.id)]||{}}; });
+    state.settings={...liveBackup.settings,dayOverride:null}; state.source=liveBackup.source; state.updatedAt=liveBackup.updatedAt;
+    viewYm=ym; document.body.classList.add('viewpast');
+    const h=location.hash; if(/^#d-/.test(h)) history.replaceState(null,'','#day');
+    renderMonthSel(); render(); toast('แสดงข้อมูลเดือนย้อนหลัง');
+  }catch(e){ toast('โหลดเดือนนี้ไม่สำเร็จ: '+e.message); renderMonthSel(); }
+  histLoading=false;
+}
+
 /* ---------- render ---------- */
 let sortKey='ac', sortDir=-1, q='';
 function render(){
+  if(viewYm&&route().v==='profile'){ restoreLive(); renderMonthSel(); }
   const D=computeAll(), {M}=D, R=route();
   for(const [v,id] of [['store','Store'],['people','People'],['day','Day'],['profile','Profile']]){ $('#v'+id).classList.toggle('on',R.v===v); $('#tab'+id).classList.toggle('on',R.v===v); }
-  $('#daybox').innerHTML = M.ym? `<span>เดือน <b>${TH_MF[M.m-1]} ${M.y+543}</b></span><span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${state.settings.dayOverride?' (กำหนดเอง)':''}</span><span>เหลือวันขาย <b>${M.remain}</b> วัน</span>` : '';
+  $('#daybox').innerHTML = !M.ym? '' : viewYm? `<span class="pastpill">📅 ข้อมูลย้อนหลัง</span><span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${M.remain?'':' · ปิดเดือนแล้ว'}</span><a href="#" id="backLive">กลับไปเดือนปัจจุบัน ›</a>` : `<span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${state.settings.dayOverride?' (กำหนดเอง)':''}</span><span>เหลือวันขาย <b>${M.remain}</b> วัน</span>`;
+  const bl=$('#backLive'); if(bl) bl.onclick=e=>{ e.preventDefault(); viewMonth(null); };
+  $('#monthSel').style.display=R.v==='profile'?'none':'';
+  if(!$('#monthSel').options.length) renderMonthSel();
   $('#meta').innerHTML = `${synced?'<span class="pill ok">● ข้อมูลล่าสุด</span>':'<span class="pill off">● ออฟไลน์ (ข้อมูลตั้งต้น)</span>'}${state.updatedAt?' &nbsp;อัปเดต '+new Date(state.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''}`;
   document.querySelectorAll('.mixT').forEach(e=>e.textContent=pct(state.settings.att.mix||0.07,0));
   if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else if(R.v==='profile') renderProfile(D,R); else renderPeople(D,R.id);
@@ -648,7 +686,8 @@ function renderStore(D){
   const k=[
     {l:'ยอดขายรวม (7 หมวด)',v:money(S.actSales),u:'บาท',f:`เป้า ${money(S.tgSales)} · ทำได้ <b class="st ${stCls(S.ac,M.pace)}">${pct(S.ac)}</b>`,bar:track(S.ac,S.fcp,M.pace)},
     {l:'คาดการณ์สิ้นเดือน (FC)',v:pct(S.fcp),f:`${money(S.fc)} บาท ถ้ายังขายในอัตราเดิม`},
-    {l:'ต้องทำเพิ่มเพื่อถึง 100%',v:money(needAll),u:'บาท',f:`เหลือ ${M.remain} วัน · วันละ <b>${money(perDay)}</b>`},
+    M.remain? {l:'ต้องทำเพิ่มเพื่อถึง 100%',v:money(needAll),u:'บาท',f:`เหลือ ${M.remain} วัน · วันละ <b>${money(perDay)}</b>`}
+      : {l:needAll>0?'ปิดเดือน: ขาดเป้า':'ปิดเดือน: ถึงเป้า',v:needAll>0?money(needAll):money(S.actSales-S.tgSales),u:'บาท',f:needAll>0?`ปิดที่ <b class="st ${S.ac>=.85?'w':'b'}">${pct(S.ac)}</b> ของเป้า`:`<b class="st g">เกินเป้า ${pct(S.ac-1)}</b>`},
     {l:'ยอดขายรวมทุกหมวด',v:money(S.total),u:'บาท',f:`MIX 3RD <b class="st ${attGood('mix',S.att.mix)}">${pct(S.att.mix,2)}</b> · Cover+ ${pct(S.att.smile)}`},
   ];
   $('#storeKpis').innerHTML=k.map(x=>`<div class="card kpi"><div class="lbl"><span>${x.l}</span></div><div class="bigval num">${x.v}${x.u?`<small>${x.u}</small>`:''}</div>${x.bar||''}<div class="foot" style="margin-top:${x.bar?24:6}px">${x.f}</div></div>`).join('');
@@ -657,7 +696,7 @@ function renderStore(D){
     const f=v=>c.unit?fmt(v,v%1?1:0)+' เครื่อง':money(v);
     return `<div class="card cat"><div class="top"><span class="nm">${c.l}</span><span class="pct num st ${stCls(ac,M.pace)}">${pct(ac,0)}</span></div>
       <div class="sub num">${f(a)} / ${f(t)}</div>${track(ac,fcp,M.pace)}
-      <div class="row2"><span>FC <b class="num">${pct(fcp,0)}</b></span><span>${need>0?`ต้องการอีกวันละ <b class="num">${c.unit?fmt(pd,1):money(pd)}</b>`:'<b class="st g">✓ ถึงเป้าแล้ว</b>'}</span></div></div>`; }).join('');
+      <div class="row2"><span>FC <b class="num">${pct(fcp,0)}</b></span><span>${need<=0?'<b class="st g">✓ ถึงเป้าแล้ว</b>':M.remain?`ต้องการอีกวันละ <b class="num">${c.unit?fmt(pd,1):money(pd)}</b>`:`ขาดเป้า <b class="num">${c.unit?fmt(need,1):money(need)}</b>`}</span></div></div>`; }).join('');
   staffTable(D); mixChart(list); dailyChart(D);
 }
 
@@ -835,9 +874,12 @@ function renderPeople(D,id){
     ${Object.keys(G.per).length?`<button class="btn sm ghost" id="gReset">ล้างค่ารายหมวด</button>`:''}</div>
   </section>
   <div class="sumcards" style="margin-top:12px">
-    <div class="sumcard"><div class="l">ต้องขายเพิ่มอีก (6 หมวด)</div><div class="v num">${tot.need>0?fmt(tot.need):'0'}<small>บาท</small></div><div class="f">เป้าใหม่ ${fmt(tot.nt)} บาท</div></div>
+    ${M.remain?`<div class="sumcard"><div class="l">ต้องขายเพิ่มอีก (6 หมวด)</div><div class="v num">${tot.need>0?fmt(tot.need):'0'}<small>บาท</small></div><div class="f">เป้าใหม่ ${fmt(tot.nt)} บาท</div></div>
     <div class="sumcard"><div class="l">เหลือวันขาย</div><div class="v num">${M.remain}<small>วัน</small></div><div class="f">ข้อมูลถึงวันที่ ${M.day} จาก ${M.dim} วัน</div></div>
-    <div class="sumcard"><div class="l">ต้องขายเฉลี่ยต่อวัน</div><div class="v num">${tot.need>0?fmt(tot.pd):'0'}<small>บาท/วัน</small></div><div class="f">${tot.need>0?'ถ้าขายตามนี้ทุกวันจะถึงเป้าที่ตั้งไว้':'🎉 ถึงเป้าที่ตั้งไว้แล้ว'}</div></div>
+    <div class="sumcard"><div class="l">ต้องขายเฉลี่ยต่อวัน</div><div class="v num">${tot.need>0?fmt(tot.pd):'0'}<small>บาท/วัน</small></div><div class="f">${tot.need>0?'ถ้าขายตามนี้ทุกวันจะถึงเป้าที่ตั้งไว้':'🎉 ถึงเป้าที่ตั้งไว้แล้ว'}</div></div>`
+    :`<div class="sumcard"><div class="l">ผลสิ้นเดือน (6 หมวด)</div><div class="v num">${pct(tot.ac,1)}</div><div class="f">${fmt(tot.a)} / เป้า ${fmt(tot.t)} บาท</div></div>
+    <div class="sumcard"><div class="l">${tot.need>0?'ขาดจากเป้าที่ตั้งไว้':'ถึงเป้าที่ตั้งไว้'}</div><div class="v num">${tot.need>0?fmt(tot.need):'✓'}<small>${tot.need>0?'บาท':''}</small></div><div class="f">เป้าที่ตั้งไว้ ${fmt(tot.nt)} บาท</div></div>
+    <div class="sumcard"><div class="l">สถานะ</div><div class="v num">ปิดเดือน</div><div class="f">ข้อมูลครบ ${M.day} จาก ${M.dim} วัน</div></div>`}
   </div>
   <section class="card sec" style="margin-top:12px">
     <div class="sechead"><div><h2>แผนรายหมวด</h2><div class="hint">FC = คาดการณ์สิ้นเดือนถ้าขายในอัตราเดิม · Sim นับเป็นเครื่อง</div></div></div>
@@ -845,7 +887,7 @@ function renderPeople(D,id){
   rows.forEach(r=>{ const done=r.need<=0; h+=`<tr style="cursor:default"><td class="l"><b>${r.c.l}</b></td><td class="num">${unitF(r,r.t)}</td><td class="num">${unitF(r,r.a)}</td>
     <td><span class="chip ${stCls(r.ac,M.pace)}">${pct(r.ac,0)}</span></td><td class="num">${unitF(r,r.fc)}</td><td class="num">${pct(r.fcp,0)}</td>
     <td><span class="pctin"><button data-k="${r.c.k}" data-d="-5">−</button><input type="number" data-k="${r.c.k}" value="${Math.round(r.g*100)}"><span>%</span><button data-k="${r.c.k}" data-d="5">+</button></span></td>
-    <td class="num">${unitF(r,r.nt)}</td><td class="num need ${done?'done':''}">${done?'✓ ถึงแล้ว':unitF(r,r.need)}</td><td class="num need ${done?'done':''}">${done?'–':(r.c.unit?fmt(r.pd,1):fmt(r.pd))}</td></tr>`; });
+    <td class="num">${unitF(r,r.nt)}</td><td class="num need ${done?'done':''}">${done?'✓ ถึงแล้ว':unitF(r,r.need)}</td><td class="num need ${done?'done':''}">${done||!M.remain?'–':(r.c.unit?fmt(r.pd,1):fmt(r.pd))}</td></tr>`; });
   h+=`</tbody><tfoot><tr><td class="l">รวม 6 หมวด (ไม่รวม Sim)</td><td class="num">${fmt(tot.t)}</td><td class="num">${fmt(tot.a)}</td><td class="num">${pct(tot.ac,0)}</td><td class="num">${fmt(tot.fc)}</td><td class="num">${pct(tot.fcp,0)}</td><td></td><td class="num">${fmt(tot.nt)}</td><td class="num">${fmt(tot.need)}</td><td class="num">${fmt(tot.pd)}</td></tr></tfoot></table></div>
   <div class="planCards">${rows.map(r=>{ const done=r.need<=0; return `<div class="pc"><div class="pc1"><b>${r.c.l}</b><span class="chip ${stCls(r.ac,M.pace)}">${pct(r.ac,0)}</span></div>
       <div class="pc2">ทำได้ <b class="num">${unitF(r,r.a)}</b> / เป้า ${unitF(r,r.t)} · FC ${pct(r.fcp,0)}</div>
@@ -925,7 +967,7 @@ async function postMonth(ym,rows,tgMap,staffList,source){
   return summary;
 }
 async function syncCurrentMonth(){
-  if(!adminKey||!state.rows.length) return false;
+  if(!adminKey||!state.rows.length||viewYm) return false;
   const M=monthInfo(); if(!M.ym) return false;
   try{ await postMonth(M.ym,state.rows,tgMapOf(state.staff),state.staff,state.source); profCache.all=null; return true; }
   catch(e){ console.error(e); toast('บันทึกประวัติรายเดือนไม่สำเร็จ: '+e.message); return false; }
@@ -1505,19 +1547,20 @@ function payload(){ return {v:1,savedAt:Date.now(),source:state.source,updatedAt
 let lastStamp=null;
 async function save(msg){
   if(!adminKey){ toast('ต้องเข้าสู่โหมดผู้ดูแลก่อน'); return false; }
+  if(viewYm){ toast('กำลังดูเดือนย้อนหลัง — กลับไปเดือนปัจจุบันก่อนบันทึก'); return false; }
   try{ const body=JSON.stringify(payload());
     const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json','x-admin-key':adminKey},body});
     if(r.status===401){ adminKey=null; LS.set('mt_key',null); setAdmin(false); throw new Error('รหัสผู้ดูแลไม่ถูกต้อง'); }
     if(!r.ok) throw new Error('เซิร์ฟเวอร์ตอบกลับ '+r.status);
     lastStamp=JSON.parse(body).savedAt; synced=true; render(); if(msg) toast(msg); return true;
   }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+(e.message||e)); return false; } }
-function apply(d){ if(!d||!Array.isArray(d.rows)) return false;
-  state.source=d.source; state.updatedAt=d.updatedAt; state.staff=d.staff||state.staff; state.names=d.names||state.names;
-  state.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; state.rows=d.rows; return true; }
+function apply(d,T){ T=T||state; if(!d||!Array.isArray(d.rows)) return false;
+  T.source=d.source; T.updatedAt=d.updatedAt; T.staff=d.staff||T.staff; T.names=d.names||T.names;
+  T.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; T.rows=d.rows; return true; }
 async function load(){
   try{ const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
-    if(d&&d.savedAt!==lastStamp&&apply(d)) lastStamp=d.savedAt; }catch(e){ synced=false; }
-  render(); }
+    if(d&&d.savedAt!==lastStamp&&apply(d,viewYm?liveBackup:state)) lastStamp=d.savedAt; }catch(e){ synced=false; }
+  render(); loadHistoryIndex(); }
 $('#loginBtn').onclick=()=>{ $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); setTimeout(()=>$('#keyInp').focus(),50); };
 $('#keyInp').onkeydown=e=>{ if(e.key==='Enter') $('#loginGo').click(); };
 $('#loginGo').onclick=async()=>{ const k=$('#keyInp').value.trim(); if(!k) return; const s=$('#loginStatus');
@@ -1530,6 +1573,7 @@ $('#logoutBtn').onclick=()=>{ adminKey=null; LS.set('mt_key',null); mgrKey=null;
 async function ensureMonthHistory(){ if(!adminKey||!state.rows.length) return; try{ const idx=await api('months',{},'admin'); const ym=monthInfo().ym; const e=idx.find(x=>x.ym===ym); if(ym&&(!e||(e.sv||1)<2)) await syncCurrentMonth(); }catch(e){} }
 
 setAdmin(!!adminKey);
+$('#monthSel').onchange=e=>viewMonth(e.target.value);
 render(); load().then(()=>ensureMonthHistory());
 setInterval(()=>{ if(!document.hidden) load(); },5*60*1000);
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(); });
