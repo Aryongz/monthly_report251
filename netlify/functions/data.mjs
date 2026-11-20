@@ -21,6 +21,9 @@ import crypto from "node:crypto";
     POST /api/data, /api/photo, DELETE /api/photo
     POST /api/months               {months:[{ym, rows, tg, staff, summary, source}]}
     DELETE /api/months?ym=
+  Manager or admin (roster)
+    GET  /api/roster/sheet?id=     proxy: Google Sheet export (xlsx) — sheet must be "anyone with the link can view"
+    POST /api/roster               {months:{ym:{id:{day:[status,code]}}}, meta}  (replaces given months)
     GET/POST /api/pin              status / set or clear a staff PIN {id, pin|null}
     GET/POST/DELETE /api/managers  manager keys {name, key} / ?mid=
     POST /api/log/void             void an entry                 {id, eid, reason}
@@ -35,16 +38,24 @@ const cleanId = (v) => String(v ?? "").replace(/[^0-9A-Za-z_-]/g, "");
 const YM = /^\d{4}-\d{2}$/;
 const MAX_PHOTO = 1_500_000;
 const LOG_TYPES = ["praise", "attendance", "verbal", "written", "complaint", "meeting", "other"];
-const SHIFT_ST = ["off", "leave", "absent"];
+const SHIFT_ST = ["off", "leave", "absent", "work"];  // "work" = manual override of a roster off/leave day
 const median = (arr) => { const s = arr.filter((v) => Number.isFinite(v)).sort((a, b) => a - b); if (!s.length) return 0; const h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
 /* Recompute the "consistency" stat from the shift calendar.
    Work days = days 1..last, minus days marked off/leave (sales on those days still count in totals, not in consistency).
    Absent days count as work days that missed the target. No marks for a person-month = fall back to days with sales. */
-function applyShifts(sum, shifts) {
+/* effective marks for one person-month: roster (Google Sheet) first, manual marks override */
+function effMarks(manual, roster) {
+  const out = {};
+  for (const [d, v] of Object.entries(roster || {})) { const st = Array.isArray(v) ? v[0] : v; if (st === "off" || st === "leave") out[d] = st; }
+  for (const [d, st] of Object.entries(manual || {})) { if (st === "work") delete out[d]; else if (SHIFT_ST.includes(st)) out[d] = st; }
+  return out;
+}
+function applyShifts(sum, shifts, roster) {
   const sm = (shifts || {})[sum.ym] || {};
+  const rm = ((roster && roster.months) || {})[sum.ym] || {};
   const L = [];
   for (const o of Object.values(sum.staff || {})) {
-    const marks = sm[String(o.id)] || {};
+    const marks = effMarks(sm[String(o.id)], rm[String(o.id)]);
     const cnt = { off: 0, leave: 0, absent: 0 };
     for (const [d, st] of Object.entries(marks)) if (+d <= sum.last && cnt[st] != null) cnt[st]++;
     o.marks = cnt;
@@ -216,16 +227,19 @@ export default async (req) => {
     if (!id) return json({ error: "missing id" }, 400);
     if (w.role === "staff" && id !== w.staffId) return json({ error: "forbidden" }, 403);
     const shifts = await getJ("shifts", {});
-    const sums = (await loadSummaries()).map((s) => applyShifts(s, shifts));
+    const roster = await getJ("roster", { months: {} });
+    const sums = (await loadSummaries()).map((s) => applyShifts(s, shifts, roster));
     const myShifts = {}; for (const [ym, m] of Object.entries(shifts)) if (m[id]) myShifts[ym] = m[id];
+    const myRoster = {}; for (const [ym, m] of Object.entries(roster.months || {})) if (m[id]) myRoster[ym] = m[id];
     const months = sums.filter((s) => s.staff && s.staff[id]).map((s) => ({ ym: s.ym, dim: s.dim, last: s.last, me: s.staff[id], team: s.team }));
     const logs = await getJ("logs", {});
-    return json({ id, months, logs: visibleLogs(logs[id], w.role), shifts: myShifts });
+    return json({ id, months, logs: visibleLogs(logs[id], w.role), shifts: myShifts, roster: myRoster });
   }
   if (route === "profiles" && method === "GET") {
     if (!isMgr) return json({ error: "forbidden" }, 403);
     const shifts = await getJ("shifts", {});
-    return json({ months: (await loadSummaries()).map((s) => applyShifts(s, shifts)), logs: await getJ("logs", {}), shifts });
+    const roster = await getJ("roster", { months: {} });
+    return json({ months: (await loadSummaries()).map((s) => applyShifts(s, shifts, roster)), logs: await getJ("logs", {}), shifts, roster: roster.months || {}, rosterMeta: roster.meta || null });
   }
 
   // ----- behaviour log -----
@@ -288,6 +302,47 @@ export default async (req) => {
     }
     await store.setJSON("shifts", shifts);
     return json({ ok: true });
+  }
+
+  // ----- roster (work schedule from Google Sheet) -----
+  if (route === "roster/sheet" && method === "GET") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const sid = String(url.searchParams.get("id") || "");
+    if (!/^[A-Za-z0-9_-]{20,100}$/.test(sid)) return json({ error: "ลิงก์ Google Sheet ไม่ถูกต้อง" }, 400);
+    let r;
+    try { r = await fetch(`https://docs.google.com/spreadsheets/d/${sid}/export?format=xlsx`, { redirect: "follow" }); }
+    catch (e) { return json({ error: "ติดต่อ Google Sheets ไม่ได้" }, 502); }
+    const ct = r.headers.get("content-type") || "";
+    if (!r.ok || ct.includes("text/html")) return json({ error: "เปิดชีตไม่ได้ — ตั้งแชร์เป็น \"ทุกคนที่มีลิงก์ดูได้\" ก่อน", status: r.status }, 403);
+    const buf = await r.arrayBuffer();
+    if (buf.byteLength > 5_500_000) return json({ error: "ไฟล์ตารางงานใหญ่เกินไป" }, 413);
+    return new Response(buf, { headers: { "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "cache-control": "no-store" } });
+  }
+  if (route === "roster" && method === "POST") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const b = (await body()) || {};
+    if (!b.months || typeof b.months !== "object") return json({ error: "bad body" }, 400);
+    const roster = await getJ("roster", { months: {} });
+    roster.months ||= {};
+    for (const [ym, m] of Object.entries(b.months)) {
+      if (!YM.test(ym) || !m || typeof m !== "object") return json({ error: "bad month" }, 400);
+      const clean = {};
+      for (const [id, days] of Object.entries(m)) {
+        const cid = cleanId(id); if (!cid || !days || typeof days !== "object") continue;
+        const o = {};
+        for (const [d, v] of Object.entries(days)) {
+          const dd = Number(d); if (!(dd >= 1 && dd <= 31) || !Array.isArray(v)) continue;
+          const st = ["off", "leave", ""].includes(v[0]) ? v[0] : "";
+          o[String(dd)] = [st, String(v[1] ?? "").slice(0, 12)];
+        }
+        clean[cid] = o;
+      }
+      roster.months[ym] = clean;
+    }
+    const meta = b.meta && typeof b.meta === "object" ? b.meta : {};
+    roster.meta = { at: Date.now(), by: w.name, source: String(meta.source || "").slice(0, 200), tabs: Array.isArray(meta.tabs) ? meta.tabs.slice(0, 24).map((t) => String(t).slice(0, 40)) : [], warn: Array.isArray(meta.warn) ? meta.warn.slice(0, 40).map((t) => String(t).slice(0, 200)) : [] };
+    await store.setJSON("roster", roster);
+    return json({ ok: true, meta: roster.meta });
   }
 
   // ----- PIN -----
