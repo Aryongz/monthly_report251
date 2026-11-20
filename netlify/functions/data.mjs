@@ -150,6 +150,16 @@ export default async (req) => {
     return json({ error: "method not allowed" }, 405);
   }
 
+  /* ---------------- past months for the dashboard (public, like the current month) ---------------- */
+  if (route === "history" && method === "GET") {
+    const ym = url.searchParams.get("ym");
+    if (!ym) return json((await getJ("months-index", [])).map((e) => ({ ym: e.ym, last: e.last, dim: e.dim })));
+    if (!YM.test(ym)) return json({ error: "bad ym" }, 400);
+    const m = await getJ(`mrows-${ym}`, null);
+    if (!m) return json({ error: "not found" }, 404);
+    return json({ ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [] });
+  }
+
   /* ---------------- everything below needs a signed-in caller ---------------- */
   const w = await who();
   if (!w || !w.role) return deny(w);
