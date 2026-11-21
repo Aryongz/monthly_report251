@@ -204,6 +204,22 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
+.ladgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+@media (max-width:420px){.ladgrid{grid-template-columns:1fr}}
+.lad{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--surface-1)}
+.ladh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ladbar{position:relative;height:8px;background:var(--surface-2);border-radius:99px;margin:10px 0 8px;overflow:visible}
+.ladbar i{display:block;height:100%;background:var(--good);border-radius:99px}
+.ladbar em{position:absolute;top:-2px;width:2px;height:12px;background:var(--text-muted);opacity:.45}
+.ladv{font-family:Prompt;font-size:26px;font-weight:600;line-height:1.2;margin-bottom:4px}.ladv small{font-size:14px;color:var(--text-muted)}
+.ladst{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.ladst .r{margin-left:auto;text-align:right;white-space:nowrap}
+.ldot{width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--text-secondary);border:1px dashed var(--text-muted)}
+.ladst.now .ldot{background:var(--good-soft);color:var(--good);border:0;font-size:15px}
+.ldot.zero{border-style:solid}.ldot.top{background:var(--good-soft);color:var(--good);border:0}
+.ladst .gain{color:var(--good);font-size:16px}
+.ladfc{border-top:1px solid var(--line);padding-top:8px;margin-top:2px}
+
 .cat.clk{cursor:pointer;transition:border-color .15s,box-shadow .15s;position:relative}
 .cat.clk:hover{border-color:var(--s1);box-shadow:0 0 0 1px var(--s1) inset}
 .clkhint{font-size:11.5px;color:var(--s1);margin-top:8px;text-align:right;opacity:.75}
@@ -458,7 +474,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
   </header>
 
   <div class="bar">
-    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#day" id="tabDay">รายวัน</a><a href="#people" id="tabPeople">รายบุคคล</a><a href="#profile" id="tabProfile">โปรไฟล์ 🔐</a></nav>
+    <nav class="tabs"><a href="#store" id="tabStore">ภาพรวมร้าน</a><a href="#day" id="tabDay">รายวัน</a><a href="#people" id="tabPeople">รายบุคคล</a><a href="#profile" id="tabProfile">โปรไฟล์ 🔐</a><a href="#back" id="tabBack">หลังบ้าน 🔐</a></nav>
     <select id="monthSel" class="monthsel" hidden aria-label="เลือกเดือน"></select>
     <div class="daybox" id="daybox"></div>
     <div class="meta" id="meta"></div>
@@ -518,6 +534,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
   </section>
 
   <section class="view" id="vProfile"><div id="profileBody"></div></section>
+  <section class="view" id="vBack"><div id="backBody"></div></section>
 </div>
 <!-- upload -->
 <div class="scrim" id="upScrim"><div class="modal">
@@ -545,7 +562,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
 <div class="scrim" id="setScrim"><div class="modal xl">
   <header><h3>เป้าหมาย & ตั้งค่า</h3><button class="x" data-close>×</button></header>
   <div class="body">
-    <div class="chips settabs" id="setTabs"><button data-t="tg" class="on">🎯 เป้า & พนักงาน</button><button data-t="focus">🏅 ภารกิจประจำเดือน</button><button data-t="comm">💰 ค่าคอมมิชชั่น</button><button data-t="roster">📅 ตารางงาน</button><button data-t="cat">🗂 จัด Category</button><button data-t="sys">🔑 หัวหน้าร้าน & ประวัติ</button></div>
+    <div class="chips settabs" id="setTabs"><button data-t="tg" class="on">🎯 เป้า & พนักงาน</button><button data-t="focus">🏅 ภารกิจประจำเดือน</button><button data-t="comm">💰 ค่าคอมมิชชั่น</button><button data-t="roster">📅 ตารางงาน</button><button data-t="back">🧾 ทีมหลังบ้าน</button><button data-t="cat">🗂 จัด Category</button><button data-t="sys">🔑 หัวหน้าร้าน & ประวัติ</button></div>
     <div class="stab" data-s="tg">
     <div class="form" style="grid-template-columns:repeat(4,1fr)">
       <div class="field"><label>วันที่ยอดขายล่าสุด (ปล่อยว่าง = อัตโนมัติ)</label><input type="number" id="sDay" min="1" max="31" placeholder="อัตโนมัติ"><div class="help" id="sDayHelp"></div></div>
@@ -600,6 +617,20 @@ body.mgr #logoutBtn{display:inline-flex!important}
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center"><button class="btn primary sm" id="rPull">บันทึก & ดึงตอนนี้</button>
         <label class="btn sm">⬆ อัปไฟล์ตารางงาน (.xlsx) แทน<input type="file" id="rFile" accept=".xlsx,.xls" hidden></label></div>
       <div class="status" id="rSt"></div><div id="rMeta" style="margin-top:8px"></div>
+    </div>
+    <div class="stab" data-s="back" hidden>
+      <div class="h4" style="margin-top:0">🧾 รายชื่อทีมหลังบ้าน</div>
+      <div class="help" style="margin-bottom:8px">ทุกคนเข้าแท็บ "หลังบ้าน 🔐" ด้วยรหัสพนักงาน + PIN · ตำแหน่งทั่วไปคิดจากยอดรวมร้านแต่ละ Category ตามขั้น 70/90/98/105 เดียวกับเซล แล้วแบ่งเท่ากันในตำแหน่งเดียวกัน · นักศึกษาทวิภาคีคิดจากยอดของตัวเอง Rate คงที่ตั้งแต่บาทแรก</div>
+      <div class="tablewrap" style="margin:0"><table class="stafftbl" style="min-width:560px"><thead><tr><th class="l">รหัส</th><th class="l">ชื่อ</th><th class="l">ตำแหน่ง</th><th>PIN</th><th></th></tr></thead><tbody id="boBody"></tbody></table></div>
+      <button class="btn sm" id="boAdd" style="margin-top:8px">+ เพิ่มรายชื่อ</button>
+      <div class="h4">Rate ตำแหน่ง (% ตามไฟล์ค่าคอมฯ ช่อง Rate Support) · <span class="muted small">ใช้กับเดือนนี้เป็นต้นไป</span></div>
+      <div class="form" style="grid-template-columns:repeat(4,1fr)">
+        <div class="field"><label>PIA (Rate PIA)</label><input id="boPia" inputmode="decimal"></div>
+      </div>
+      <div class="form" style="grid-template-columns:repeat(3,1fr);margin-top:6px" id="boPosForm"></div>
+      <div class="h4">Rate นักศึกษาทวิภาคี (% ของยอดส่วนตัว)</div>
+      <div class="form" style="grid-template-columns:repeat(6,1fr)" id="boIntForm"></div>
+      <div class="help">ตัวอย่างจากไฟล์ ต.ค.: Apple Watch 0.6 · BTB 2.5 · BTB(APPLE) 2.5 · ใส่ 0 = ไม่มีค่าคอมฯ</div>
     </div>
     <div class="stab" data-s="cat" hidden>
       <div class="h4" style="margin-top:0">🗂 จัด Category (Sub Category → Category)</div>
@@ -745,6 +776,8 @@ function route(){ const h=location.hash.replace('#','');
   if(h==='people') return {v:'people',id:null};
   if(h==='day') return {v:'day',date:null};
   if(h==='profile') return {v:'profile',id:null};
+  if(h==='back') return {v:'back',id:null};
+  if(/^b\d+$/.test(h)) return {v:'back',id:h.slice(1)};
   if(/^p\d+$/.test(h)) return {v:'profile',id:+h.slice(1)};
   if(/^d-\d{4}-\d{2}-\d{2}$/.test(h)) return {v:'day',date:h.slice(2)};
   return {v:'store'}; }
@@ -783,14 +816,14 @@ let sortKey='ac', sortDir=-1, q='';
 function render(){
   if(viewYm&&route().v==='profile'){ restoreLive(); renderMonthSel(); }
   const D=computeAll(), {M}=D, R=route();
-  for(const [v,id] of [['store','Store'],['people','People'],['day','Day'],['profile','Profile']]){ $('#v'+id).classList.toggle('on',R.v===v); $('#tab'+id).classList.toggle('on',R.v===v); }
+  for(const [v,id] of [['store','Store'],['people','People'],['day','Day'],['profile','Profile'],['back','Back']]){ $('#v'+id).classList.toggle('on',R.v===v); $('#tab'+id).classList.toggle('on',R.v===v); }
   $('#daybox').innerHTML = !M.ym? '' : viewYm? `<span class="pastpill">📅 ข้อมูลย้อนหลัง</span><span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${M.remain?'':' · ปิดเดือนแล้ว'}</span><a href="#" id="backLive">กลับไปเดือนปัจจุบัน ›</a>` : `<span>ข้อมูลถึงวันที่ <b>${M.day}</b>/${M.dim}${state.settings.dayOverride?' (กำหนดเอง)':''}</span><span>เหลือวันขาย <b>${M.remain}</b> วัน</span>`;
   const bl=$('#backLive'); if(bl) bl.onclick=e=>{ e.preventDefault(); viewMonth(null); };
   $('#monthSel').style.display=R.v==='profile'?'none':'';
   if(!$('#monthSel').options.length) renderMonthSel();
   $('#meta').innerHTML = `${synced?'<span class="pill ok">● ข้อมูลล่าสุด</span>':'<span class="pill off">● ออฟไลน์ (ข้อมูลตั้งต้น)</span>'}${state.updatedAt?' &nbsp;อัปเดต '+new Date(state.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''}`;
   document.querySelectorAll('.mixT').forEach(e=>e.textContent=pct(state.settings.att.mix||0.07,0));
-  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else if(R.v==='profile') renderProfile(D,R); else renderPeople(D,R.id);
+  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else if(R.v==='profile') renderProfile(D,R); else if(R.v==='back') renderBack(D,R); else renderPeople(D,R.id);
 }
 
 function renderStore(D){
@@ -1304,9 +1337,9 @@ function renderProfile(D,R){
   if(isMgrRole()&&id==null){ el.innerHTML=mgrOverview(D); bindOverview(); return; }
   el.innerHTML=profilePage(D,id); bindProfile(id);
 }
-function loginCard(){
+function loginCard(title,hint){
   return `<section class="card sec loginCard">
-    <h2>🔐 เข้าดูโปรไฟล์ของฉัน</h2><div class="hint">ผลงานสะสมรายเดือนและแฟ้มประวัติของคุณ เห็นได้เฉพาะตัวคุณ ผู้ดูแล และหัวหน้าร้าน</div>
+    <h2>${title||'🔐 เข้าดูโปรไฟล์ของฉัน'}</h2><div class="hint">${hint||'ผลงานสะสมรายเดือนและแฟ้มประวัติของคุณ เห็นได้เฉพาะตัวคุณ ผู้ดูแล และหัวหน้าร้าน'}</div>
     <div class="form" style="grid-template-columns:1fr;margin-top:14px;max-width:360px">
       <div class="field"><label>รหัสพนักงาน</label><input id="stId" inputmode="numeric" autocomplete="username" placeholder="เช่น 7700"></div>
       <div class="field"><label>PIN · <b>5 ตัวท้ายเลขบัตรประชาชน</b></label><input id="stPin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password" placeholder="•••••"></div>
@@ -1506,7 +1539,7 @@ let pinStatus={pins:{},locks:{}};
 async function loadAdminExtras(){
   if(!adminKey) return;
   try{ pinStatus=await api('pin',{},'admin'); }catch(e){ pinStatus={pins:{},locks:{}}; }
-  staffRows();
+  staffRows(); backRows();
   try{ const ms=await api('managers',{},'admin'); $('#mgrList').innerHTML=ms.length?ms.map(m=>`<div class="mrow"><b>${esc(m.name)}</b><span class="muted small">เพิ่มเมื่อ ${new Date(m.at).toLocaleDateString('th-TH',{dateStyle:'medium'})}</span><button class="btn sm ghost" data-delm="${m.mid}">ลบ</button></div>`).join(''):'<div class="muted small">ยังไม่มีหัวหน้าร้าน</div>';
     document.querySelectorAll('[data-delm]').forEach(b=>b.onclick=async()=>{ await api('managers?mid='+b.dataset.delm,{method:'DELETE'},'admin'); toast('ลบรหัสหัวหน้าร้านแล้ว'); loadAdminExtras(); }); }catch(e){}
   try{ const idx=await api('months',{},'admin'); $('#monthList').innerHTML=idx.length?`<table class="stafftbl" style="min-width:0"><thead><tr><th>เดือน</th><th>ข้อมูลถึงวันที่</th><th>พนักงาน</th><th>อัปเดตล่าสุด</th><th>ไฟล์</th><th></th></tr></thead><tbody>${idx.slice().reverse().map(e=>`<tr><td><b>${ymLong(e.ym)}</b></td><td>${e.last}/${e.dim}</td><td>${e.n} คน</td><td>${new Date(e.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</td><td class="muted small">${esc(e.source||'')}</td><td><button class="btn sm ghost" data-delym="${e.ym}">ลบ</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted small">ยังไม่มีประวัติรายเดือน</div>';
@@ -1682,12 +1715,12 @@ const AC_T=[['acIphN','AppleCare iPhone','iphone'],['acIpdN','AppleCare iPad','i
 function commCfg(ym){ const C=state.settings.comm||{}; const ks=Object.keys(C).filter(k=>!ym||k<=ym).sort(); if(!ks.length) return null; const k=ks[ks.length-1]; return {...C[k],from:k}; }
 function tierOf2(tiers,achPct){ let cur=null, next=null; const t=(tiers||[]).filter(x=>x&&x[0]>0&&x[1]>=0).slice().sort((a,b)=>a[0]-b[0]); for(const x of t){ if(achPct>=x[0]-1e-9) cur=x; else { next=x; break; } } return {cur,next,any:t.length>0}; }
 function commOf(o,ym){
-  const cfg=commCfg(ym); const a=o.a||{}; const rows=[]; let total=0, totalFC=0;
+  const cfg=commCfg(ym); const a=o.a||{}; const rows=[]; let total=0, totalFC=0; const fcf0=(o.fcf)||(o.ac&&o.fcp?o.fcp/o.ac:1);
   for(const [k,l] of COMM_CATS){ const c=(o.cat||{})[k]||{t:0,a:0,fcp:0}; const t=+c.t||0, av=+c.a||0, ach=t?av/t*100:0, fcP=(+c.fcp||0)*100, fc=t?c.fcp*t:av;
     const tiers=cfg&&cfg.tiers?cfg.tiers[k]:null; const T=tierOf2(tiers,ach), TF=tierOf2(tiers,fcP);
     const amt=T.cur?av*T.cur[1]/100:0, amtFC=TF.cur?fc*TF.cur[1]/100:0;
     let next=null; if(T.next&&t){ const need=Math.max(T.next[0]/100*t-av,0); next={th:T.next[0],need,gain:(av+need)*T.next[1]/100-amt}; }
-    rows.push({k,l,t,a:av,ach,amt,amtFC,fcP,cur:T.cur,next,set:T.any,noTg:!t}); total+=amt; totalFC+=amtFC; }
+    rows.push({k,l,t,a:av,ach,amt,amtFC,fcP,cur:T.cur,next,set:T.any,noTg:!t,L:ladderCalc(tiers,t,av,1,fcf0)}); total+=amt; totalFC+=amtFC; }
   const pieces=a.smileN!=null&&a.smileN!==0?a.smileN:(a.smileU||0); const cpRate=cfg&&cfg.cp!=null&&cfg.cp!==''?+cfg.cp:null;
   const cp={pieces,rate:cpRate,amt:cpRate!=null?pieces*cpRate:0}; total+=cp.amt;
   const fcf=(o.fcf)||(o.ac&&o.fcp?o.fcp/o.ac:1); totalFC+=cp.amt*(isFinite(fcf)&&fcf>0?fcf:1);
@@ -1696,34 +1729,6 @@ function commOf(o,ym){
   return {cfg,rows,cp,ac,hasAcSplit,total,totalFC};
 }
 function liveCat(p){ const o={}; CATS.forEach(c=>{ const t=+(p.tg||{})[c.k]||0, av=p.a[c.a]; o[c.k]={t,a:av,fcp:t?av*p.fcf/t:0}; }); return o; }
-function commCard(id,ms){
-  if(!ms.length) return '';
-  if(!commYm||!ms.some(m=>m.ym===commYm)) commYm=ms[ms.length-1].ym;
-  const m=ms.find(x=>x.ym===commYm); const C=commOf(m.me,m.ym); const inProg=m.last<m.dim;
-  const rateTxt=r=>r==null?'<span class="muted">ยังไม่ได้ตั้ง Rate</span>':'';
-  let h=`<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>💰 ค่าคอมมิชชั่น PIA (ประมาณการ) · ${ymLong(m.ym)}</h2><div class="hint">ยอดทั้งก้อน (ราคาขายตามบิล) × Rate ของขั้นที่ทำได้ · ต่ำกว่าขั้นแรก = 0 บาท${C.cfg?` · Rate ตั้งไว้เมื่อ ${ymLong(C.cfg.from)}`:''}</div></div>
-    <div class="chips" id="commMonths">${ms.slice(-6).map(x=>`<button data-ym="${x.ym}" class="${x.ym===commYm?'on':''}">${ymLabel(x.ym)}</button>`).join('')}</div></div>`;
-  if(!C.cfg){ return h+`<div class="empty" style="padding:16px">ผู้ดูแลยังไม่ได้ตั้ง Rate ค่าคอมมิชชั่น</div></section>`; }
-  h+=`<div class="commtop"><div class="sumcard"><div class="l">${inProg?'ได้แล้วตอนนี้ (ถึงวันที่ '+m.last+')':'ผลสิ้นเดือน'}</div><div class="v num">${fmt(C.total)}<small>บาท</small></div><div class="f">รวมทุกรายการที่ตั้ง Rate แล้ว</div></div>
-    ${inProg?`<div class="sumcard"><div class="l">ถ้าขายตามอัตราเดิมถึงสิ้นเดือน</div><div class="v num">${fmt(C.totalFC)}<small>บาท</small></div><div class="f">คิดจาก FC ของแต่ละ Category</div></div>`:''}
-    <div class="commlink"><a class="btn sm" href="#s${esc(id)}">🎯 วางแผนปิดยอด ›</a><div class="muted small">ตั้ง % ที่อยากปิด แล้วดูว่าต้องขายอีกเท่าไหร่</div></div></div>
-  <div class="commCards">${C.rows.map(r=>`<div class="pc"><div class="pc1"><b>${r.l}</b><b class="num">${r.set?fmt(r.amt)+' ฿':'<span class="muted small">ยังไม่ได้ตั้ง Rate</span>'}</b></div>
-      <div class="pc2">ยอด <b class="num">${fmt(r.a)}</b>${r.t?` / เป้า ${fmt(r.t)} · <span class="st ${r.cur?'g':'b'}">${pct(r.ach/100,0)}</span>`:''}${r.cur?` · ขั้น ≥${r.cur[0]}% (${r.cur[1]}%)`:r.set?' · ยังไม่ถึงขั้นแรก':''}</div>
-      ${r.next?`<div class="pc2">ขายอีก <b class="num">${fmt(r.next.need)}</b> → ขั้น ${r.next.th}% <span class="st g">+${fmt(r.next.gain)} บาท</span></div>`:''}</div>`).join('')}
-    <div class="pc"><div class="pc1"><b>Cover Plus</b><b class="num">${C.cp.rate!=null?fmt(C.cp.amt)+' ฿':'–'}</b></div><div class="pc2">${fmt(C.cp.pieces)} ชิ้น × ${C.cp.rate!=null?fmt(C.cp.rate):'?'} บาท</div></div>
-    <div class="pc"><div class="pc1"><b>AppleCare</b><b class="num">${fmt(C.ac.reduce((s,x)=>s+x.amt,0))} ฿</b></div><div class="pc2">${C.hasAcSplit?C.ac.filter(x=>x.n).map(x=>`${x.l.replace('AppleCare ','')} ${fmt(x.n)} ชิ้น${x.rate==null?' (ยังไม่ตั้ง Rate)':''}`).join(' · ')||'ยังไม่มี':'อัปไฟล์ใหม่เพื่อแยกประเภท'}</div></div></div>
-  <div class="tablewrap commTbl"><table style="min-width:860px"><thead><tr><th class="l">Category</th><th>ยอด</th><th>เป้า</th><th>% ทำได้</th><th>ขั้นที่ได้</th><th>ค่าคอมฯ ตอนนี้</th><th class="l">ขั้นถัดไป</th>${inProg?'<th>ถ้าขายตามอัตราเดิม</th>':''}</tr></thead><tbody>`;
-  C.rows.forEach(r=>{ h+=`<tr style="cursor:default"><td class="l"><b>${r.l}</b></td><td class="num">${fmt(r.a)}</td><td class="num">${r.t?fmt(r.t):'–'}</td><td><span class="chip ${r.cur?'g':r.ach>0?'b':''}">${pct(r.ach/100,0)}</span></td>
-    <td class="num">${!r.set?'<span class="muted small">ยังไม่ได้ตั้ง Rate</span>':r.cur?`≥${r.cur[0]}% · ${r.cur[1]}%`:'<span class="muted small">ยังไม่ถึงขั้นแรก</span>'}</td>
-    <td class="num"><b>${r.set?fmt(r.amt):'–'}</b></td>
-    <td class="l small">${r.next?`ขายอีก <b class="num">${fmt(r.next.need)}</b> → ขั้น ${r.next.th}% <span class="st g">+${fmt(r.next.gain)} บาท</span>`:r.set&&r.cur?'<span class="st g">✓ ขั้นสูงสุดแล้ว</span>':r.noTg?'<span class="muted">ไม่มีเป้า</span>':''}</td>
-    ${inProg?`<td class="num muted">${r.set?fmt(r.amtFC)+` <span class="small">(${fmt(r.fcP,0)}%)</span>`:'–'}</td>`:''}</tr>`; });
-  h+=`<tr style="cursor:default"><td class="l"><b>Cover Plus</b></td><td class="num">${fmt(C.cp.pieces)} ชิ้น</td><td class="num">–</td><td></td><td class="num">${C.cp.rate!=null?fmt(C.cp.rate)+' บาท/ชิ้น':rateTxt(null)}</td><td class="num"><b>${C.cp.rate!=null?fmt(C.cp.amt):'–'}</b></td><td class="l small muted">จ่ายเป็นชิ้น</td>${inProg?'<td></td>':''}</tr>`;
-  C.ac.forEach(x=>{ h+=`<tr style="cursor:default"><td class="l">${x.l}</td><td class="num">${C.hasAcSplit?fmt(x.n)+' ชิ้น':'–'}</td><td class="num">–</td><td></td><td class="num">${x.rate!=null?fmt(x.rate)+' บาท/ชิ้น':rateTxt(null)}</td><td class="num"><b>${x.rate!=null&&C.hasAcSplit?fmt(x.amt):'–'}</b></td><td class="l small muted">${C.hasAcSplit?'สุทธิหลังคืน':'อัปไฟล์ใหม่เพื่อแยกประเภท'}</td>${inProg?'<td></td>':''}</tr>`; });
-  h+=`</tbody><tfoot><tr><td class="l" colspan="5">รวมประมาณการ</td><td class="num">${fmt(C.total)}</td><td></td>${inProg?`<td class="num">${fmt(C.totalFC)}</td>`:''}</tr></tfoot></table></div>
-  <div class="muted small" style="margin-top:8px">⚠ เป็นตัวเลขประมาณการจากยอดในระบบเท่านั้น ยังไม่รวม Incentive PIA และ NPI · ยอดจริงตามใบแจ้งค่าคอมฯ ของบริษัท</div></section>`;
-  return h;
-}
 let commYm=null;
 
 /* ---------- Focus of the Month ---------- */
@@ -1759,11 +1764,14 @@ let commDraft=null, focusDraft=null, setTab='tg';
 function showSetTab(t){ setTab=t; document.querySelectorAll('#setTabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); document.querySelectorAll('.stab').forEach(s=>s.hidden=s.dataset.s!==t); }
 function initExtraSettings(){
   const ym=liveYm()||monthInfo().ym||'';
-  const cc=commCfg(ym); commDraft=cc?JSON.parse(JSON.stringify({tiers:cc.tiers||{},cp:cc.cp,ac:cc.ac||{}})):{tiers:{},cp:70,ac:{}};
+  const cc=commCfg(ym); commDraft=cc?JSON.parse(JSON.stringify({tiers:cc.tiers||{},cp:cc.cp,ac:cc.ac||{},pia:cc.pia,pos:cc.pos,intern:cc.intern})):{tiers:{},cp:70,ac:{}};
   focusDraft=JSON.parse(JSON.stringify(focusOf(ym)));
   $('#commYmL').textContent=ym?ymLong(ym):''; $('#focusYmL').textContent=ym?ymLong(ym):'';
   $('#commFrom').textContent=cc&&cc.from!==ym?`(ตอนนี้ใช้ Rate ของ ${ymLong(cc.from)} · บันทึกแล้วจะเป็น Rate ของ ${ymLong(ym)} เป็นต้นไป)`:'';
   renderCommEditor(); renderFocusEditor();
+  $('#boPosForm').innerHTML=BO_POS.filter(x=>x!==INTERN).map((x,i)=>`<div class="field"><label>${x}</label><input id="boPos_${i}" inputmode="decimal"></div>`).join('');
+  $('#boIntForm').innerHTML=COMM_CATS.map(([k,l])=>`<div class="field"><label>${l}</label><input id="boInt_${k}" inputmode="decimal"></div>`).join('');
+  initBackSettings();
   const R=rosterCfg(); $('#rUrl').value=R.url||''; $('#rTab').value=R.tab||''; const cd={...ROSTER_DEF,...(R.codes||{})}; $('#rOff').value=cd.off; $('#rLeave').value=cd.leave; $('#rWork').value=cd.work;
   renderRosterMeta(); renderCheck($('#setCheck'),lastCheck||state.settings.lastCheck);
 }
@@ -1787,7 +1795,8 @@ function collectExtraSettings(){
   const clean={tiers:{},cp:$('#cCp').value===''?null:+$('#cCp').value,ac:{}};
   for(const [k] of COMM_CATS){ const a=(commDraft.tiers[k]||[]).filter(t=>t[0]>0&&t[1]>=0).sort((x,y)=>x[0]-y[0]); if(a.length) clean.tiers[k]=a; }
   AC_T.forEach(([,,t])=>{ const v=$('#cAc_'+t).value; if(v!=='') clean.ac[t]=+v; });
-  const prev=commCfg(ym); const same=prev&&JSON.stringify({tiers:prev.tiers||{},cp:prev.cp??null,ac:prev.ac||{}})===JSON.stringify(clean);
+  collectBack(clean);
+  const prev=commCfg(ym); const same=prev&&JSON.stringify({tiers:prev.tiers||{},cp:prev.cp??null,ac:prev.ac||{},pia:prev.pia,pos:prev.pos,intern:prev.intern})===JSON.stringify(clean);
   const any=Object.keys(clean.tiers).length||clean.cp!=null||Object.keys(clean.ac).length;
   if(!same&&(any||prev)){ state.settings.comm={...(state.settings.comm||{}),[ym]:clean}; }
   const F=focusDraft.filter(x=>x.m&&x.t>0).slice(0,3);
@@ -1807,6 +1816,129 @@ async function rosterAction(file){
     const R=await syncRoster(file?await file.arrayBuffer():null,cfg);
     st.className='status on ok'; st.innerHTML='✓ ดึงตารางงานแล้ว: '+esc(R.tabs.join(', '))+(R.warn.length?` · มีคำเตือน ${R.warn.length} รายการ`:''); renderRosterMeta();
   }catch(e){ st.className='status on err'; st.textContent='✕ '+e.message; }
+}
+
+/* =====================================================================
+   v6 — commission ladder (sales + back office), back-office tab
+   ===================================================================== */
+const BO_POS=['BM','PIS','ABM','Cashier','Trainer','Presenter','Stock Monitoring','Bilateral Student'];
+const BO_POS_DEF={BM:0.11,PIS:0.09,ABM:0.08,Cashier:0.07,Trainer:0.055,Presenter:0.05,'Stock Monitoring':0.025};
+const INTERN_DEF={mac:0,ipad:0,iphone:0,aw:0.6,aba:2.5,rd:2.5};
+const INTERN='Bilateral Student';
+const CAT_S={mac:'macS',ipad:'ipadS',iphone:'iphoneS',aw:'awS',aba:'abaS',rd:'rdS'};
+function boCfg(cfg){ cfg=cfg||{}; return {pia:cfg.pia!=null&&cfg.pia!==''?+cfg.pia:0.52,pos:{...BO_POS_DEF,...(cfg.pos||{})},intern:{...INTERN_DEF,...(cfg.intern||{})}}; }
+function boList(){ return (state.settings.backoffice||[]).filter(p=>p&&p.id!==''&&p.id!=null); }
+
+/* tier ladder: a = actual, t = target, tiers = [[th%, rate%]], mult scales the rate (1 for sales) */
+function ladderCalc(tiers,t,a,mult,fcf){
+  const T=(tiers||[]).filter(x=>x&&x[0]>0&&x[1]>=0).slice().sort((x,y)=>x[0]-y[0]);
+  const ach=t?a/t*100:0; let cur=null; for(const x of T) if(ach>=x[0]-1e-9) cur=x;
+  const amt=cur?a*cur[1]*mult/100:0;
+  const steps=t?T.filter(x=>x[0]>ach+1e-9).map(x=>{ const need=x[0]/100*t-a, tot=x[0]/100*t*x[1]*mult/100; return {th:x[0],need,tot,gain:tot-amt}; }):[];
+  let fcAmt=null; if(fcf&&isFinite(fcf)&&fcf>0){ const fa=a*fcf, fach=t?fa/t*100:0; let fc=null; for(const x of T) if(fach>=x[0]-1e-9) fc=x; fcAmt=fc?fa*fc[1]*mult/100:0; }
+  return {ach,cur,amt,steps,fcAmt,set:T.length>0,noTg:!t};
+}
+function ladderCard(o){
+  const L=o.L, big=o.big||fmt, who=o.who||'ขายอีก';
+  let h=`<div class="lad"><div class="ladh"><b>${esc(o.title)}</b><span class="muted small">${L.noTg?'ไม่มีเป้า':`${o.store?'ร้าน':''}ทำได้ ${fmt(L.ach,0)}% ของเป้า`}</span></div>
+    <div class="ladbar"><i style="width:${Math.min(L.ach,110)/110*100}%"></i>${[70,90,98,105].map(x=>`<em style="left:${x/110*100}%"></em>`).join('')}</div>
+    <div class="muted small">${o.nowLabel||'ได้แล้วตอนนี้'}</div><div class="ladv num">${L.set?fmt(L.amt):'–'}<small> ฿</small></div>`;
+  if(!L.set){ return h+`<div class="ladst"><span class="muted small">ยังไม่ได้ตั้ง Rate</span></div></div>`; }
+  if(L.cur) h+=`<div class="ladst now"><span class="ldot">✓</span><div><b>ขั้น ${L.cur[0]}% · ผ่านแล้ว</b><div class="muted small">ขั้นที่ได้อยู่ตอนนี้</div></div><b class="num r">${fmt(L.amt)} ฿</b></div>`;
+  else if(!L.noTg) h+=`<div class="ladst"><span class="ldot zero">0</span><div><b>ยังไม่ถึงขั้นแรก</b><div class="muted small">ต่ำกว่าขั้นแรก = 0 บาท</div></div></div>`;
+  L.steps.forEach(s=>{ h+=`<div class="ladst nx"><span class="ldot">${s.th}</span><div><b>${who} ${big(s.need)}</b><div class="muted small">ถึง ${s.th}% ได้รวม ${fmt(s.tot)} ฿</div></div><b class="num r gain">+${fmt(s.gain)} ฿</b></div>`; });
+  if(L.set&&L.cur&&!L.steps.length) h+=`<div class="ladst"><span class="ldot top">★</span><div><b class="st g">ขั้นสูงสุดแล้ว</b><div class="muted small">ขายเพิ่มทุกบาทยังได้เงินเพิ่มตาม</div></div></div>`;
+  if(o.fc&&L.fcAmt!=null) h+=L.fcAmt>0?`<div class="ladfc muted small">ถ้าขายตามอัตราเดิมถึงสิ้นเดือน ≈ <b>${fmt(L.fcAmt)} ฿</b></div>`:`<div class="ladfc small st w">⚡ ถ้าขายตามอัตราเดิม จะยังไม่ถึงขั้นแรก ต้องเร่งอีกนิด</div>`;
+  return h+'</div>';
+}
+function flatCard(title,amt,sub,extra){ return `<div class="lad"><div class="ladh"><b>${esc(title)}</b></div><div class="muted small">ได้แล้วตอนนี้</div><div class="ladv num">${amt==null?'–':fmt(amt)}<small> ฿</small></div><div class="muted small">${sub}</div>${extra||''}</div>`; }
+
+/* ---------- sales commission card (ladder view, no rates shown) ---------- */
+function commCard(id,ms){
+  if(!ms.length) return '';
+  if(!commYm||!ms.some(m=>m.ym===commYm)) commYm=ms[ms.length-1].ym;
+  const m=ms.find(x=>x.ym===commYm); const C=commOf(m.me,m.ym); const inProg=m.last<m.dim;
+  let h=`<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>💰 ค่าคอมมิชชั่น PIA (ประมาณการ) · ${ymLong(m.ym)}</h2><div class="hint">ขายถึงขั้นไหน ได้เงินทั้งก้อนตามขั้นนั้น · ต่ำกว่าขั้นแรก = 0 บาท</div></div>
+    <div class="chips" id="commMonths">${ms.slice(-6).map(x=>`<button data-ym="${x.ym}" class="${x.ym===commYm?'on':''}">${ymLabel(x.ym)}</button>`).join('')}</div></div>`;
+  if(!C.cfg) return h+`<div class="empty" style="padding:16px">ผู้ดูแลยังไม่ได้ตั้ง Rate ค่าคอมมิชชั่น</div></section>`;
+  const fcf=(m.me.ac&&m.me.fcp)?m.me.fcp/m.me.ac:1;
+  h+=`<div class="commtop"><div class="sumcard"><div class="l">${inProg?'ได้แล้วตอนนี้ (ถึงวันที่ '+m.last+')':'ผลสิ้นเดือน'}</div><div class="v num">${fmt(C.total)}<small>บาท</small></div><div class="f">รวมทุก Category ที่ตั้ง Rate แล้ว</div></div>
+    ${inProg?`<div class="sumcard"><div class="l">ถ้าขายตามอัตราเดิมถึงสิ้นเดือน</div><div class="v num">${fmt(C.totalFC)}<small>บาท</small></div><div class="f">คิดจาก FC ของแต่ละ Category</div></div>`:''}
+    <div class="commlink"><a class="btn sm" href="#s${esc(id)}">🎯 วางแผนปิดยอด ›</a><div class="muted small">ตั้ง % ที่อยากปิด แล้วดูว่าต้องขายอีกเท่าไหร่</div></div></div>
+    <div class="ladgrid">${C.rows.map(r=>ladderCard({title:r.l,L:r.L,fc:inProg})).join('')}
+    ${flatCard('Cover Plus',C.cp.rate!=null?C.cp.amt:null,`${fmt(C.cp.pieces)} ชิ้น${C.cp.rate!=null?` · ขายเพิ่ม 1 ชิ้น +${fmt(C.cp.rate)} ฿`:' · ยังไม่ได้ตั้ง Rate'}`)}
+    ${flatCard('AppleCare',C.hasAcSplit?C.ac.reduce((s,x)=>s+x.amt,0):null,C.hasAcSplit?(C.ac.filter(x=>x.n).map(x=>`${x.l.replace('AppleCare ','')} ${fmt(x.n)} ชิ้น${x.rate!=null?` (+${fmt(x.rate)} ฿/ชิ้น)`:''}`).join(' · ')||'ยังไม่มี'):'อัปไฟล์ใหม่เพื่อแยกประเภท')}</div>
+  <div class="muted small" style="margin-top:10px">⚠ ประมาณการจากยอดในระบบ ยังไม่รวม Incentive PIA, NPI และรายการหัก · ยอดจริงตามใบแจ้งค่าคอมฯ ของบริษัท</div></section>`;
+  return h;
+}
+
+/* ---------- back office ---------- */
+function storeAllActual(M){ const a=blank(); for(const r of state.rows){ if(!r[0].startsWith(M.ym)) continue; for(const k of KEYS) a[k]+=r[KI[k]]||0; } return a; }
+function personActual(id,M){ const a=blank(); for(const r of state.rows){ if(r[2]!=id||!r[0].startsWith(M.ym)) continue; for(const k of KEYS) a[k]+=r[KI[k]]||0; } return a; }
+function backCalc(p,D){
+  const M=D.M, cfg=commCfg(M.ym), B=boCfg(cfg), fcf=D.store.fcf;
+  if(p.pos===INTERN){ const a=personActual(p.id,M); let total=0,totalFC=0;
+    const rows=COMM_CATS.map(([k,l])=>{ const s=a[CAT_S[k]], r=+B.intern[k]||0, amt=s*r/100; total+=amt; totalFC+=amt*(fcf||1); return {k,l,s,r,amt,per:10000*r/100}; });
+    return {intern:true,cfg,rows,total,totalFC,a}; }
+  const n=Math.max(boList().filter(x=>x.pos===p.pos).length,1), pr=+B.pos[p.pos]||0, mult=B.pia?pr/B.pia/n:0;
+  const a=storeAllActual(M); let total=0,totalFC=0;
+  const rows=COMM_CATS.map(([k,l])=>{ const t=+D.store.tg[k]||0, L=ladderCalc(cfg&&cfg.tiers?cfg.tiers[k]:null,t,a[CAT_S[k]],mult,fcf); total+=L.amt; totalFC+=L.fcAmt||0; return {k,l,L,s:a[CAT_S[k]],t}; });
+  return {intern:false,cfg,rows,total,totalFC,n,mult};
+}
+function backPage(p,D){
+  const M=D.M, C=backCalc(p,D), inProg=!!M.remain;
+  let h=`<section class="card sec"><div class="sechead"><div><h2>🧾 ${esc(p.name)} <span class="muted small">${esc(p.id)} · ${esc(p.pos)}</span></h2><div class="hint">${C.intern?'ค่าคอมฯ จากยอดขายของคุณเอง · ได้ตั้งแต่บาทแรก':'ค่าคอมฯ จากยอดรวมของร้านแต่ละ Category · ร้านขายถึงขั้นไหน ทุกคนในทีมได้ตามขั้นนั้น'} · ${ymLong(M.ym)}${M.ym?` (ข้อมูลถึงวันที่ ${M.day})`:''}</div></div>
+    ${staffAuth&&!isMgrRole()?'<button class="btn sm ghost" id="boOut">ออกจากระบบ</button>':''}</div>`;
+  if(!C.cfg){ return h+`<div class="empty" style="padding:16px">ผู้ดูแลยังไม่ได้ตั้ง Rate ค่าคอมมิชชั่น</div></section>`; }
+  h+=`<div class="commtop"><div class="sumcard"><div class="l">${inProg?'ได้แล้วตอนนี้':'ผลสิ้นเดือน'}</div><div class="v num">${fmt(C.total)}<small>บาท</small></div><div class="f">รวม 6 Category</div></div>
+    ${inProg?`<div class="sumcard"><div class="l">ถ้าขายตามอัตราเดิมถึงสิ้นเดือน</div><div class="v num">${fmt(C.totalFC)}<small>บาท</small></div><div class="f">${C.intern?'คิดจากอัตราการขายของคุณ':'คิดจากอัตราการขายของร้าน'}</div></div>`:''}</div>`;
+  if(C.intern){
+    h+=`<div class="ladgrid">${C.rows.filter(r=>r.r>0||r.s>0).map(r=>`<div class="lad"><div class="ladh"><b>${r.l}</b><span class="muted small">ยอดของคุณ ${fmt(r.s)}</span></div><div class="muted small">ได้แล้วตอนนี้</div><div class="ladv num">${r.r>0?fmt(r.amt):'–'}<small> ฿</small></div>
+      ${r.r>0?`<div class="ladst nx"><span class="ldot">+</span><div><b>ขายเพิ่มอีก 10,000</b><div class="muted small">ได้เงินเพิ่มทันที ไม่ต้องรอถึงเป้า</div></div><b class="num r gain">+${fmt(r.per)} ฿</b></div>
+      <div class="ladst nx"><span class="ldot">+</span><div><b>ขายเพิ่มอีก 50,000</b><div class="muted small">รวมเป็น ${fmt(r.amt+r.per*5)} ฿</div></div><b class="num r gain">+${fmt(r.per*5)} ฿</b></div>`:'<div class="muted small">Category นี้ไม่มีค่าคอมฯ สำหรับตำแหน่งนี้</div>'}</div>`).join('')}</div>`;
+  } else {
+    h+=`<div class="ladgrid">${C.rows.map(r=>ladderCard({title:r.l,L:r.L,fc:inProg,store:true,who:'ร้านขายอีก',big:money})).join('')}</div>
+      <div class="muted small" style="margin-top:8px">ตำแหน่ง ${esc(p.pos)} ในร้านมี ${C.n} คน · เงินส่วนนี้แบ่งเท่ากันในตำแหน่งเดียวกัน</div>`;
+  }
+  return h+`<div class="muted small" style="margin-top:10px">⚠ ประมาณการจากยอดในระบบ ยังไม่รวม Apple Care, Service, Incentive และรายการหัก · ยอดจริงตามใบแจ้งค่าคอมฯ ของบริษัท</div></section>`;
+}
+function renderBack(D,R){
+  const el=$('#backBody'); const L=boList();
+  if(isMgrRole()){
+    if(!L.length){ el.innerHTML='<section class="card sec empty">ยังไม่มีรายชื่อทีมหลังบ้าน · เพิ่มได้ที่ ⚙ เป้า & ตั้งค่า › แท็บ "ทีมหลังบ้าน"</section>'; return; }
+    const sel=L.find(p=>String(p.id)===String(R.id))||L[0];
+    el.innerHTML=`<div class="chips" style="margin-bottom:12px;flex-wrap:wrap">${L.map(p=>`<a class="${p===sel?'on':''}" href="#b${esc(p.id)}" style="text-decoration:none"><button class="${p===sel?'on':''}">${esc(p.name)} · ${esc(p.pos)}</button></a>`).join('')}</div>`+backPage(sel,D);
+    return; }
+  if(!staffAuth){ el.innerHTML=loginCard('🔐 ค่าคอมมิชชั่นทีมหลังบ้าน','ใส่รหัสพนักงานและ PIN เพื่อดูค่าคอมฯ ของคุณ · เห็นเฉพาะตัวคุณ'); bindLogin(); return; }
+  const me=L.find(p=>String(p.id)===String(staffAuth.id));
+  if(!me){ el.innerHTML=`<section class="card sec empty">รหัส ${esc(staffAuth.id)} ไม่ได้อยู่ในรายชื่อทีมหลังบ้าน · ถ้าเป็นพนักงานขายดูค่าคอมฯ ได้ที่แท็บ <a href="#profile">โปรไฟล์</a> <button class="btn sm ghost" id="boOut">ออกจากระบบ</button></section>`; }
+  else el.innerHTML=backPage(me,D);
+  const o=$('#boOut'); if(o) o.onclick=()=>staffLogout();
+}
+
+/* ---------- settings: back-office list ---------- */
+let draftBack=[];
+function backRows(){
+  const el=$('#boBody'); if(!el) return;
+  el.innerHTML=draftBack.map((p,i)=>`<tr><td style="width:90px"><input data-bi="${i}" data-bf="id" value="${esc(p.id)}" style="text-align:left"></td><td><input data-bi="${i}" data-bf="name" value="${esc(p.name)}" style="text-align:left"></td>
+    <td style="width:190px"><select class="btn sm" data-bi="${i}" data-bf="pos">${BO_POS.map(x=>`<option ${p.pos===x?'selected':''} value="${x}">${x==='Bilateral Student'?'Bilateral Student (ทวิภาคี)':x}</option>`).join('')}</select></td>
+    <td style="width:96px">${(()=>{ const st=pinStatus.pins[String(p.id)], lk=pinStatus.locks[String(p.id)]; return `<button class="btn sm ${st?'':'primary'}" data-bpin="${i}">${lk?'🔒 ถูกล็อก':st?'✓ ตั้งแล้ว':'ตั้ง PIN'}</button>`; })()}</td>
+    <td style="width:40px"><button class="btn sm ghost" data-bdel="${i}">✕</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted small">ยังไม่มีรายชื่อ</td></tr>';
+  el.querySelectorAll('[data-bf]').forEach(inp=>{ const ev=inp.tagName==='SELECT'?'onchange':'oninput'; inp[ev]=()=>{ const p=draftBack[+inp.dataset.bi]; const f=inp.dataset.bf; p[f]=f==='id'?inp.value.replace(/\D/g,''):inp.value; }; });
+  el.querySelectorAll('[data-bdel]').forEach(b=>b.onclick=()=>{ draftBack.splice(+b.dataset.bdel,1); backRows(); });
+  el.querySelectorAll('[data-bpin]').forEach(b=>b.onclick=()=>{ const p=draftBack[+b.dataset.bpin]; if(!p||!p.id){ toast('ใส่รหัสพนักงานก่อน'); return; }
+    $('#pinWho').textContent=`${p.name} (${p.id})`; $('#pinInp').value=''; $('#pinSt').className='status'; $('#pinScrim').dataset.id=p.id; $('#pinScrim').dataset.name=p.name; $('#pinScrim').classList.add('on'); setTimeout(()=>$('#pinInp').focus(),50); });
+}
+function initBackSettings(){
+  draftBack=(state.settings.backoffice||[]).map(p=>({...p})); backRows();
+  const B=boCfg(commDraft);
+  $('#boPia').value=B.pia; BO_POS.filter(x=>x!==INTERN).forEach((x,i)=>{ const inp=$('#boPos_'+i); if(inp) inp.value=B.pos[x]; });
+  COMM_CATS.forEach(([k])=>{ const inp=$('#boInt_'+k); if(inp) inp.value=B.intern[k]; });
+}
+function collectBack(clean){
+  state.settings.backoffice=draftBack.filter(p=>p.id&&p.name).map(p=>({id:String(p.id),name:String(p.name).trim(),pos:BO_POS.includes(p.pos)?p.pos:'Cashier'}));
+  clean.pia=+$('#boPia').value||0.52; clean.pos={}; BO_POS.filter(x=>x!==INTERN).forEach((x,i)=>{ const v=$('#boPos_'+i).value; clean.pos[x]=v===''?0:+v; });
+  clean.intern={}; COMM_CATS.forEach(([k])=>{ const v=$('#boInt_'+k).value; clean.intern[k]=v===''?0:+v; });
 }
 
 /* ---------- modals ---------- */
@@ -1839,7 +1971,7 @@ $('#openSettings').onclick=()=>{ const S=state.settings; const M=monthInfo();
   draftStaff=state.staff.map(p=>({...p,tg:{...(p.tg||{})}})); staffRows(); initExtraSettings(); showSetTab(setTab); $('#setScrim').classList.add('on'); loadAdminExtras(); };
 document.querySelectorAll('#setTabs button').forEach(b=>b.onclick=()=>showSetTab(b.dataset.t));
 $('#rPull').onclick=()=>rosterAction(null); $('#rFile').onchange=e=>{ const f=e.target.files[0]; if(f) rosterAction(f); e.target.value=''; };
-$('#openMap2').onclick=()=>openMapEditor(); $('#mapSave').onclick=()=>saveMapEditor();
+$('#openMap2').onclick=()=>openMapEditor(); $('#boAdd').onclick=()=>{ draftBack.push({id:'',name:'',pos:'Cashier'}); backRows(); }; $('#mapSave').onclick=()=>saveMapEditor();
 $('#pinSave').onclick=()=>savePin(false); $('#pinClear').onclick=()=>savePin(true); $('#pinInp').onkeydown=e=>{ if(e.key==='Enter') savePin(false); };
 $('#mgrAdd').onclick=async()=>{ const name=$('#mgrName').value.trim(), key=$('#mgrKey').value; try{ await api('managers',{method:'POST',body:{name,key}},'admin'); $('#mgrName').value=''; $('#mgrKey').value=''; toast('เพิ่มหัวหน้าร้านแล้ว'); loadAdminExtras(); }catch(e){ toast('เพิ่มไม่สำเร็จ: '+e.message); } };
 $('#fillAll').onclick=()=>{ document.querySelectorAll('[data-all]').forEach(inp=>{ const v=String(inp.value).replace(/,/g,''); if(v==='') return; draftStaff.forEach(p=>{ p.tg=p.tg||{}; p.tg[inp.dataset.all]=+v||0; }); }); staffRows(); };
