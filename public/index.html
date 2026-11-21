@@ -204,6 +204,15 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
+.exstrip{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:12px 0 0;font-size:13.5px;cursor:pointer}
+.exstrip b{color:var(--text-primary)}
+.expill{background:var(--warn-soft);color:var(--warn);border-radius:99px;padding:2px 12px;font-size:12.5px;font-weight:600}
+.exlink{margin-left:auto;color:var(--s1);font-size:13px}
+.expanel{background:var(--surface-1);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;margin-top:-8px;padding:16px 16px 12px}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.exh{font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.exrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+
 .ladgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
 @media (max-width:420px){.ladgrid{grid-template-columns:1fr}}
 .lad{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--surface-1)}
@@ -484,6 +493,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
   <section class="view" id="vStore">
     <div class="watch" id="adminBanner" hidden style="margin:0 0 12px"></div>
     <div class="kpis4" id="storeKpis"></div>
+    <div id="exclBox"></div>
     <section class="card sec" style="margin-top:12px">
       <div class="sechead"><div><h2>ยอดขายตาม Category เทียบเป้าของเดือน</h2><div class="hint">แถบทึบ = ทำได้แล้ว · เส้นประ = คาดการณ์สิ้นเดือน (FC) · ขีดดำ = ควรอยู่ตรงนี้ตามจำนวนวันที่ผ่านไป</div></div></div>
       <div class="catgrid" id="catGrid"></div>
@@ -694,7 +704,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
 const BASE=JSON.parse(document.getElementById('baseline').textContent);
 const DEFAULT_MAP=BASE.map;
 const KEYS=['macU','macS','ipadU','ipadS','iphoneU','iphoneS','awU','awS','smileU','simU','ufundU','pvlU','acU','pencilU','airpodsU','abaS','rdS','serviceS','trueS','insS',
-  'smileN','acIphN','acIpdN','acAwN','acMacN','acHpN']; /* *N = net pieces after returns (for commission) — older rows don't have them */
+  'smileN','acIphN','acIpdN','acAwN','acMacN','acHpN','xS']; /* xS = bill sales not counted in any Category */ /* *N = net pieces after returns (for commission) — older rows don't have them */
 const KI=Object.fromEntries(KEYS.map((k,i)=>[k,i+3]));
 const CATS=[
   {k:'mac',l:'Mac',a:'macS'},{k:'ipad',l:'iPad',a:'ipadS'},{k:'iphone',l:'iPhone',a:'iphoneS'},
@@ -741,12 +751,16 @@ function derive(a,tg,M){
   const fcf = M.day? M.dim/M.day : 0;
   return {total,att,tgSales,actSales,ac:div(actSales,tgSales),fc:actSales*fcf,fcp:div(actSales*fcf,tgSales),fcf};
 }
+function internIds(){ return new Set((state.settings.backoffice||[]).filter(p=>p&&p.pos==='Bilateral Student').map(p=>String(p.id))); }
 function computeAll(){
   const M=monthInfo();
   const list=state.staff.map(p=>{ const a=sumFor(p,M); const tg=p.tg||{}; return {...p,a,tg,...derive(a,tg,M)}; });
   const sa=blank(); list.forEach(p=>KEYS.forEach(k=>sa[k]+=p.a[k]));
+  /* interns (Bilateral Student): count toward store totals, never shown per person */
+  const iIds=internIds(), ia=blank(); if(iIds.size&&M.ym) for(const r of state.rows){ if(iIds.has(String(r[2]))&&r[0].startsWith(M.ym)) for(const k of KEYS) ia[k]+=r[KI[k]]||0; }
+  KEYS.forEach(k=>sa[k]+=ia[k]);
   const stg={}; CATS.forEach(c=>stg[c.k]=list.reduce((s,p)=>s+(+p.tg[c.k]||0),0));
-  const store={a:sa,tg:stg,...derive(sa,stg,M)};
+  const store={a:sa,tg:stg,...derive(sa,stg,M),intern:derive(ia,{},M).total};
   const ranked=[...list].sort((x,y)=>y.ac-x.ac); ranked.forEach((p,i)=>p.rank=i+1);
   return {M,list,store};
 }
@@ -802,7 +816,7 @@ async function viewMonth(ym){
     if(!liveBackup) liveBackup={rows:state.rows,staff:state.staff,settings:state.settings,source:state.source,updatedAt:state.updatedAt,names:state.names};
     const live=new Map(liveBackup.staff.map(p=>[String(p.id),p]));
     const list=(d.staff&&d.staff.length?d.staff:liveBackup.staff);
-    state.rows=d.rows; state.staff=list.map(p=>{ const lp=live.get(String(p.id))||{}; return {...lp,...p,photo:lp.photo,tg:(d.tg||{})[p.id]||(d.tg||{})[String(p.id)]||{}}; });
+    if(d.x) xCache[ym]=d.x; state.rows=d.rows; state.staff=list.map(p=>{ const lp=live.get(String(p.id))||{}; return {...lp,...p,photo:lp.photo,tg:(d.tg||{})[p.id]||(d.tg||{})[String(p.id)]||{}}; });
     state.settings={...liveBackup.settings,dayOverride:null}; state.source=liveBackup.source; state.updatedAt=liveBackup.updatedAt;
     viewYm=ym; document.body.classList.add('viewpast');
     const h=location.hash; if(/^#d-/.test(h)) history.replaceState(null,'','#day');
@@ -843,7 +857,7 @@ function renderStore(D){
     return `<div class="card cat clk" data-dk="${c.k}"><div class="top"><span class="nm">${c.l}</span><span class="pct num st ${stCls(ac,M.pace)}">${pct(ac,0)}</span></div>
       <div class="sub num">${f(a)} / ${f(t)}</div>${track(ac,fcp,M.pace)}
       <div class="row2"><span>FC <b class="num">${pct(fcp,0)}</b></span><span>${need<=0?'<b class="st g">✓ ถึงเป้าแล้ว</b>':M.remain?`ต้องการอีกวันละ <b class="num">${c.unit?fmt(pd,1):money(pd)}</b>`:`ขาดเป้า <b class="num">${c.unit?fmt(need,1):money(need)}</b>`}</span></div><div class="clkhint">ดูอันดับ ›</div></div>`; }).join('')+coverCard(S.a,M,{fcf:S.fcf});
-  bindDrillCards($('#catGrid'));
+  bindDrillCards($('#catGrid')); renderExcl(D);
   $('#focusBox').innerHTML=focusSection(D); $('#focusBox').querySelectorAll('.flrow[data-id]').forEach(r=>r.onclick=()=>{ location.hash='s'+r.dataset.id; });
   const lc=state.settings.lastCheck, ab=$('#adminBanner'); if(ab){ const u=adminKey&&!viewYm&&lc&&lc.unk&&lc.unk.length; ab.hidden=!u; if(u){ ab.innerHTML=`<span>⚠</span><div><b>ไฟล์ล่าสุดมี Sub Category ที่ยังไม่ได้จัด Category ${lc.unk.length} รายการ</b> (ยอด ${fmt(lc.unk.reduce((s,e)=>s+e.s,0))} บาท ยังไม่ถูกนับ)${lc.pending?' · จัดแล้วบางส่วน รออัปไฟล์ครั้งถัดไป':''} <a href="#" id="abFix">ตรวจและจัด Category ›</a></div>`; $('#abFix').onclick=e=>{ e.preventDefault(); openMapEditor(); }; } }
   staffTable(D); mixChart(list); dailyChart(D);
@@ -905,7 +919,7 @@ function barChart(el,data,opt){
   el.innerHTML=s; el.querySelectorAll('.hit').forEach(g=>{ const o=data[+g.dataset.i]; g.onmousemove=e=>showTip(e,opt.tip(o)); g.onmouseleave=hideTip; });
 }
 function dailySeries(filter,M){ const m={}; for(const r of state.rows){ if(!r[0].startsWith(M.ym)||!filter(r)) continue; const v=r[KI.macS]+r[KI.ipadS]+r[KI.iphoneS]+r[KI.awS]+r[KI.abaS]+r[KI.rdS]+r[KI.serviceS]+r[KI.trueS]+r[KI.insS]; m[r[0]]=(m[r[0]]||0)+v; } return Object.keys(m).sort().map(d=>({d,v:m[d]})); }
-function dailyChart(D){ const ids=new Set(state.staff.map(p=>p.branch+':'+p.id)); barChart($('#dailyChart'),dailySeries(r=>ids.has(r[1]+':'+r[2]),D.M),{label:'ยอดขายรวมรายวัน',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท`}); }
+function dailyChart(D){ const ids=new Set(state.staff.map(p=>p.branch+':'+p.id)); internIds().forEach(i=>{ for(const r of state.rows) if(String(r[2])===i) ids.add(r[1]+':'+r[2]); }); barChart($('#dailyChart'),dailySeries(r=>ids.has(r[1]+':'+r[2]),D.M),{label:'ยอดขายรวมรายวัน',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท`}); }
 function mixChart(list){
   const g=state.settings.att.mix||0.07, W=560,rowH=24,pl=92,pr=56,H=list.length*rowH+24;
   const s=[...list].sort((a,b)=>b.att.mix-a.att.mix); const mx=Math.max(g*1.35,...s.map(p=>p.att.mix*1.2),0.01); const x=v=>pl+(W-pl-pr)*v/mx;
@@ -935,7 +949,9 @@ function renderDay(D,date){
     return {...p,a,b,...x,dtg,need,dT,nT,dp:dT?x.actSales/dT:0}; });
   P.sort((x,y)=>y.dp-x.dp||y.actSales-x.actSales).forEach((p,i)=>p.drank=i+1);
   const S={a:blank(),dtg:{},need:{}}; P.forEach(p=>KEYS.forEach(k=>S.a[k]+=p.a[k]));
-  CATS.forEach(c=>{ S.dtg[c.k]=P.reduce((s,p)=>s+p.dtg[c.k],0); S.need[c.k]=P.reduce((s,p)=>s+p.need[c.k],0); });
+  const iI=internIds(), iDay=blank(), iBef=blank(); if(iI.size) for(const r of state.rows){ if(!iI.has(String(r[2]))) continue; if(r[0]===date) for(const k of KEYS) iDay[k]+=r[KI[k]]||0; else if(r[0]<date&&r[0].startsWith(date.slice(0,7))) for(const k of KEYS) iBef[k]+=r[KI[k]]||0; }
+  KEYS.forEach(k=>S.a[k]+=iDay[k]);
+  CATS.forEach(c=>{ S.dtg[c.k]=P.reduce((s,p)=>s+p.dtg[c.k],0); S.need[c.k]=Math.max(P.reduce((s,p)=>s+p.need[c.k],0)-iBef[c.a]/remainIncl,0); });
   Object.assign(S,derive(S.a,Object.fromEntries(CATS.map(c=>[c.k,S.dtg[c.k]])),M));
   S.dT=SALES_CATS.reduce((s,c)=>s+S.dtg[c.k],0); S.nT=SALES_CATS.reduce((s,c)=>s+S.need[c.k],0); S.dp=S.dT?S.actSales/S.dT:0;
   // strip
@@ -1112,9 +1128,10 @@ function summarizeMonth(ym,rows,tgMap,staffList,source){
 }
 const staffLite=list=>list.map(p=>({id:p.id,name:p.name,pos:p.pos||'',branch:p.branch||251}));
 const tgMapOf=list=>Object.fromEntries(list.map(p=>[p.id,p.tg||{}]));
-async function postMonth(ym,rows,tgMap,staffList,source){
+async function postMonth(ym,rows,tgMap,staffList,source,x){
   const summary=summarizeMonth(ym,rows,tgMap,staffList,source);
-  await api('months',{method:'POST',body:{months:[{ym,rows,tg:tgMap,staff:staffLite(staffList),summary,source}]}},'admin');
+  const mo={ym,rows,tg:tgMap,staff:staffLite(staffList),summary,source}; if(x!==undefined) mo.x=x;
+  await api('months',{method:'POST',body:{months:[mo]}},'admin');
   return summary;
 }
 async function syncCurrentMonth(){
@@ -1124,7 +1141,7 @@ async function syncCurrentMonth(){
   catch(e){ console.error(e); toast('บันทึกประวัติรายเดือนไม่สำเร็จ: '+e.message); return false; }
 }
 /* called by the upload handler: store every month found in the file */
-async function storeUploadedMonths(rowsAll,tgList,source,merge){
+async function storeUploadedMonths(rowsAll,tgList,source,merge,xd){
   const byM={}; rowsAll.forEach(r=>{ (byM[r[0].slice(0,7)] ||= []).push(r); });
   const yms=Object.keys(byM).sort(); const out=[];
   for(const ym of yms){
@@ -1136,7 +1153,8 @@ async function storeUploadedMonths(rowsAll,tgList,source,merge){
     if(tgList){ tgMap=tgMapOf(tgList); staffList=tgList; tgFrom='ชีต TG ในไฟล์'; }
     else if(existing&&existing.tg&&Object.keys(existing.tg).length){ tgMap=existing.tg; staffList=existing.staff&&existing.staff.length?existing.staff:state.staff; tgFrom='เป้าเดิมของเดือนนี้'; }
     else { tgMap=tgMapOf(state.staff); staffList=state.staff; tgFrom='เป้าปัจจุบัน'; }
-    await postMonth(ym,rows,tgMap,staffList,source);
+    let x; if(xd){ const nd=new Set(byM[ym].map(r=>r[0])); x={}; if(merge&&existing&&existing.x) for(const [d,o] of Object.entries(existing.x)) if(!nd.has(d)) x[d]=o; for(const [d,o] of Object.entries(xd)) if(d.startsWith(ym)) x[d]=o; xCache[ym]=x; }
+    await postMonth(ym,rows,tgMap,staffList,source,x);
     out.push({ym,rows,tgMap,staffList,tgFrom});
   }
   profCache.all=null;
@@ -1941,6 +1959,42 @@ function collectBack(clean){
   clean.intern={}; COMM_CATS.forEach(([k])=>{ const v=$('#boInt_'+k).value; clean.intern[k]=v===''?0:+v; });
 }
 
+
+/* ---------- sales not counted (excluded) ---------- */
+const xCache={}; let exclOpen=false, xLoading=null;
+function exclData(D){
+  const M=D.M, ids=new Set(D.list.map(p=>String(p.id))); internIds().forEach(i=>ids.add(i)); const byO={}; let A=0, B=0, hasX=false;
+  for(const r of state.rows){ if(!r[0].startsWith(M.ym)) continue; const xs=r[KI.xS]; if(xs!=null){ hasX=true; B+=xs; }
+    if(ids.has(String(r[2]))) continue; const a=blank(); for(const k of KEYS) a[k]=r[KI[k]]||0; const t=derive(a,{},M).total; if(t){ byO[r[2]]=(byO[r[2]]||0)+t; A+=t; } }
+  return {A,B,hasX,byO,counted:D.store.total};
+}
+function whoLabel(o){ if(+o===1) return 'System · บิลออนไลน์'; const bo=boList().find(p=>String(p.id)===String(o)); const nm=(bo&&bo.name)||state.names[o]||''; return `${esc(nm||'รหัส '+o)} <span class="muted small">${o}${bo?' · '+esc(bo.pos===INTERN?'นักศึกษา':bo.pos):''}</span>`; }
+function renderExcl(D){
+  const el=$('#exclBox'); if(!el||!D.M.ym) { if(el) el.innerHTML=''; return; }
+  const E=exclData(D), ex=E.A+E.B, bill=E.counted+ex;
+  if(ex<1){ el.innerHTML=''; return; }
+  let h=`<div class="exstrip" id="exToggle" role="button" tabindex="0"><span>🧾</span><span class="muted">ยอดตามบิลทั้งไฟล์ <b>${money(bill)}</b></span><span class="muted">นำมาคิด <b>${money(E.counted)}</b>${D.store.intern?` (รวมยอดนักศึกษา ${money(D.store.intern)})`:''}</span>
+    <span class="expill">ไม่ได้นำมาคิด ${money(ex)} · ${pct(ex/bill,1)}</span><span class="exlink">${exclOpen?'ซ่อน ▴':'ดูรายละเอียด ▾'}</span></div>`;
+  if(exclOpen){
+    const O=Object.entries(E.byO).sort((a,b)=>b[1]-a[1]); const top=O.slice(0,8), rest=O.slice(8);
+    const X=xCache[D.M.ym]; const sub={}; if(X) for(const o of Object.values(X)) for(const [k,v] of Object.entries(o)) sub[k]=(sub[k]||0)+v;
+    const S=Object.entries(sub).filter(x=>Math.abs(x[1])>=1).sort((a,b)=>b[1]-a[1]);
+    h+=`<div class="expanel"><div class="exgrid">
+      <div><div class="exh">ขายโดยรหัสที่ไม่อยู่ในรายชื่อเซล <b class="num">${fmt(E.A)}</b></div><div class="muted small">ไม่นับเข้ายอดร้าน เช่น บิลออนไลน์ หลังบ้าน (นักศึกษานับเข้ายอดร้านแล้ว)</div>
+        ${top.map(([o,v])=>`<div class="exrow"><span>${whoLabel(o)}</span><b class="num">${fmt(v)}</b></div>`).join('')||'<div class="exrow muted">ไม่มี</div>'}
+        ${rest.length?`<div class="exrow"><span class="muted">อื่นๆ ${rest.length} รหัส</span><b class="num">${fmt(rest.reduce((s,x)=>s+x[1],0))}</b></div>`:''}</div>
+      <div><div class="exh">สินค้าที่ไม่อยู่ใน Category ไหน <b class="num">${E.hasX?fmt(E.B):'–'}</b></div><div class="muted small">Sub Category ที่ยังไม่ได้จัด หรือตั้งใจไม่นับ</div>
+        ${!E.hasX?'<div class="exrow muted small">ข้อมูลเดือนนี้อัปก่อนมีฟีเจอร์นี้ · อัปไฟล์เดือนนี้ใหม่ 1 ครั้งเพื่อดูส่วนนี้</div>'
+          :!X?(xLoading===D.M.ym?'<div class="exrow muted small">⏳ กำลังโหลด…</div>':'<div class="exrow muted small">ไม่มีรายละเอียด · อัปไฟล์ใหม่เพื่อดูแยกรายสินค้า</div>')
+          :S.slice(0,10).map(([k,v])=>`<div class="exrow"><span>${esc(k)}</span><b class="num">${fmt(v)}</b></div>`).join('')+(S.length>10?`<div class="exrow"><span class="muted">อื่นๆ ${S.length-10} รายการ</span><b class="num">${fmt(S.slice(10).reduce((s,x)=>s+x[1],0))}</b></div>`:'')}
+        ${adminKey&&!viewYm?'<a href="#" class="small" id="exMap">จัด Category ›</a>':''}</div></div></div>`;
+    if(E.hasX&&!X&&xLoading!==D.M.ym){ xLoading=D.M.ym; fetch('/api/history?ym='+D.M.ym,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ xCache[D.M.ym]=(d&&d.x)||{}; }).catch(()=>{ xCache[D.M.ym]={}; }).finally(()=>{ xLoading=null; renderExcl(computeAll()); }); }
+  }
+  el.innerHTML=h;
+  const t=$('#exToggle'); t.onclick=()=>{ exclOpen=!exclOpen; renderExcl(computeAll()); };
+  const m=$('#exMap'); if(m) m.onclick=e=>{ e.preventDefault(); openMapEditor(); };
+}
+
 /* ---------- modals ---------- */
 document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('click',e=>{ if(e.target===s||e.target.closest('[data-close]')) s.classList.remove('on'); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.scrim.on').forEach(s=>s.classList.remove('on')); });
@@ -2058,7 +2112,7 @@ function parseData(aoa){
 function acType(N){ if(/iphone/.test(N)) return 'acIphN'; if(/ipad/.test(N)) return 'acIpdN'; if(/watch/.test(N)) return 'acAwN'; if(/mac/.test(N)) return 'acMacN'; if(/head|airpods|beats/.test(N)) return 'acHpN'; return null; }
 const CHK_B=[['mac','Mac'],['ipad','iPad'],['iphone','iPhone'],['aw','Apple Watch'],['aba','BTB(APPLE)'],['rd','3RD (BTB)'],['service','Service'],['oth','True / ประกัน'],['skip','ไม่นับ (ตั้งใจ)'],['unk','ยังไม่ได้จัด Category']];
 function aggregateRaw(raw,map){
-  const agg={}; const ck={tot:{},all:0,lines:raw.length,unk:{},skip:{}}; CHK_B.forEach(b=>ck.tot[b[0]]=0);
+  const agg={}; const ck={tot:{},all:0,lines:raw.length,unk:{},skip:{},xd:{}}; CHK_B.forEach(b=>ck.tot[b[0]]=0);
   for(const x of raw){ const [d,b,o,F,Hh,M,N,O,D,AP,L,Nraw,PN,Braw,Mraw]=x; const pos=Hh>0;
     const cate=low(map[N]||'');
     const key=d+'|'+b+'|'+o; const a=agg[key]||(agg[key]=[d,b,o].concat(KEYS.map(()=>0)));
@@ -2080,6 +2134,7 @@ function aggregateRaw(raw,map){
     if(cate==='service'){ add('serviceS',Hh); bk=bk||'service'; }
     if(N==='sim extra avd payment'){ add('trueS',Hh); bk=bk||'oth'; }
     if(N==='insurance'){ add('insS',Hh); bk=bk||'oth'; }
+    if(!bk&&Hh){ add('xS',Hh); const xo=ck.xd[d]||(ck.xd[d]={}); const xk=Nraw||'(ว่าง)'; xo[xk]=(xo[xk]||0)+Hh; }
     if(!bk){ const known=N in map; bk=known?'skip':'unk';
       if(Hh){ const g=(known?ck.skip:ck.unk); const e=g[N]||(g[N]={n:Nraw||'(ว่าง)',k:N,c:0,s:0,p:PN,b:Braw,m:Mraw,v:known?map[N]:''}); e.c++; e.s+=Hh; } }
     ck.tot[bk]+=Hh; ck.all+=Hh; }
@@ -2109,7 +2164,7 @@ function renderCheck(el,ck){
 async function recomputeWithMap(){
   if(!lastParsed){ const ok=await save('บันทึกการจัด Category แล้ว · จะใช้กับการอัปโหลดครั้งถัดไป (อัปไฟล์ใหม่เพื่อคำนวณยอดเดิม)'); render(); return ok; }
   try{ const A=aggregateRaw(lastParsed.raw,effMap()); lastCheck=A.check; state.settings.lastCheck=compactCheck(A.check,lastParsed.fname);
-    const stored=await storeUploadedMonths(A.rows,lastParsed.tg,lastParsed.fname,true);
+    const stored=await storeUploadedMonths(A.rows,lastParsed.tg,lastParsed.fname,true,A.check.xd);
     const latest=stored[stored.length-1], curYm=monthInfo().ym; if(!curYm||latest.ym>=curYm){ state.rows=latest.rows; state.updatedAt=Date.now(); }
     const ok=await save('จัด Category และคำนวณยอดใหม่แล้ว'); renderCheck($('#upCheck'),lastCheck); render(); return ok;
   }catch(e){ toast('คำนวณใหม่ไม่สำเร็จ: '+e.message); return false; }
@@ -2135,7 +2190,7 @@ async function handleFile(f){
       if(!rows.length) throw new Error('ไม่พบรายการขายในไฟล์');
       state.names={...state.names,...names};
       status('busy','⏳ กำลังบันทึกประวัติรายเดือน…');
-      const stored=await storeUploadedMonths(rows,tg,f.name,$('#mergeChk').checked);
+      const stored=await storeUploadedMonths(rows,tg,f.name,$('#mergeChk').checked,lastCheck?lastCheck.xd:null);
       const curYm=monthInfo().ym; const latest=stored[stored.length-1];
       if(!state.rows.length||!curYm||latest.ym>=curYm){ state.rows=latest.rows; state.source=f.name; state.updatedAt=Date.now(); upd=true;
         if(tg){ applyTG(tg); } }
