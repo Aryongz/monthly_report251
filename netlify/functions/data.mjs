@@ -168,7 +168,7 @@ export default async (req) => {
     if (!YM.test(ym)) return json({ error: "bad ym" }, 400);
     const m = await getJ(`mrows-${ym}`, null);
     if (!m) return json({ error: "not found" }, 404);
-    return json({ ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [] });
+    return json({ ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [], x: m.x || null });
   }
 
   /* ---------------- everything below needs a signed-in caller ---------------- */
@@ -193,7 +193,14 @@ export default async (req) => {
       const idx = await getJ("months-index", []);
       for (const m of b.months) {
         if (!m || !YM.test(m.ym) || !Array.isArray(m.rows) || !m.summary) return json({ error: "bad month" }, 400);
-        await store.setJSON(`mrows-${m.ym}`, { ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [], source: m.source || "", updatedAt: Date.now() });
+        let x = m.x;
+        if (x === undefined) { const old = await getJ(`mrows-${m.ym}`, null); x = (old && old.x) || null; }
+        if (x && typeof x === "object") { const cx = {}; let n = 0;
+          for (const [d, o] of Object.entries(x)) { if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !o || typeof o !== "object") continue; const co = {};
+            for (const [k, v] of Object.entries(o)) { if (++n > 20000) break; const nv = Number(v); if (isFinite(nv)) co[String(k).slice(0, 80)] = Math.round(nv * 100) / 100; }
+            cx[d] = co; }
+          x = cx; } else x = null;
+        await store.setJSON(`mrows-${m.ym}`, { ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [], source: m.source || "", x, updatedAt: Date.now() });
         await store.setJSON(`msum-${m.ym}`, m.summary);
         const e = { ym: m.ym, last: m.summary.last, dim: m.summary.dim, source: m.source || "", updatedAt: Date.now(), n: Object.keys(m.summary.staff || {}).length, sv: m.summary.sv || 1 };
         const i = idx.findIndex((x) => x.ym === m.ym); if (i >= 0) idx[i] = e; else idx.push(e);
