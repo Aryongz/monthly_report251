@@ -350,7 +350,8 @@ export default async (req) => {
       roster.months[ym] = clean;
     }
     const meta = b.meta && typeof b.meta === "object" ? b.meta : {};
-    roster.meta = { at: Date.now(), by: w.name, source: String(meta.source || "").slice(0, 200), tabs: Array.isArray(meta.tabs) ? meta.tabs.slice(0, 24).map((t) => String(t).slice(0, 40)) : [], warn: Array.isArray(meta.warn) ? meta.warn.slice(0, 40).map((t) => String(t).slice(0, 200)) : [] };
+    roster.meta = { at: Date.now(), by: w.name, source: String(meta.source || "").slice(0, 200), tabs: Array.isArray(meta.tabs) ? meta.tabs.slice(0, 24).map((t) => String(t).slice(0, 40)) : [], warn: Array.isArray(meta.warn) ? meta.warn.slice(0, 40).map((t) => String(t).slice(0, 200)) : [],
+      order: { ...((roster.meta && roster.meta.order) || {}), ...Object.fromEntries(Object.entries(meta.order && typeof meta.order === "object" ? meta.order : {}).filter(([ym, a]) => YM.test(ym) && Array.isArray(a)).slice(0, 24).map(([ym, a]) => [ym, a.slice(0, 300).map((x) => String(x).replace(/\D/g, "").slice(0, 12))])) } };
     await store.setJSON("roster", roster);
     return json({ ok: true, meta: roster.meta });
   }
