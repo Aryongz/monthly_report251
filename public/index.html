@@ -204,6 +204,29 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
+.rpbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 10px}
+.rpfrom{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--text-secondary)}
+.rpsum{font-size:12.5px;color:var(--text-secondary);margin-left:auto}
+.rpwrap{margin:0}
+.rptbl{border-collapse:separate;border-spacing:2px;font-size:11.5px;min-width:100%}
+.rptbl th{font-weight:600;color:var(--text-muted);padding:2px 0;min-width:26px;text-align:center}
+.rptbl th.we{color:var(--s1)}
+.rptbl .nm{position:sticky;left:0;background:var(--surface-1);z-index:1;white-space:nowrap;padding-right:8px;font-size:12.5px;min-width:90px}
+.rptbl td.rc{height:26px;text-align:center;border-radius:6px;background:var(--surface-2);font-weight:600;cursor:default}
+.rptbl td.rc.rk-m{background:#fde7b0;color:#7a5200}.rptbl td.rc.rk-a{background:#cfe1fb;color:#1d4f91}.rptbl td.rc.rk-f{background:#dff1e4;color:#256b3a}
+.rptbl td.rc.rk-o{background:var(--surface-2);color:var(--text-muted)}.rptbl td.rc.rk-all{background:#e6dcf7;color:#4b2f84}.rptbl td.rc.rk-w{background:#eee;color:#555}
+.rptbl td.rc.lk{background-image:repeating-linear-gradient(135deg,transparent 0 4px,rgba(0,0,0,.07) 4px 6px)}
+.rptbl td.rc.bad{box-shadow:0 0 0 2px var(--bad) inset}
+#rpBox td.rc:not(.lk){cursor:pointer}
+.rptbl tfoot td{text-align:center;color:var(--text-secondary);font-size:11px}
+.rptbl tfoot td.short{color:var(--bad);font-weight:700;background:var(--bad-soft);border-radius:5px}
+.stafftbl td.far{background:#fff4cc}
+
+.expill.cn{background:var(--bad-soft);color:var(--bad)}
+.cnbadge{margin-top:10px}
+.cnpill{border:0;background:var(--bad-soft);color:var(--bad);border-radius:99px;padding:4px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.cndet{margin-top:8px;max-width:520px;background:var(--surface-2);border-radius:10px;padding:8px 12px}
+
 .dayback{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--surface-1);border:1px solid var(--s1);border-radius:12px;padding:10px 14px;margin-bottom:12px;position:sticky;top:8px;z-index:5}
 tr.focusrow td{background:color-mix(in srgb,var(--s1) 14%,transparent)!important}
 .attbox.clk{cursor:pointer;transition:box-shadow .15s}.attbox.clk:hover{box-shadow:0 0 0 1.5px var(--s1) inset}
@@ -712,7 +735,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
 const BASE=JSON.parse(document.getElementById('baseline').textContent);
 const DEFAULT_MAP=BASE.map;
 const KEYS=['macU','macS','ipadU','ipadS','iphoneU','iphoneS','awU','awS','smileU','simU','ufundU','pvlU','acU','pencilU','airpodsU','abaS','rdS','serviceS','trueS','insS',
-  'smileN','acIphN','acIpdN','acAwN','acMacN','acHpN','xS']; /* xS = bill sales not counted in any Category */ /* *N = net pieces after returns (for commission) — older rows don't have them */
+  'smileN','acIphN','acIpdN','acAwN','acMacN','acHpN','xS','cnS']; /* cnS = credit-note amount deducted (positive) */ /* xS = bill sales not counted in any Category */ /* *N = net pieces after returns (for commission) — older rows don't have them */
 const KI=Object.fromEntries(KEYS.map((k,i)=>[k,i+3]));
 const CATS=[
   {k:'mac',l:'Mac',a:'macS'},{k:'ipad',l:'iPad',a:'ipadS'},{k:'iphone',l:'iPhone',a:'iphoneS'},
@@ -836,6 +859,9 @@ async function viewMonth(ym){
 
 /* ---------- render ---------- */
 let sortKey='ac', sortDir=-1, q='';
+/* scroll a horizontal strip so the chip is centred — never moves the page itself */
+function centerX(box,el){ if(!box||!el) return; let c=box; while(c&&c!==document.body&&c.scrollWidth<=c.clientWidth+1) c=c.parentElement; if(!c||c===document.body) return;
+  const br=c.getBoundingClientRect(), er=el.getBoundingClientRect(); c.scrollLeft+=er.left-br.left-(c.clientWidth-er.width)/2; }
 function render(){
   if(viewYm&&route().v==='profile'){ restoreLive(); renderMonthSel(); }
   const D=computeAll(), {M}=D, R=route();
@@ -974,7 +1000,7 @@ function renderDay(D,date,focus){
   $('#dayStrip').innerHTML=strip;
   const fs=focus?'~'+focus:'';
   $('#dayStrip').querySelectorAll('[data-d]').forEach(el=>el.onclick=()=>{ location.hash='d-'+el.dataset.d+fs; });
-  const on=$('#dayStrip .dchip.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
+  const on=$('#dayStrip .dchip.on'); if(on) centerX($('#dayStrip'),on);
   const sorted=[...daysWithData].sort(); const ix=sorted.indexOf(date);
   $('#dPrev').disabled=ix<=0; $('#dNext').disabled=ix<0||ix>=sorted.length-1;
   $('#dPrev').onclick=()=>{ if(ix>0) location.hash='d-'+sorted[ix-1]+fs; }; $('#dNext').onclick=()=>{ if(ix<sorted.length-1) location.hash='d-'+sorted[ix+1]+fs; };
@@ -1031,7 +1057,7 @@ function renderPeople(D,id){
   const p=list.find(x=>x.id==id);
   if(!p){ $('#personBody').innerHTML=`<div class="card sec empty" style="padding:40px">👆 เลือกชื่อของคุณด้านบน เพื่อดูยอดและวางแผนปิดเป้า<br><span class="localnote">ลิงก์หน้าส่วนตัวจะเป็น …/#s&lt;รหัสพนักงาน&gt; บุ๊กมาร์กไว้ได้</span></div>`; return; }
   LS.set('mt_last',p.id);
-  const sel=$('#picker .pk.on'); if(sel) sel.scrollIntoView({block:'nearest',inline:'center'});
+  const sel=$('#picker .pk.on'); if(sel) centerX($('#picker'),sel);
   const G=goalOf(p.id);
   const gp=c=> (G.per[c.k]!=null? G.per[c.k] : G.all)/100;
   const rows=CATS.map(c=>{ const t=+p.tg[c.k]||0, a=p.a[c.a], ac=t?a/t:0, fc=a*p.fcf, fcp=t?fc/t:0, g=gp(c), nt=t*g, need=nt-a, pd=M.remain?need/M.remain:need; return {c,t,a,ac,fc,fcp,g,nt,need,pd}; });
@@ -1045,7 +1071,7 @@ function renderPeople(D,id){
     ${avatar(p,'xl')}
     <div><h2>${esc(p.name)}</h2><div class="meta2">${esc(p.id)} · ${esc(p.pos||'')} · อันดับ ${p.rank} จาก ${list.length} (ตาม % ยอดเทียบเป้า)</div>
       <div style="margin-top:12px;max-width:520px">${track(tot.ac,tot.fcp,M.pace)}</div>
-      <div class="meta2" style="margin-top:24px">ยอด 6 Category <b class="num" style="color:var(--text-primary)">${fmt(tot.a)}</b> / เป้า ${fmt(tot.t)} บาท · FC สิ้นเดือน ${pct(tot.fcp,0)}</div></div>
+      <div class="meta2" style="margin-top:24px">ยอด 6 Category <b class="num" style="color:var(--text-primary)">${fmt(tot.a)}</b> / เป้า ${fmt(tot.t)} บาท · FC สิ้นเดือน ${pct(tot.fcp,0)}</div>${cnBadge(p,M)}</div>
     <div class="ring"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="10"/><circle cx="55" cy="55" r="${R}" fill="none" stroke="${ringCol}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-Math.min(p.ac,1))}"/></svg><div class="c"><div><b class="num">${pct(p.ac,0)}</b><span>ทำได้แล้ว</span></div></div></div>
   </section>
   <section class="card goalbar" style="margin-top:12px">
@@ -1095,6 +1121,7 @@ function renderPeople(D,id){
   $('#personBody').querySelectorAll('tbody .pctin, .planCards .pctin').forEach(w=>{ const k=w.querySelector('input').dataset.k;
     w.querySelector('input').onchange=e=>upd(g=>{ g.per[k]=Math.max(0,+e.target.value||0); });
     w.querySelectorAll('button').forEach(b=>b.onclick=()=>upd(g=>{ const cur=g.per[k]!=null?g.per[k]:g.all; g.per[k]=Math.max(0,cur+(+b.dataset.d)); })); });
+  const ct=$('#cnToggle'); if(ct) ct.onclick=()=>{ const d=$('#cnDet'); d.hidden=!d.hidden; };
   $('#personBody').querySelectorAll('.attbox[data-att]').forEach(b=>b.onclick=()=>openAttDrill(b.dataset.att,p.id));
   const note=$('#note'); let nt; note.oninput=()=>{ clearTimeout(nt); nt=setTimeout(()=>LS.set('mt_note_'+p.id,note.value),300); };
 }
@@ -1341,6 +1368,7 @@ function personShiftCal(id){
     <div class="muted small" style="margin-top:8px">${ymLong(ym)}: หยุด ${c.off} วัน · ลา ${c.leave} วัน · ขาด ${c.absent} วัน</div></section>`;
 }
 function bindShifts(){
+  bindPlanner();
   document.querySelectorAll('#shMonths button').forEach(b=>b.onclick=()=>{ shiftYm=b.dataset.ym; render(); });
   const rp=$('#rosterPull'); if(rp) rp.onclick=async()=>{ rp.disabled=true; rp.textContent='⏳ กำลังดึง…'; try{ const R=await syncRoster(); toast('ดึงตารางงานแล้ว: '+R.tabs.join(', ')); }catch(e){ toast('ดึงตารางงานไม่สำเร็จ: '+e.message); rp.disabled=false; rp.textContent='↻ ดึงตารางงานล่าสุด'; } };
   if(!isMgrRole()) return;
@@ -1418,6 +1446,7 @@ function mgrOverview(D){
     ${flagged.length?flagged.map(r=>`<div class="warnrow" data-id="${r.p.id}">${avatar(r.p)}<div style="flex:1"><b>${esc(r.p.name)}</b> <span class="muted small">${esc(r.p.id)}</span><div class="chips2">${r.w.map(x=>`<span class="chip ${x.c}">${x.t}</span>`).join('')}</div></div><span class="muted">เปิดแฟ้ม ›</span></div>`).join(''):'<div class="empty" style="padding:16px">✓ ไม่มีสัญญาณเตือนในตอนนี้</div>'}
   </section>
   ${teamShiftGrid()}
+  ${rosterPlanner()}
   ${mgrCommTable(rows)}
   <section class="card sec" style="margin-top:12px">
     <div class="sechead"><div><h2>โปรไฟล์พนักงานทั้งหมด</h2><div class="hint">OVR = คะแนนเฉลี่ย 6 ด้านในช่วง ${profPeriod>=99?'ทั้งหมด':profPeriod+' เดือนล่าสุด'} · คลิกเพื่อเปิดแฟ้ม</div></div>
@@ -1702,7 +1731,7 @@ function tabYm(name){
   return `${y}-${String(mo).padStart(2,'0')}`;
 }
 function parseRoster(wb,cfg){
-  const S=codeSets(cfg), out={months:{},tabs:[],warn:[]}; const unknownCodes=new Map(); const staffIds=new Set(state.staff.map(p=>String(p.id)));
+  const S=codeSets(cfg), out={months:{},tabs:[],warn:[],order:{}}; const unknownCodes=new Map(); const staffIds=new Set(state.staff.map(p=>String(p.id)));
   for(const sn of wb.SheetNames){
     let ym=tabYm(sn); if(cfg.tab&&sn.trim()===String(cfg.tab).trim()) ym=liveYm()||monthInfo().ym; if(!ym) continue;
     const a=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,blankrows:true,defval:null,raw:true});
@@ -1717,7 +1746,7 @@ function parseRoster(wb,cfg){
       const days={}; for(const [col,d] of Object.entries(dayCols)){ const code=r[col]; const st=classifyCode(code,S); if(st==null) continue; const cs=String(code).trim().slice(0,12);
         if(st==='?'){ const k=cs.toUpperCase(); unknownCodes.set(k,(unknownCodes.get(k)||0)+1); days[String(d)]=['',cs]; } else days[String(d)]=[st,cs]; }
       mm[sid]=days; }
-    out.months[ym]=mm; out.tabs.push(`${sn} → ${ymLabel(ym)}`);
+    out.months[ym]=mm; out.order[ym]=[...seen]; out.tabs.push(`${sn} → ${ymLabel(ym)}`);
     if(dups.size) out.warn.push(`แท็บ "${sn}": รหัสซ้ำ ${[...dups].join(', ')} (ใช้แถวแรก)`);
     if(ym===(liveYm()||monthInfo().ym)){ const miss=state.staff.filter(p=>!mm[String(p.id)]).map(p=>p.name); if(miss.length) out.warn.push(`แท็บ "${sn}": ไม่พบในตารางงาน — ${miss.join(', ')}`); }
   }
@@ -1730,7 +1759,7 @@ async function syncRoster(buf,cfg){
     const r=await api('roster/sheet?id='+encodeURIComponent(id),{raw:true}); buf=await r.arrayBuffer(); }
   await loadXLSX(); const wb=XLSX.read(buf,{type:'array'});
   const R=parseRoster(wb,cfg); if(!R.tabs.length) throw new Error('ไม่พบแท็บของเดือน (ตั้งชื่อแท็บแบบ "Nov 26" หรือใส่ชื่อแท็บในหน้าตั้งค่า)'+(R.warn.length?' · '+R.warn.join(' · '):''));
-  await api('roster',{method:'POST',body:{months:R.months,meta:{source:cfg._file?'ไฟล์ Excel':'Google Sheet',tabs:R.tabs,warn:R.warn}}});
+  await api('roster',{method:'POST',body:{months:R.months,meta:{source:cfg._file?'ไฟล์ Excel':'Google Sheet',tabs:R.tabs,warn:R.warn,order:R.order}}});
   profCache.all=null; if(isMgrRole()) loadProfiles(true);
   return R;
 }
@@ -1976,21 +2005,257 @@ function collectBack(clean){
 }
 
 
+
+/* =====================================================================
+   CREDIT NOTES (ลดหนี้) — matched to the original sale line by Sell ID + product code,
+   deducted from the original seller on the original sale date, re-applied on every sales upload
+   ===================================================================== */
+function findCNSheet(wb){
+  for(const n of wb.SheetNames){ const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,blankrows:false,defval:null,raw:true}); const h=(a[0]||[]).map(x=>String(x==null?'':x).trim());
+    if(h.includes('Sell ID')&&h.includes('Return Number')&&h.includes('Total Price')&&h.includes('Product')) return a; }
+  return null;
+}
+function parseCN(aoa){
+  const H=aoa[0].map(x=>String(x==null?'':x).trim()), ix=k=>H.indexOf(k);
+  const c={doc:ix('Doc Ref'),dt:ix('Doc Date'),sid:ix('Sell ID'),sb:ix('Sell Bill'),pc:ix('Product'),q:ix('Return Number'),a:ix('Total Price'),cm:ix('Comment'),br:ix('Branch (ID)')};
+  const out=[], occ={};
+  for(let i=1;i<aoa.length;i++){ const r=aoa[i]; if(r[c.sid]==null||r[c.pc]==null) continue; const dt=parseDate(r[c.dt]); if(!dt) continue;
+    const doc=String(r[c.doc]==null?'':r[c.doc]).trim(), pc=String(r[c.pc]).trim(); const k0=doc+'|'+pc; occ[k0]=(occ[k0]||0)+1;
+    out.push({k:k0+'|'+occ[k0],doc,dt,sid:String(r[c.sid]).trim(),sb:String(r[c.sb]==null?'':r[c.sb]).trim(),pc,q:num(r[c.q])||1,a:num(r[c.a]),cm:String(r[c.cm]==null?'':r[c.cm]).replace(/^[-\s]+$/,'').trim().slice(0,60),br:c.br>=0?Math.round(num(r[c.br])):0}); }
+  return out;
+}
+function applyCN(raw){
+  const lines=state.cn||[], res={...(state.cnMatch||{})}, negs=[];
+  if(!lines.length) return {negs,res};
+  const dates=new Set(raw.map(x=>x[0])); const bc={}; raw.forEach(x=>bc[x[1]]=(bc[x[1]]||0)+1);
+  const fileBr=+Object.keys(bc).sort((a,b)=>bc[b]-bc[a])[0]||0;
+  const idx=new Map(); raw.forEach((x,j)=>{ if(!x[15]) return; const k=x[15]+'|'+x[8]; if(!idx.has(k)) idx.set(k,[]); idx.get(k).push(j); });
+  const used=new Set();
+  for(const c of lines){
+    const j=(idx.get(c.sid+'|'+c.pc)||[]).find(j=>!used.has(j));
+    if(j!=null){ used.add(j); const x=raw[j]; const n=x.slice(0,15); n[3]=-c.q; n[4]=-c.a; n.push(x[15],true,x[4]>0,c.k); negs.push(n);
+      res[c.k]={st:'ok',sd:x[0],o:x[2],b:x[1],a:c.a,q:c.q,doc:c.doc,dt:c.dt,cm:c.cm,pn:x[12]}; continue; }
+    const prev=res[c.k]; if(prev&&prev.st==='ok'&&!dates.has(prev.sd)) continue;   // matched on an earlier upload; its row is kept
+    const bsuf=+((c.sb.match(/-(\d+)$/)||[])[1]||0);
+    res[c.k]={st:(bsuf&&fileBr&&bsuf!==fileBr)?'branch':'prev',br:bsuf,a:c.a,q:c.q,doc:c.doc,dt:c.dt,cm:c.cm,sb:c.sb};
+  }
+  return {negs,res};
+}
+async function handleCN(aoa,fname){
+  const L=parseCN(aoa); if(!L.length) throw new Error('ไม่พบรายการในไฟล์ลดหนี้');
+  const have=new Set((state.cn||[]).map(c=>c.k)); let added=0;
+  const keep=(state.cn||[]).filter(c=>c.dt>=ymShift(monthInfo().ym||L[0].dt.slice(0,7),-3)+'-01');
+  for(const c of L) if(!have.has(c.k)){ keep.push(c); added++; } else { const i=keep.findIndex(x=>x.k===c.k); if(i>=0) keep[i]=c; }
+  state.cn=keep;
+  let msg=`อ่านใบลดหนี้ ${new Set(L.map(c=>c.doc)).size} ใบ (${L.length} บรรทัด) · ใหม่ ${added} บรรทัด`;
+  if(lastParsed){ status('busy','⏳ กำลังจับคู่ใบลดหนี้กับบิลขาย…'); await recomputeWithMap(); msg+=' · หักจากบิลขายที่เพิ่งอัปแล้ว'; }
+  else { await save(); msg+=' · จะหักให้อัตโนมัติตอนอัปไฟล์ยอดขายครั้งถัดไป'; }
+  status('ok','✓ '+msg); $('#upCheck').innerHTML=cnReportHTML(true); render();
+}
+function ymShift(ym,n){ const [y,m]=ym.split('-').map(Number); const d=new Date(Date.UTC(y,m-1+n,1)); return d.toISOString().slice(0,7); }
+const CN_BK={mac:'Mac',ipad:'iPad',iphone:'iPhone',aw:'Apple Watch',aba:'BTB(APPLE)',rd:'3RD',service:'Service',oth:'True/ประกัน',cp:'Cover+',skip:'ไม่นับ',unk:'ไม่นับ'};
+const CN_SIX=new Set(['mac','ipad','iphone','aw','aba','rd']);
+function cnPersonName(o,pub){ const bo=boList().find(p=>String(p.id)===String(o)); if(bo&&bo.pos===INTERN) return pub?'นักศึกษา':esc(bo.name)+' <span class="muted small">(นักศึกษา)</span>'; const st=state.staff.find(p=>String(p.id)===String(o)); return esc((st&&st.name)||(bo&&bo.name)||state.names[o]||('รหัส '+o)); }
+function cnFor(ym){ const M=state.cnMatch||{}; const lines=state.cn||[]; const ok=[], un=[], pend=[];
+  for(const c of lines){ const r=M[c.k]; if(!r){ if(!ym||c.dt.startsWith(ym)) pend.push(c); continue; }
+    if(r.st==='ok'){ if(!ym||r.sd.startsWith(ym)) ok.push({...r,k:c.k}); } else if(!ym||c.dt.startsWith(ym)) un.push({...r,k:c.k}); }
+  return {ok,un,pend}; }
+function cnBySeller(ok,pub){ const g={}; for(const r of ok){ const key=pub&&internIds().has(String(r.o))?'intern':String(r.o); const e=g[key]||(g[key]={o:r.o,six:0,cp:0,oth:0,docs:new Set(),cats:{}}); const bk=r.bk||'skip';
+    if(CN_SIX.has(bk)) e.six+=r.a; else if(bk==='cp') e.cp+=r.a; else e.oth+=r.a; e.docs.add(r.doc); e.cats[bk]=(e.cats[bk]||0)+1; }
+  return Object.values(g).sort((a,b)=>(b.six+b.cp+b.oth)-(a.six+a.cp+a.oth)); }
+function cnReportHTML(admin){
+  const ym=monthInfo().ym; const {ok,un,pend}=cnFor(null);
+  const okA=ok.reduce((s,r)=>s+r.a,0), unA=un.reduce((s,r)=>s+r.a,0), docs=new Set([...ok,...un,...pend].map(r=>r.doc)).size;
+  const S=cnBySeller(ok,false);
+  return `<div class="chk-rep"><div class="h4" style="margin-top:14px">🧾 รายงานใบลดหนี้</div>
+    <div class="chk-grid"><div class="chk-b"><span>ใบลดหนี้ทั้งหมด</span><b class="num">${docs} ใบ</b></div>
+      <div class="chk-b bad"><span>หักจากคนขายเดิม</span><b class="num">${new Set(ok.map(r=>r.doc)).size} ใบ · ${fmt(okA)}</b></div>
+      <div class="chk-b muted"><span>ยอดย้อนหลังเดือนก่อน (ไม่หัก)</span><b class="num">${new Set(un.map(r=>r.doc)).size} ใบ · ${fmt(unA)}</b></div>
+      ${pend.length?`<div class="chk-b"><span>รอหัก (อัปยอดขายครั้งถัดไป)</span><b class="num">${pend.length} บรรทัด</b></div>`:''}</div>
+    ${S.length?`<div class="tablewrap" style="margin:6px 0 0"><table class="stafftbl" style="min-width:560px"><thead><tr><th class="l">คนขายเดิม</th><th class="l">Category</th><th>6 Category</th><th>Cover+</th><th>อื่นๆ</th></tr></thead><tbody>
+      ${S.map(e=>`<tr style="cursor:default"><td class="l"><b>${cnPersonName(e.o,false)}</b> <span class="muted small">${e.docs.size} ใบ</span></td><td class="l small">${Object.entries(e.cats).map(([k,n])=>`${CN_BK[k]||k} ${n}`).join(' · ')}</td><td class="num st b">${e.six?'−'+fmt(e.six):'–'}</td><td class="num st b">${e.cp?'−'+fmt(e.cp):'–'}</td><td class="num muted">${e.oth?'−'+fmt(e.oth):'–'}</td></tr>`).join('')}
+      </tbody><tfoot><tr><td class="l" colspan="2">รวม</td><td class="num">−${fmt(S.reduce((s,e)=>s+e.six,0))}</td><td class="num">−${fmt(S.reduce((s,e)=>s+e.cp,0))}</td><td class="num">−${fmt(S.reduce((s,e)=>s+e.oth,0))}</td></tr></tfoot></table></div>`:''}
+    ${un.length?`<details style="margin-top:8px"><summary class="muted small">ไม่ได้หัก ${new Set(un.map(r=>r.doc)).size} ใบ (บิลเดือนก่อน / สาขาอื่น)</summary><div class="small" style="margin-top:6px">${[...new Map(un.map(r=>[r.doc,r])).values()].map(r=>`<div class="exrow"><span>${esc(r.doc)} · ${thDate(r.dt)} · บิล ${esc(r.sb||'')} <span class="muted">${r.st==='branch'?'บิลสาขา '+r.br:'บิลเดือนก่อน'}</span></span><b class="num">${fmt(un.filter(x=>x.doc===r.doc).reduce((s,x)=>s+x.a,0))}</b></div>`).join('')}</div></details>`:''}
+    ${admin?'<div class="muted small" style="margin-top:6px">ถ้าบิลเดิมเป็นของเดือนนี้แต่ขึ้นว่า "บิลเดือนก่อน" ให้อัปไฟล์ยอดขายทั้งเดือน (ไม่ใช่เฉพาะวันนี้) ระบบจะจับคู่ให้</div>':''}</div>`;
+}
+function cnBadge(p,M){
+  const {ok}=cnFor(M.ym); const mine=ok.filter(r=>String(r.o)===String(p.id)); if(!mine.length) return '';
+  const six=mine.filter(r=>CN_SIX.has(r.bk)).reduce((s,r)=>s+r.a,0), cp=mine.filter(r=>r.bk==='cp').reduce((s,r)=>s+r.a,0), docs=[...new Set(mine.map(r=>r.doc))];
+  return `<div class="cnbadge"><button class="cnpill" id="cnToggle">🧾 ลดหนี้ ${docs.length} ใบ${six?` · 6 Category −${fmt(six)}`:''}${cp?` · Cover+ −${fmt(cp)}`:''} ▾</button>
+    <div class="cndet" id="cnDet" hidden><div class="muted small" style="margin-bottom:4px">ยอดด้านบนหักลดหนี้แล้ว · หักในวันที่ขายเดิม</div>${docs.map(d=>{ const L=mine.filter(r=>r.doc===d); const r0=L[0];
+      return `<div class="exrow"><span>${thDate(r0.sd)} · ${[...new Set(L.map(r=>CN_BK[r.bk]||r.bk))].filter(x=>x!=='ไม่นับ').join(' + ')||'สินค้าอื่น'} <span class="muted small">ลดหนี้ ${thDate(r0.dt)}${r0.cm?' · '+esc(r0.cm):''}</span></span><b class="num st b">−${fmt(L.reduce((s,r)=>s+r.a,0))}</b></div>`; }).join('')}</div></div>`;
+}
+
+/* =====================================================================
+   PIA ROSTER — rule checker + automatic planner
+   Rules (store): weekday morning 3 / afternoon ≥6, rest shift 4;
+   Sat–Sun morning 4–5 / shift 4 2–3 / afternoon ≥7; 2 key holders (🔑 = opens next
+   morning, must be on afternoon the day before); day before a day off = morning when
+   possible; no afternoon streak over 4 (target ≤3). PIA only.
+   ===================================================================== */
+const RS_OFF=new Set(['H','F','V','L','EV','MT/H','AT/H','MT/L','AT/L']);
+const RS_EDIT=['2','8','4','🔑'];
+function rsKind(c){ c=String(c||'').toUpperCase(); if(c==='2'||c==='🔑') return 'M'; if(c==='8'||c==='MT'||c==='AT') return 'A'; if(c==='4') return 'F'; if(c==='53') return 'ALL'; if(!c) return ''; if(RS_OFF.has(c)) return 'OFF'; if(/^\d+$/.test(c)) return 'F'; return 'W'; }
+function rsLocked(c){ c=String(c||'').toUpperCase(); return !!c && !RS_EDIT.includes(c); }
+function rsIds(){ return state.staff.map(p=>String(p.id)); }
+function rsOrder(ym){ const ord=(((profCache.all&&profCache.all.rosterMeta)||{}).order||{})[ym]; const ids=rsIds(); return ord? ord.filter(i=>ids.includes(String(i))).map(String).concat(ids.filter(i=>!ord.map(String).includes(i))) : ids; }
+function rsSheet(ym){ const o={}; for(const id of rsIds()){ const R=rosterOf(ym,id), Mn=manualOf(ym,id), d={};
+    for(const [k,v] of Object.entries(R)) if(v&&v[1]) d[+k]=String(v[1]).trim().toUpperCase()==='🔑'?'🔑':String(v[1]).trim().toUpperCase();
+    for(const [k,st] of Object.entries(Mn)){ if(st==='off') d[+k]='H'; else if(st==='leave') d[+k]='L'; }
+    o[id]=d; } return o; }
+function rsWeekend(ym,d){ const [y,m]=ym.split('-').map(Number); const w=new Date(Date.UTC(y,m-1,d)).getUTCDay(); return w===0||w===6; }
+
+function rsCheck(ym,S){
+  const N=dimOf(ym), ids=rsOrder(ym), days=[];
+  for(let d=1;d<=N;d++){ const we=rsWeekend(ym,d); const c={M:0,A:0,F:0,OFF:0,ALL:0,key:0};
+    ids.forEach(i=>{ const code=S[i][d]||''; const k=rsKind(code); if(c[k]!=null) c[k]++; if(code==='🔑') c.key++; });
+    const iss=[]; if(!c.ALL){ const nm=we?4:3, na=we?7:6; if(c.M<nm) iss.push(`เช้า ${c.M}/${nm}`); if(c.A<na) iss.push(`บ่าย ${c.A}/${na}`); if(we&&c.M>5) iss.push(`เช้าเกิน ${c.M}/5`); if(d>1&&c.key!==2) iss.push(`🔑 ${c.key}/2`); }
+    days.push({d,we,c,iss}); }
+  const per={}; const keys=[];
+  for(const i of ids){ const s=S[i]; const p={M:0,A:0,F:0,key:0,we:0,weM:0,off:0,pre:[],preX:0,streak:0,keyBad:[]}; let st=0;
+    for(let d=1;d<=N;d++){ const c=s[d]||'', k=rsKind(c);
+      if(k==='M'||k==='A'||k==='F') p[k]++; if(c==='🔑') p.key++; if(k==='OFF') p.off++; if(k==='M'&&rsWeekend(ym,d)) p.weM++;
+      if(rsWeekend(ym,d)&&k&&k!=='OFF') p.we++;
+      if(c==='🔑'&&d>1){ const pk=rsKind(s[d-1]); if(pk!=='A'&&pk!=='ALL') p.keyBad.push(d); }
+      if(d<N&&RS_OFF.has(String(s[d+1]||'').toUpperCase())&&k!=='M'&&k!=='OFF'&&k){ if(rsLocked(c)) p.preX++; else p.pre.push(d); }
+      st=k==='A'?st+1:0; p.streak=Math.max(p.streak,st); }
+    per[i]=p; keys.push(p.key); }
+  const avg=k=>ids.reduce((s,i)=>s+per[i][k],0)/Math.max(ids.length,1);
+  const weMs=ids.map(i=>per[i].weM);
+  return {days,per,ids,avg:{M:avg('M'),A:avg('A'),key:avg('key'),we:avg('we'),weM:avg('weM')},
+    sum:{dayBad:days.filter(x=>x.iss.length).length,pre:ids.reduce((s,i)=>s+per[i].pre.length,0),keyBad:ids.reduce((s,i)=>s+per[i].keyBad.length,0),streak:ids.filter(i=>per[i].streak>4).length,keyMin:Math.min(...keys),keyMax:Math.max(...keys),weMMin:Math.min(...weMs),weMMax:Math.max(...weMs)}};
+}
+
+function rsSolve(ym,base,fromDay,seed){
+  let x=seed||1; const rnd=()=>{ x=(x*1103515245+12345)&0x7fffffff; return x/0x7fffffff; };
+  const N=dimOf(ym), ids=rsOrder(ym), S={};
+  for(const i of ids){ S[i]={}; for(let d=1;d<=N;d++){ const c=(base[i]||{})[d]||''; if(d<fromDay||rsLocked(c)) S[i][d]=c; } }
+  const cnt={}, streak={}; ids.forEach(i=>{ cnt[i]={M:0,A:0,F:0,key:0,weM:0}; streak[i]=0; });
+  const tally=d=>ids.forEach(i=>{ const c=S[i][d]||'', k=rsKind(c); streak[i]=k==='A'?streak[i]+1:0; if(cnt[i][k]!=null) cnt[i][k]++; if(c==='🔑') cnt[i].key++; if(k==='M'&&rsWeekend(ym,d)) cnt[i].weM++; });
+  for(let d=1;d<fromDay&&d<=N;d++) tally(d);
+  let keysNext=new Set(fromDay>1?ids.filter(i=>S[i][fromDay]==='🔑'):[]);
+  const free=(i,d)=>d<=N&&!rsLocked(S[i][d]||'')&&!(d<fromDay);
+  const aheadA=(i,d)=>{ let n=0; for(let k=d+1;k<=N&&rsKind(S[i][k])==='A'&&rsLocked(S[i][k]);k++) n++; return n; };
+  const longA=(i,d)=>streak[i]+1+aheadA(i,d)>3;
+  /* weekend-morning fairness: fair share T, and mornings still "owed" by the morning-before-day-off rule */
+  const weDays=[]; for(let d=1;d<=N;d++) if(rsWeekend(ym,d)&&!ids.some(i=>S[i][d]==='53')) weDays.push(d);
+  const T=Math.ceil(weDays.length*4/Math.max(ids.length,1));
+  const futPre=(i,d)=>weDays.filter(x=>x>d&&!S[i][x]&&x<N&&RS_OFF.has(String(S[i][x+1]||'').toUpperCase())).length;
+  const projW=(i,d)=>cnt[i].weM+futPre(i,d);   /* aim for ≤3 afternoons in a row (hard limit 4) */   /* putting i on afternoon today would make a run over 4 days */
+  for(let d=fromDay;d<=N;d++){
+    const we=rsWeekend(ym,d), avail=ids.filter(i=>!S[i][d]);
+    const allDay=ids.some(i=>S[i][d]==='53');
+    if(allDay){ avail.forEach(i=>S[i][d]='53');
+      const kc=ids.filter(i=>S[i][d]==='53'&&free(i,d+1)).sort((a,b)=>(cnt[a].key-cnt[b].key)||(rnd()-.5)); keysNext=new Set(d<N?kc.slice(0,2):[]); }
+    else{
+      const nM=we?4:3, nA=we?7:6, Mset=new Set(), Aset=new Set(), Fset=new Set();
+      keysNext.forEach(i=>{ if(avail.includes(i)){ S[i][d]='🔑'; Mset.add(i); } });
+      const avgW0=ids.reduce((t,i)=>t+cnt[i].weM,0)/ids.length;
+      /* weekend: someone already ahead on weekend mornings may skip the "morning before a day off" rule (balance comes first) */
+      const preOff=new Set(avail.filter(i=>!Mset.has(i)&&d<N&&RS_OFF.has(String(S[i][d+1]||'').toUpperCase())&&!(we&&cnt[i].weM>=T)));
+      preOff.forEach(i=>Mset.add(i));
+      // tomorrow's key holders: on afternoon today, free tomorrow
+      const tWe=d<N&&rsWeekend(ym,d+1);   /* a 🔑 opening on Sat/Sun is also a weekend morning */
+      const kc=avail.filter(i=>!Mset.has(i)&&free(i,d+1)&&!longA(i,d)).sort((a,b)=>(tWe?(projW(a,d+1)-projW(b,d+1)):0)||(cnt[a].key-cnt[b].key)||(streak[a]-streak[b])||(rnd()-.5));
+      keysNext=new Set(d<N?kc.slice(0,2):[]); keysNext.forEach(i=>Aset.add(i));
+      let rest=avail.filter(i=>!Mset.has(i)&&!Aset.has(i));
+      rest.sort((a,b)=>((longA(b,d)||streak[b]>=3)-(longA(a,d)||streak[a]>=3))||(we?(projW(a,d)-projW(b,d)):0)||(cnt[a].M-cnt[b].M)||(rnd()-.5));
+      while(Mset.size<nM&&rest.length) Mset.add(rest.shift());
+      rest.sort((a,b)=>(longA(a,d)-longA(b,d))||(cnt[a].A-cnt[b].A)||(rnd()-.5));
+      while(Aset.size<nA&&rest.length) Aset.add(rest.shift());
+      // still short on afternoon: relax "morning before a day off" (never the key openers)
+      if(Aset.size<nA){ const can=[...Mset].filter(i=>S[i][d]!=='🔑').sort((a,b)=>(preOff.has(a)-preOff.has(b))||(rnd()-.5));
+        while(Aset.size<nA&&Mset.size>nM&&can.length){ const i=can.shift(); Mset.delete(i); Aset.add(i); } }
+      if(we&&Mset.size>5){ const ex=[...Mset].filter(i=>S[i][d]!=='🔑').sort((a,b)=>(preOff.has(a)-preOff.has(b))||(cnt[b].weM-cnt[a].weM)||(rnd()-.5)); while(Mset.size>5&&ex.length){ const i=ex.shift(); Mset.delete(i); (Fset.size<3?Fset:Aset).add(i); } }
+      if(we){ const avgW=ids.reduce((t,i)=>t+cnt[i].weM,0)/ids.length; rest.sort((a,b)=>(cnt[a].weM-cnt[b].weM)||(rnd()-.5));
+        while(rest.length&&Mset.size<5&&Aset.size>=nA&&cnt[rest[0]].weM<=avgW) Mset.add(rest.shift());
+        rest.sort((a,b)=>(cnt[a].F-cnt[b].F)||(rnd()-.5)); while(rest.length&&Fset.size<2) Fset.add(rest.shift());
+        rest.forEach(i=>{ if(longA(i,d)&&Mset.size<5) Mset.add(i); else if(longA(i,d)&&Fset.size<3) Fset.add(i); else Aset.add(i); }); }
+      else rest.forEach(i=>{ (longA(i,d)?Fset:(Aset.size<nA+1?Aset:Fset)).add(i); });
+      Mset.forEach(i=>{ if(S[i][d]!=='🔑') S[i][d]='2'; }); Aset.forEach(i=>S[i][d]='8'); Fset.forEach(i=>S[i][d]='4');
+    }
+    tally(d);
+  }
+  return S;
+}
+function rsScore(ym,S){ const C=rsCheck(ym,S), s=C.sum; const ms=C.ids.map(i=>C.per[i].M);
+  return s.dayBad*100+s.keyBad*30+s.streak*60+s.pre*6+(s.keyMax-s.keyMin)*8+(s.weMMax-s.weMMin)*15+(Math.max(...ms)-Math.min(...ms))*3; }
+function rsPlan(ym,fromDay){ const base=rsSheet(ym); let best=null;
+  for(let t=1;t<=400;t++){ const S=rsSolve(ym,base,fromDay,t*7919); const sc=rsScore(ym,S); if(!best||sc<best.sc) best={S,sc}; }
+  return best.S; }
+
+/* ---------- UI ---------- */
+let rpYm=null, rpDraft=null, rpFrom=1;
+function rpMonths(){ const r=(profCache.all&&profCache.all.roster)||{}; return Object.keys(r).filter(ym=>rsIds().some(i=>r[ym][i])).sort(); }
+function rpLoadDraft(ym){ const d=LS.get('mt_rsdraft_'+ym,null); return d&&d.S?d:null; }
+function rosterPlanner(){
+  const yms=rpMonths(); if(!yms.length) return `<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>🧩 จัดตาราง PIA</h2><div class="hint">ดึงตารางงานจาก Google Sheet ก่อน (⚙ ตั้งค่า › ตารางงาน)</div></div></div></section>`;
+  if(!rpYm||!yms.includes(rpYm)) rpYm=yms[yms.length-1];
+  const dr=rpLoadDraft(rpYm); const S=dr?dr.S:rsSheet(rpYm); const C=rsCheck(rpYm,S); const N=dimOf(rpYm), ids=C.ids;
+  const sheet=rsSheet(rpYm);
+  const nm=i=>{ const p=state.staff.find(x=>String(x.id)===i); return p?p.name:i; };
+  const cls=c=>{ const k=rsKind(c); return k==='M'?'rk-m':k==='A'?'rk-a':k==='F'?'rk-f':k==='OFF'?'rk-o':k==='ALL'?'rk-all':k==='W'?'rk-w':''; };
+  let h=`<section class="card sec" style="margin-top:12px" id="rpBox"><div class="sechead"><div><h2>🧩 จัดตาราง PIA · ${ymLong(rpYm)}</h2>
+    <div class="hint">${dr?`<b class="st w">ร่างตารางอัตโนมัติ</b> (ยังไม่ได้อยู่ในชีต) · ช่องลายเส้น = ล็อกจากชีต (หยุด/ลา/MT/ประชุม) · คลิกช่องอื่นเพื่อสลับ 2 → 8 → 4 → 🔑`:'ตรวจตารางจาก Google Sheet ตามกฎของร้าน · กด "จัดอัตโนมัติ" ให้ระบบเติมกะเช้า/บ่าย/🔑 ให้ (วันหยุด ลา MT ประชุม ล็อกตามชีต)'}</div></div>
+    <div class="chips" id="rpMonths">${yms.map(ym=>`<button data-ym="${ym}" class="${ym===rpYm?'on':''}">${ymLabel(ym)}</button>`).join('')}</div></div>
+    <div class="rpbar"><button class="btn primary sm" id="rpAuto">⚙ จัดอัตโนมัติทั้งเดือน</button>
+      <span class="rpfrom">จัดใหม่ตั้งแต่วันที่ <select class="btn sm" id="rpFrom">${Array.from({length:N},(_,k)=>k+1).map(d=>`<option ${d===rpFrom?'selected':''}>${d}</option>`).join('')}</select><button class="btn sm" id="rpAutoFrom">จัด</button></span>
+      ${dr?`<button class="btn sm" id="rpCopy">📋 คัดลอกไปวางในชีต</button><button class="btn sm" id="rpDl">⬇ ดาวน์โหลด</button><button class="btn sm ghost" id="rpClear">ทิ้งร่าง กลับไปดูชีต</button>`:''}
+      <span class="rpsum">${C.sum.dayBad?`<b class="st b">⚠ ${C.sum.dayBad} วันคนหรือ 🔑 ไม่ครบ</b>`:'<b class="st g">✓ ทุกวันคนครบ</b>'} · 🔑 ต่อคน ${C.sum.keyMin}–${C.sum.keyMax} · เช้า ส-อา ต่อคน ${C.sum.weMMin}–${C.sum.weMMax} · ก่อนหยุดไม่ได้เช้า ${C.sum.pre} · 🔑 เมื่อวานไม่ได้บ่าย ${C.sum.keyBad} · บ่ายติด >4 วัน ${C.sum.streak} คน</span></div>
+    <div class="tablewrap rpwrap"><table class="rptbl"><thead><tr><th class="l nm">PIA</th>${Array.from({length:N},(_,k)=>k+1).map(d=>`<th class="${rsWeekend(rpYm,d)?'we':''}">${d}</th>`).join('')}</tr></thead><tbody>`;
+  for(const i of ids){ h+=`<tr><td class="l nm">${esc(nm(i))}</td>`; for(let d=1;d<=N;d++){ const c=S[i][d]||''; const lk=rsLocked(sheet[i][d]||'')||(dr&&d<(dr.from||1)); const bad=C.per[i].pre.includes(d)||C.per[i].keyBad.includes(d);
+      h+=`<td class="rc ${cls(c)} ${lk?'lk':''} ${bad?'bad':''}" data-i="${i}" data-d="${d}" title="${esc(nm(i))} · ${d} ${ymLabel(rpYm)}${lk?' · ล็อกจากชีต':''}${C.per[i].pre.includes(d)?' · ก่อนวันหยุดควรเป็นกะเช้า':''}${C.per[i].keyBad.includes(d)?' · 🔑 แต่เมื่อวานไม่ได้เข้าบ่าย':''}">${esc(c)}</td>`; } h+='</tr>'; }
+  const foot=(lab,f)=>`<tr class="rpfoot"><td class="l nm">${lab}</td>${C.days.map(x=>f(x)).join('')}</tr>`;
+  h+=`</tbody><tfoot>${foot('เช้า',x=>`<td class="${!x.c.ALL&&(x.c.M<(x.we?4:3)||(x.we&&x.c.M>5))?'short':''}">${x.c.ALL?'–':x.c.M}</td>`)}${foot('บ่าย',x=>`<td class="${!x.c.ALL&&x.c.A<(x.we?7:6)?'short':''}">${x.c.ALL?'–':x.c.A}</td>`)}${foot('กะ 4',x=>`<td>${x.c.ALL?'–':x.c.F}</td>`)}${foot('🔑',x=>`<td class="${!x.c.ALL&&x.d>1&&x.c.key!==2?'short':''}">${x.c.ALL?'–':x.c.key}</td>`)}</tfoot></table></div>
+    <div class="h4" style="margin-top:14px">สรุปรายคน <span class="muted small">สีเหลือง = ห่างจากค่าเฉลี่ยทีมมาก · ตัวเลขในวงเล็บ = ข้อยกเว้น (วันก่อนหยุดเป็น MT/ประชุม/ลา)</span></div>
+    <div class="tablewrap"><table class="stafftbl" style="min-width:720px"><thead><tr><th class="l">PIA</th><th>กะเช้า</th><th>กะบ่าย</th><th>กะ 4</th><th>🔑</th><th>เช้า ส-อา</th><th>ทำงาน ส-อา</th><th>วันหยุด/ลา</th><th>ก่อนหยุดไม่ได้เช้า</th><th>บ่ายติดสูงสุด</th><th>🔑 เมื่อวานไม่บ่าย</th></tr></thead><tbody>
+    ${ids.map(i=>{ const p=C.per[i], far=(v,a,t)=>Math.abs(v-a)>=t?'far':''; return `<tr style="cursor:default"><td class="l"><b>${esc(nm(i))}</b></td><td class="num ${far(p.M,C.avg.M,2)}">${p.M}</td><td class="num ${far(p.A,C.avg.A,3)}">${p.A}</td><td class="num">${p.F}</td><td class="num ${far(p.key,C.avg.key,2)}">${p.key}</td><td class="num ${far(p.weM,C.avg.weM,1.5)}">${p.weM}</td><td class="num ${far(p.we,C.avg.we,2)}">${p.we}</td><td class="num">${p.off}</td>
+      <td class="num ${p.pre.length?'st b':''}">${p.pre.length}${p.preX?` <span class="muted">(${p.preX})</span>`:''}</td><td class="num ${p.streak>4?'st b':p.streak>3?'st w':''}">${p.streak}</td><td class="num ${p.keyBad.length?'st b':''}">${p.keyBad.length}</td></tr>`; }).join('')}
+    </tbody><tfoot><tr><td class="l">เฉลี่ยทีม</td><td class="num">${fmt(C.avg.M,1)}</td><td class="num">${fmt(C.avg.A,1)}</td><td></td><td class="num">${fmt(C.avg.key,1)}</td><td class="num">${fmt(C.avg.weM,1)}</td><td class="num">${fmt(C.avg.we,1)}</td><td colspan="4"></td></tr></tfoot></table></div>
+    ${C.sum.dayBad?`<div class="watch" style="margin-top:10px"><span>⚠</span><div>${C.days.filter(x=>x.iss.length).map(x=>`<b>${x.d}${x.we?' (ส-อา)':''}</b> ${x.iss.join(', ')}`).join(' · ')}</div></div>`:''}
+    <div class="status" id="rpSt"></div></section>`;
+  return h;
+}
+function bindPlanner(){
+  const box=$('#rpBox'); if(!box) return;
+  box.querySelectorAll('#rpMonths button').forEach(b=>b.onclick=()=>{ rpYm=b.dataset.ym; rpFrom=1; render(); });
+  const run=from=>{ const st=$('#rpSt'); st.className='status on busy'; st.textContent='⏳ กำลังจัดตาราง…';
+    setTimeout(()=>{ const prev=rpLoadDraft(rpYm);
+      const S=from>1&&prev? rsPlanFrom(rpYm,prev.S,from) : rsPlan(rpYm,from);
+      LS.set('mt_rsdraft_'+rpYm,{S,at:Date.now(),from}); render(); },30); };
+  $('#rpAuto').onclick=()=>{ rpFrom=1; run(1); };
+  $('#rpAutoFrom').onclick=()=>{ rpFrom=+$('#rpFrom').value||1; run(rpFrom); };
+  const cl=$('#rpClear'); if(cl) cl.onclick=()=>{ LS.set('mt_rsdraft_'+rpYm,null); render(); };
+  const dr=rpLoadDraft(rpYm); const sheet=rsSheet(rpYm);
+  if(dr) box.querySelectorAll('td.rc').forEach(td=>{ const i=td.dataset.i, d=+td.dataset.d; if(rsLocked(sheet[i][d]||'')||d<(dr.from||1)) return;
+    td.onclick=()=>{ const cur=dr.S[i][d]||''; const nx=RS_EDIT[(RS_EDIT.indexOf(cur)+1)%RS_EDIT.length]; dr.S[i][d]=nx; LS.set('mt_rsdraft_'+rpYm,dr); const y=scrollY; render(); scrollTo(0,y); }; });
+  const cp=$('#rpCopy'); if(cp) cp.onclick=async()=>{ const N=dimOf(rpYm), ids=rsOrder(rpYm); const tsv=ids.map(i=>Array.from({length:N},(_,k)=>dr.S[i][k+1]||'').join('\t')).join('\n');
+    try{ await navigator.clipboard.writeText(tsv); const st=$('#rpSt'); st.className='status on ok'; st.innerHTML=`✓ คัดลอกแล้ว ${ids.length} แถว · ในชีต คลิกช่อง <b>วันที่ 1</b> ของแถว <b>${esc((state.staff.find(p=>String(p.id)===ids[0])||{}).name||ids[0])}</b> (PIA คนแรก) แล้ววาง (Ctrl+V) · ลำดับแถว: ${ids.map(i=>esc((state.staff.find(p=>String(p.id)===i)||{}).name||i)).join(', ')}`; }
+    catch(e){ toast('คัดลอกไม่สำเร็จ ลองใช้ปุ่มดาวน์โหลดแทน'); } };
+  const dl=$('#rpDl'); if(dl) dl.onclick=async()=>{ const N=dimOf(rpYm), ids=rsOrder(rpYm); const head=['รหัส','ชื่อ',...Array.from({length:N},(_,k)=>k+1)];
+    const rows=[head,...ids.map(i=>[i,(state.staff.find(p=>String(p.id)===i)||{}).name||'',...Array.from({length:N},(_,k)=>dr.S[i][k+1]||'')])];
+    await loadXLSX(); if(XLSX.utils.aoa_to_sheet&&XLSX.writeFile){ const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'PIA '+rpYm); XLSX.writeFile(wb,`ตาราง-PIA-${rpYm}.xlsx`); }
+    else { const blob=new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ตาราง-PIA-${rpYm}.csv`; a.click(); } };
+}
+function rsPlanFrom(ym,prevS,from){ /* re-plan from a day, keeping the existing draft before it */
+  const base=rsSheet(ym); const mix={}; for(const i of Object.keys(prevS)){ mix[i]={...base[i]}; for(let d=1;d<from;d++){ if(prevS[i][d]) mix[i][d]=prevS[i][d]; } }
+  let best=null; for(let t=1;t<=400;t++){ const S=rsSolve(ym,mix,from,t*7919); const sc=rsScore(ym,S); if(!best||sc<best.sc) best={S,sc}; } return best.S; }
+
 /* ---------- sales not counted (excluded) ---------- */
 const xCache={}; let exclOpen=false, xLoading=null;
 function exclData(D){
-  const M=D.M, ids=new Set(D.list.map(p=>String(p.id))); internIds().forEach(i=>ids.add(i)); const byO={}; let A=0, B=0, hasX=false;
-  for(const r of state.rows){ if(!r[0].startsWith(M.ym)) continue; const xs=r[KI.xS]; if(xs!=null){ hasX=true; B+=xs; }
+  const M=D.M, ids=new Set(D.list.map(p=>String(p.id))); internIds().forEach(i=>ids.add(i)); const byO={}; let A=0, B=0, hasX=false, CNt=0;
+  for(const r of state.rows){ if(!r[0].startsWith(M.ym)) continue; const xs=r[KI.xS]; if(xs!=null){ hasX=true; B+=xs; } CNt+=r[KI.cnS]||0;
     if(ids.has(String(r[2]))) continue; const a=blank(); for(const k of KEYS) a[k]=r[KI[k]]||0; const t=derive(a,{},M).total; if(t){ byO[r[2]]=(byO[r[2]]||0)+t; A+=t; } }
-  return {A,B,hasX,byO,counted:D.store.total};
+  return {A,B,hasX,byO,counted:D.store.total,CN:CNt};
 }
 function whoLabel(o){ if(+o===1) return 'System · บิลออนไลน์'; const bo=boList().find(p=>String(p.id)===String(o)); const nm=(bo&&bo.name)||state.names[o]||''; return `${esc(nm||'รหัส '+o)} <span class="muted small">${o}${bo?' · '+esc(bo.pos===INTERN?'นักศึกษา':bo.pos):''}</span>`; }
 function renderExcl(D){
   const el=$('#exclBox'); if(!el||!D.M.ym) { if(el) el.innerHTML=''; return; }
-  const E=exclData(D), ex=E.A+E.B, bill=E.counted+ex;
-  if(ex<1){ el.innerHTML=''; return; }
+  const E=exclData(D), ex=E.A+E.B, bill=E.counted+ex+E.CN; const CNI=cnFor(D.M.ym);
+  if(ex<1&&E.CN<1&&!CNI.un.length){ el.innerHTML=''; return; }
   let h=`<div class="exstrip" id="exToggle" role="button" tabindex="0"><span>🧾</span><span class="muted">ยอดตามบิลทั้งไฟล์ <b>${money(bill)}</b></span><span class="muted">นำมาคิด <b>${money(E.counted)}</b>${D.store.intern?` (รวมยอดนักศึกษา ${money(D.store.intern)})`:''}</span>
-    <span class="expill">ไม่ได้นำมาคิด ${money(ex)} · ${pct(ex/bill,1)}</span><span class="exlink">${exclOpen?'ซ่อน ▴':'ดูรายละเอียด ▾'}</span></div>`;
+    ${E.CN>=1?`<span class="expill cn">ลดหนี้ −${money(E.CN)}</span>`:''}<span class="expill">ไม่ได้นำมาคิด ${money(ex)} · ${pct(ex/bill,1)}</span><span class="exlink">${exclOpen?'ซ่อน ▴':'ดูรายละเอียด ▾'}</span></div>`;
   if(exclOpen){
     const O=Object.entries(E.byO).sort((a,b)=>b[1]-a[1]); const top=O.slice(0,8), rest=O.slice(8);
     const X=xCache[D.M.ym]; const sub={}; if(X) for(const o of Object.values(X)) for(const [k,v] of Object.entries(o)) sub[k]=(sub[k]||0)+v;
@@ -2003,7 +2268,12 @@ function renderExcl(D){
         ${!E.hasX?'<div class="exrow muted small">ข้อมูลเดือนนี้อัปก่อนมีฟีเจอร์นี้ · อัปไฟล์เดือนนี้ใหม่ 1 ครั้งเพื่อดูส่วนนี้</div>'
           :!X?(xLoading===D.M.ym?'<div class="exrow muted small">⏳ กำลังโหลด…</div>':'<div class="exrow muted small">ไม่มีรายละเอียด · อัปไฟล์ใหม่เพื่อดูแยกรายสินค้า</div>')
           :S.slice(0,10).map(([k,v])=>`<div class="exrow"><span>${esc(k)}</span><b class="num">${fmt(v)}</b></div>`).join('')+(S.length>10?`<div class="exrow"><span class="muted">อื่นๆ ${S.length-10} รายการ</span><b class="num">${fmt(S.slice(10).reduce((s,x)=>s+x[1],0))}</b></div>`:'')}
-        ${adminKey&&!viewYm?'<a href="#" class="small" id="exMap">จัด Category ›</a>':''}</div></div></div>`;
+        ${adminKey&&!viewYm?'<a href="#" class="small" id="exMap">จัด Category ›</a>':''}</div>
+      ${E.CN>=1||CNI.un.length?(()=>{ const S=cnBySeller(CNI.ok,true); const un=[...new Map(CNI.un.map(r=>[r.doc,r])).values()];
+        return `<div><div class="exh">ลดหนี้ (หักจากคนขายเดิมแล้ว) <b class="num st b">−${fmt(E.CN)}</b></div><div class="muted small">หักในวันที่ขายเดิม · ยอดในหน้านี้เป็นยอดหลังหักแล้ว</div>
+          ${S.map(e=>`<div class="exrow"><span>${e.o!=null&&internIds().has(String(e.o))?'นักศึกษา':cnPersonName(e.o,true)} <span class="muted small">${e.docs.size} ใบ · ${Object.entries(e.cats).filter(([k])=>k!=='skip'&&k!=='unk').map(([k,n])=>CN_BK[k]+(n>1?' '+n:'')).join(' · ')}</span></span><b class="num st b">−${fmt(e.six+e.cp+e.oth)}</b></div>`).join('')}
+          ${un.length?`<div class="exrow"><span class="muted">ยอดย้อนหลังเดือนก่อน / บิลสาขาอื่น (ไม่หัก) ${un.length} ใบ</span><b class="num muted">${fmt(CNI.un.reduce((s,r)=>s+r.a,0))}</b></div>`:''}</div>`; })():''}
+      </div></div>`;
     if(E.hasX&&!X&&xLoading!==D.M.ym){ xLoading=D.M.ym; fetch('/api/history?ym='+D.M.ym,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{ xCache[D.M.ym]=(d&&d.x)||{}; }).catch(()=>{ xCache[D.M.ym]={}; }).finally(()=>{ xLoading=null; renderExcl(computeAll()); }); }
   }
   el.innerHTML=h;
@@ -2149,7 +2419,7 @@ function parseData(aoa){
   const H=aoa[0].map(x=>String(x==null?'':x).trim()); const ix=k=>H.indexOf(k);
   const subAll=H.map((h,i)=>h==='Sub Category'?i:-1).filter(i=>i>=0);
   const cN=subAll.length>1?subAll[subAll.length-1]:subAll[0], cKey=subAll.length>1?subAll[0]:-1, cVal=ix('Catee');
-  const c={F:ix('Number'),H:ix('ราคาขายตามบิล'),L:ix('Category (ID)'),M:ix('Category (Name)'),O:ix('Brand'),D:ix('Product (Code)'),PN:ix('Product (Name)'),AP:ix('Customer (Code)'),Q:ix('Branch (ID)'),AT:ix('Officer (ID)'),AU:ix('Officer (Name)'),U:ix('Doc Date')};
+  const c={ID:ix('ID'),F:ix('Number'),H:ix('ราคาขายตามบิล'),L:ix('Category (ID)'),M:ix('Category (Name)'),O:ix('Brand'),D:ix('Product (Code)'),PN:ix('Product (Name)'),AP:ix('Customer (Code)'),Q:ix('Branch (ID)'),AT:ix('Officer (ID)'),AU:ix('Officer (Name)'),U:ix('Doc Date')};
   for(const k of ['F','H','M','Q','AT','U']) if(c[k]<0) throw new Error('ไม่พบคอลัมน์ที่จำเป็นในไฟล์');
   if(cN==null) throw new Error('ไม่พบคอลัมน์ Sub Category');
   let fileMap=null;
@@ -2159,14 +2429,16 @@ function parseData(aoa){
     const d=parseDate(r[c.U]); if(!d){ bad++; continue; }
     const o=Math.round(num(at)); if(c.AU>=0&&r[c.AU]) names[o]=String(r[c.AU]);
     raw.push([d,Math.round(num(r[c.Q])),o,num(r[c.F]),num(r[c.H]),low(r[c.M]),low(r[cN]),c.O>=0?low(r[c.O]):'',c.D>=0?String(r[c.D]==null?'':r[c.D]).trim():'',c.AP>=0?low(r[c.AP]):'',c.L>=0?num(r[c.L]):0,
-      String(r[cN]==null?'':r[cN]).trim(),c.PN>=0?String(r[c.PN]==null?'':r[c.PN]).trim().slice(0,80):'',c.O>=0?String(r[c.O]==null?'':r[c.O]).trim():'',String(r[c.M]==null?'':r[c.M]).trim()]); }
+      String(r[cN]==null?'':r[cN]).trim(),c.PN>=0?String(r[c.PN]==null?'':r[c.PN]).trim().slice(0,80):'',c.O>=0?String(r[c.O]==null?'':r[c.O]).trim():'',String(r[c.M]==null?'':r[c.M]).trim(),
+      c.ID>=0&&r[c.ID]!=null?String(r[c.ID]).trim():'']); }
   return {raw,names,bad,fileMap};
 }
 function acType(N){ if(/iphone/.test(N)) return 'acIphN'; if(/ipad/.test(N)) return 'acIpdN'; if(/watch/.test(N)) return 'acAwN'; if(/mac/.test(N)) return 'acMacN'; if(/head|airpods|beats/.test(N)) return 'acHpN'; return null; }
 const CHK_B=[['mac','Mac'],['ipad','iPad'],['iphone','iPhone'],['aw','Apple Watch'],['aba','BTB(APPLE)'],['rd','3RD (BTB)'],['service','Service'],['oth','True / ประกัน'],['skip','ไม่นับ (ตั้งใจ)'],['unk','ยังไม่ได้จัด Category']];
 function aggregateRaw(raw,map){
+  const CN=applyCN(raw); raw=raw.concat(CN.negs);
   const agg={}; const ck={tot:{},all:0,lines:raw.length,unk:{},skip:{},xd:{}}; CHK_B.forEach(b=>ck.tot[b[0]]=0);
-  for(const x of raw){ const [d,b,o,F,Hh,M,N,O,D,AP,L,Nraw,PN,Braw,Mraw]=x; const pos=Hh>0;
+  for(const x of raw){ const [d,b,o,F,Hh,M,N,O,D,AP,L,Nraw,PN,Braw,Mraw,BID,isCN,origPos,cnKey]=x; const pos=isCN?origPos:Hh>0;
     const cate=low(map[N]||'');
     const key=d+'|'+b+'|'+o; const a=agg[key]||(agg[key]=[d,b,o].concat(KEYS.map(()=>0)));
     const add=(k,v)=>{ a[KI[k]]+=v; };
@@ -2187,12 +2459,13 @@ function aggregateRaw(raw,map){
     if(cate==='service'){ add('serviceS',Hh); bk=bk||'service'; }
     if(N==='sim extra avd payment'){ add('trueS',Hh); bk=bk||'oth'; }
     if(N==='insurance'){ add('insS',Hh); bk=bk||'oth'; }
+    if(isCN){ add('cnS',-Hh); if(!bk&&Hh) add('xS',Hh); const r0=CN.res[cnKey]; if(r0) r0.bk=M==='smile'?'cp':(bk||'skip'); continue; }
     if(!bk&&Hh){ add('xS',Hh); const xo=ck.xd[d]||(ck.xd[d]={}); const xk=Nraw||'(ว่าง)'; xo[xk]=(xo[xk]||0)+Hh; }
     if(!bk){ const known=N in map; bk=known?'skip':'unk';
       if(Hh){ const g=(known?ck.skip:ck.unk); const e=g[N]||(g[N]={n:Nraw||'(ว่าง)',k:N,c:0,s:0,p:PN,b:Braw,m:Mraw,v:known?map[N]:''}); e.c++; e.s+=Hh; } }
     ck.tot[bk]+=Hh; ck.all+=Hh; }
   const rows=Object.values(agg).map(a=>a.map((v,j)=>j>2?Math.round(v*100)/100:v));
-  return {rows,check:ck};
+  ck.cn=CN.res; return {rows,check:ck};
 }
 function compactCheck(ck,fname){ return {at:Date.now(),file:fname||'',all:Math.round(ck.all),tot:Object.fromEntries(Object.entries(ck.tot).map(([k,v])=>[k,Math.round(v)])),unk:Object.values(ck.unk).sort((a,b)=>b.s-a.s).slice(0,60).map(e=>({...e,s:Math.round(e.s)}))}; }
 function renderCheck(el,ck){
@@ -2216,7 +2489,7 @@ function renderCheck(el,ck){
 }
 async function recomputeWithMap(){
   if(!lastParsed){ const ok=await save('บันทึกการจัด Category แล้ว · จะใช้กับการอัปโหลดครั้งถัดไป (อัปไฟล์ใหม่เพื่อคำนวณยอดเดิม)'); render(); return ok; }
-  try{ const A=aggregateRaw(lastParsed.raw,effMap()); lastCheck=A.check; state.settings.lastCheck=compactCheck(A.check,lastParsed.fname);
+  try{ const A=aggregateRaw(lastParsed.raw,effMap()); lastCheck=A.check; state.settings.lastCheck=compactCheck(A.check,lastParsed.fname); if(A.check.cn) state.cnMatch=A.check.cn;
     const stored=await storeUploadedMonths(A.rows,lastParsed.tg,lastParsed.fname,true,A.check.xd);
     const latest=stored[stored.length-1], curYm=monthInfo().ym; if(!curYm||latest.ym>=curYm){ state.rows=latest.rows; state.updatedAt=Date.now(); }
     const ok=await save('จัด Category และคำนวณยอดใหม่แล้ว'); renderCheck($('#upCheck'),lastCheck); render(); return ok;
@@ -2227,6 +2500,7 @@ async function handleFile(f){
     status('busy','⏳ กำลังอ่านไฟล์ '+esc(f.name)+' …');
     await loadXLSX(); const buf=await f.arrayBuffer(); await new Promise(r=>setTimeout(r,30));
     const wb=XLSX.read(buf,{type:'array',dense:true,cellFormula:false,cellHTML:false,cellStyles:false});
+    const cnSheet=findCNSheet(wb); if(cnSheet){ await handleCN(cnSheet,f.name); return; }
     const need=['Officer (ID)','Number','ราคาขายตามบิล'];
     const tryS=n=>{ const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,blankrows:false,defval:null,raw:true}); const h=(a[0]||[]).map(x=>String(x==null?'':x).trim()); return need.every(k=>h.includes(k))?a:null; };
     let sheetName=wb.SheetNames.find(n=>n.toLowerCase()==='data'), aoa=sheetName?tryS(sheetName):null;
@@ -2239,7 +2513,7 @@ async function handleFile(f){
       const P=parseData(aoa); if(P.fileMap) state.settings.catMapFile=P.fileMap;
       lastParsed={raw:P.raw,tg,fname:f.name,merge:$('#mergeChk').checked};
       const A=aggregateRaw(P.raw,effMap()); let rows=A.rows; const names=P.names, n=P.raw.length, bad=P.bad;
-      lastCheck=A.check; state.settings.lastCheck=compactCheck(A.check,f.name);
+      lastCheck=A.check; state.settings.lastCheck=compactCheck(A.check,f.name); if(A.check.cn) state.cnMatch=A.check.cn;
       if(!rows.length) throw new Error('ไม่พบรายการขายในไฟล์');
       state.names={...state.names,...names};
       status('busy','⏳ กำลังบันทึกประวัติรายเดือน…');
@@ -2257,7 +2531,7 @@ async function handleFile(f){
     if(ok&&upd&&!aoa) await syncCurrentMonth();
     let rmsg=''; if(ok&&upd&&rosterCfg().url){ status('busy','⏳ กำลังดึงตารางงานจาก Google Sheet…'); try{ const R=await syncRoster(); rmsg=' · ดึงตารางงานแล้ว ('+R.tabs.join(', ')+')'; }catch(e){ rmsg=' · <span class="st b">ดึงตารางงานไม่สำเร็จ: '+esc(e.message)+'</span>'; } }
     status('ok','✓ '+msg.join(' · ')+(ok?' · บันทึกขึ้นเซิร์ฟเวอร์แล้ว ทุกคนที่เปิดลิงก์จะเห็นข้อมูลนี้':' · <b>ยังไม่ได้บันทึกขึ้นเซิร์ฟเวอร์</b>')+rmsg);
-    if(aoa) renderCheck($('#upCheck'),lastCheck);
+    if(aoa){ renderCheck($('#upCheck'),lastCheck); if((state.cn||[]).length) $('#upCheck').insertAdjacentHTML('beforeend',cnReportHTML(true)); }
   }catch(err){ console.error(err); status('err','✕ '+esc(err.message||err)); }
 }
 
@@ -2265,7 +2539,7 @@ async function handleFile(f){
 const API='/api/data';
 let adminKey=LS.get('mt_key',null);
 function setAdmin(on){ document.body.classList.toggle('admin',!!on); document.body.classList.toggle('mgr',!!(on||mgrKey)); $('#loginBtn').hidden = !!(on||mgrKey) || location.hash!=='#admin'; const lb=$('#logoutBtn'); if(lb) lb.textContent=mgrKey&&!on?'ออก ('+mgrName+')':'ออก'; }
-function payload(){ return {v:1,savedAt:Date.now(),source:state.source,updatedAt:state.updatedAt,staff:state.staff,names:state.names,settings:state.settings,rows:state.rows}; }
+function payload(){ return {v:1,savedAt:Date.now(),source:state.source,updatedAt:state.updatedAt,staff:state.staff,names:state.names,settings:state.settings,rows:state.rows,cn:state.cn||[],cnMatch:state.cnMatch||{}}; }
 let lastStamp=null;
 async function save(msg){
   if(!adminKey){ toast('ต้องเข้าสู่โหมดผู้ดูแลก่อน'); return false; }
@@ -2278,7 +2552,7 @@ async function save(msg){
   }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+(e.message||e)); return false; } }
 function apply(d,T){ T=T||state; if(!d||!Array.isArray(d.rows)) return false;
   T.source=d.source; T.updatedAt=d.updatedAt; T.staff=d.staff||T.staff; T.names=d.names||T.names;
-  T.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; T.rows=d.rows; return true; }
+  T.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; T.rows=d.rows; T.cn=d.cn||[]; T.cnMatch=d.cnMatch||{}; if(T===liveBackup){ state.cn=T.cn; state.cnMatch=T.cnMatch; } return true; }
 async function load(light){
   try{ if(light&&lastStamp){ const q=await fetch(API+'?stamp=1',{cache:'no-store'}); if(q.ok){ const st=await q.json(); if(st&&st.s&&String(st.s)===String(lastStamp)){ synced=true; return; } } }
     const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
