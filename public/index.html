@@ -204,6 +204,13 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
+.dayback{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--surface-1);border:1px solid var(--s1);border-radius:12px;padding:10px 14px;margin-bottom:12px;position:sticky;top:8px;z-index:5}
+tr.focusrow td{background:color-mix(in srgb,var(--s1) 14%,transparent)!important}
+.attbox.clk{cursor:pointer;transition:box-shadow .15s}.attbox.clk:hover{box-shadow:0 0 0 1.5px var(--s1) inset}
+.mebox{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 16px;border-radius:12px;background:color-mix(in srgb,var(--s1) 12%,var(--surface-1));margin-bottom:10px;position:sticky;top:64px;z-index:1;box-shadow:0 6px 12px -8px rgba(0,0,0,.25)}
+.merank{font-family:Prompt;font-size:18px;font-weight:600}.merank b{font-size:24px;color:var(--s1)}
+.drrow.merow{background:color-mix(in srgb,var(--s1) 12%,transparent);box-shadow:0 0 0 1.5px var(--s1) inset}
+
 .exstrip{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:12px 0 0;font-size:13.5px;cursor:pointer}
 .exstrip b{color:var(--text-primary)}
 .expill{background:var(--warn-soft);color:var(--warn);border-radius:99px;padding:2px 12px;font-size:12.5px;font-weight:600}
@@ -520,6 +527,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
 
   <!-- ================= DAY ================= -->
   <section class="view" id="vDay">
+    <div class="dayback" id="dayBack" hidden></div>
     <section class="card sec">
       <div class="sechead" style="margin-bottom:8px"><div><h2>เลือกวันที่</h2><div class="hint">ยอดของวันที่เลือกเท่านั้น (จากข้อมูลดิบรายบิลของวันนั้น)</div></div>
         <div style="display:flex;gap:6px"><button class="btn sm" id="dPrev">◀ วันก่อน</button><button class="btn sm" id="dNext">วันถัดไป ▶</button></div></div>
@@ -794,6 +802,7 @@ function route(){ const h=location.hash.replace('#','');
   if(/^b\d+$/.test(h)) return {v:'back',id:h.slice(1)};
   if(/^p\d+$/.test(h)) return {v:'profile',id:+h.slice(1)};
   if(/^d-\d{4}-\d{2}-\d{2}$/.test(h)) return {v:'day',date:h.slice(2)};
+  if(/^d-\d{4}-\d{2}-\d{2}~\d+$/.test(h)) return {v:'day',date:h.slice(2,12),focus:h.split('~')[1]};
   return {v:'store'}; }
 addEventListener('hashchange',()=>{ setAdmin(!!adminKey); render(); window.scrollTo({top:0}); });
 
@@ -837,7 +846,7 @@ function render(){
   if(!$('#monthSel').options.length) renderMonthSel();
   $('#meta').innerHTML = `${synced?'<span class="pill ok">● ข้อมูลล่าสุด</span>':'<span class="pill off">● ออฟไลน์ (ข้อมูลตั้งต้น)</span>'}${state.updatedAt?' &nbsp;อัปเดต '+new Date(state.updatedAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):''}`;
   document.querySelectorAll('.mixT').forEach(e=>e.textContent=pct(state.settings.att.mix||0.07,0));
-  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date); else if(R.v==='profile') renderProfile(D,R); else if(R.v==='back') renderBack(D,R); else renderPeople(D,R.id);
+  if(R.v==='store') renderStore(D); else if(R.v==='day') renderDay(D,R.date,R.focus); else if(R.v==='profile') renderProfile(D,R); else if(R.v==='back') renderBack(D,R); else renderPeople(D,R.id);
 }
 
 function renderStore(D){
@@ -916,7 +925,8 @@ function barChart(el,data,opt){
     s+=`<g class="hit" data-i="${i}"><rect x="${x0}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent"/>${hh>0?`<path d="M${cx-w/2},${H-pb} V${yy+Math.min(4,hh)} q0,-4 4,-4 h${w-8} q4,0 4,4 V${H-pb} Z" fill="var(--s1)"/>`:''}</g>`; });
   if(opt.line) s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(opt.line)}" y2="${y(opt.line)}" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 3"/><text x="${W-pr}" y="${y(opt.line)-5}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${opt.lineLabel||''}</text>`;
   s+=`<line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="var(--line-2)"/></svg>`;
-  el.innerHTML=s; el.querySelectorAll('.hit').forEach(g=>{ const o=data[+g.dataset.i]; g.onmousemove=e=>showTip(e,opt.tip(o)); g.onmouseleave=hideTip; });
+  el.innerHTML=s; el.querySelectorAll('.hit').forEach(g=>{ const o=data[+g.dataset.i]; g.onmousemove=e=>showTip(e,opt.tip(o)); g.onmouseleave=hideTip;
+    if(opt.onClick&&o.v>0){ g.style.cursor='pointer'; g.onclick=()=>{ hideTip(); opt.onClick(o); }; } });
 }
 function dailySeries(filter,M){ const m={}; for(const r of state.rows){ if(!r[0].startsWith(M.ym)||!filter(r)) continue; const v=r[KI.macS]+r[KI.ipadS]+r[KI.iphoneS]+r[KI.awS]+r[KI.abaS]+r[KI.rdS]+r[KI.serviceS]+r[KI.trueS]+r[KI.insS]; m[r[0]]=(m[r[0]]||0)+v; } return Object.keys(m).sort().map(d=>({d,v:m[d]})); }
 function dailyChart(D){ const ids=new Set(state.staff.map(p=>p.branch+':'+p.id)); internIds().forEach(i=>{ for(const r of state.rows) if(String(r[2])===i) ids.add(r[1]+':'+r[2]); }); barChart($('#dailyChart'),dailySeries(r=>ids.has(r[1]+':'+r[2]),D.M),{label:'ยอดขายรวมรายวัน',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท`}); }
@@ -936,7 +946,7 @@ function mixChart(list){
 /* ---------- day view ---------- */
 const TH_WD=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
 function daySum(p,date,before){ const a=blank(); for(const r of state.rows){ if(r[2]!=p.id||r[1]!=p.branch) continue; if(before? (r[0]<date && r[0].startsWith(date.slice(0,7))) : r[0]===date) for(const k of KEYS) a[k]+=r[KI[k]]||0; } return a; }
-function renderDay(D,date){
+function renderDay(D,date,focus){
   const {M,list}=D;
   const daysWithData=new Set(state.rows.filter(r=>r[0].startsWith(M.ym)).map(r=>r[0]));
   if(!date||!date.startsWith(M.ym||'x')){ date=M.last; if(date){ history.replaceState(null,'','#d-'+date); } }
@@ -962,11 +972,12 @@ function renderDay(D,date){
     const pp=has&&avgDayTot?dayTot[iso]/avgDayTot:0; const cls=pp>=1?'g':pp>=.85?'w':'b';
     strip+=`<div class="dchip ${iso===date?'on':''} ${has?'':'empty'}" ${has?`data-d="${iso}"`:''}><div class="dw">${wd}</div><div class="dd">${d}</div><div class="dp ${has?cls:''}">${has?fmt(pp*100,0)+'%':'–'}</div></div>`; }
   $('#dayStrip').innerHTML=strip;
-  $('#dayStrip').querySelectorAll('[data-d]').forEach(el=>el.onclick=()=>{ location.hash='d-'+el.dataset.d; });
+  const fs=focus?'~'+focus:'';
+  $('#dayStrip').querySelectorAll('[data-d]').forEach(el=>el.onclick=()=>{ location.hash='d-'+el.dataset.d+fs; });
   const on=$('#dayStrip .dchip.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
   const sorted=[...daysWithData].sort(); const ix=sorted.indexOf(date);
   $('#dPrev').disabled=ix<=0; $('#dNext').disabled=ix<0||ix>=sorted.length-1;
-  $('#dPrev').onclick=()=>{ if(ix>0) location.hash='d-'+sorted[ix-1]; }; $('#dNext').onclick=()=>{ if(ix<sorted.length-1) location.hash='d-'+sorted[ix+1]; };
+  $('#dPrev').onclick=()=>{ if(ix>0) location.hash='d-'+sorted[ix-1]+fs; }; $('#dNext').onclick=()=>{ if(ix<sorted.length-1) location.hash='d-'+sorted[ix+1]+fs; };
   const label=`${TH_WD[new Date(date+'T00:00:00Z').getUTCDay()]} ${thDate(date)}`;
   // KPIs
   const prevIso=sorted[ix-1]; const prevTot=prevIso?dayTot[prevIso]:null; const avgActual=sorted.length?sorted.reduce((s,d)=>s+(dayTot[d]||0),0)/sorted.length:0;
@@ -1003,6 +1014,10 @@ function renderDay(D,date){
     <td class="num ${p.a.airpodsU?'':'zero'}">${z(p.a.airpodsU)}</td><td class="num ${p.att.mix?'':'zero'}">${p.att.mix?`<span class="${attGood('mix',p.att.mix)?'chip '+attGood('mix',p.att.mix):''}">${pct(p.att.mix,1)}</span>`:'–'}</td></tr>`; });
   h+=`</tbody><tfoot><tr><td class="l" colspan="2">รวมทั้งร้าน</td><td class="num">${fmt(S.actSales)}</td><td class="num">${pct(S.dp,0)}</td><td class="num">${fmt(S.nT)}</td>${cells.map(kk=>`<td class="num">${fmt(S.a[kk])}</td>`).join('')}<td class="num">${fmt(S.a.simU)}</td><td class="num">${pct(S.att.smile,0)}</td><td class="num">${pct(S.att.ac,0)}</td><td class="num">${pct(S.att.pencil,0)}</td><td class="num">${fmt(S.a.airpodsU)}</td><td class="num">${pct(S.att.mix,1)}</td></tr></tfoot>`;
   const t=$('#dayTbl'); t.innerHTML=h; t.querySelectorAll('tbody tr[data-id]').forEach(tr=>tr.onclick=()=>{ location.hash='s'+tr.dataset.id; });
+  const fb=$('#dayBack'), fp=focus&&D.list.find(p=>String(p.id)===String(focus));
+  if(fb){ fb.hidden=!fp; if(fp){ const me=P.find(x=>String(x.id)===String(focus)); fb.innerHTML=`<button class="btn sm" id="dayBackBtn">← กลับไปหน้า ${esc(fp.name)}</button><span class="muted small">กำลังดู ${thDate(date)}${me?` · ยอดของคุณวันนั้น <b>${fmt(me.actSales)}</b> บาท · อันดับ ${me.drank} ของวัน`:''}</span>`;
+    $('#dayBackBtn').onclick=()=>{ location.hash='s'+fp.id; };
+    const tr=t.querySelector(`tbody tr[data-id="${fp.id}"]`); if(tr){ tr.classList.add('focusrow'); setTimeout(()=>tr.scrollIntoView({block:'center',behavior:'smooth'}),120); } } }
 }
 
 /* ---------- person view ---------- */
@@ -1061,16 +1076,16 @@ function renderPeople(D,id){
       <div class="need ${done?'done':''}" style="text-align:right">${done?'✓ ถึงเป้าแล้ว':`อีก <span class="num">${unitF(r,r.need)}</span><br><small>วันละ <span class="num">${r.c.unit?fmt(r.pd,1):fmt(r.pd)}</span></small>`}</div></div></div>`; }).join('')}</div>
   </section>
   <div class="grid2">
-    <section class="card sec"><div class="sechead"><div><h2>ATT ของฉัน</h2><div class="hint">เขียว/แดง เทียบเป้าที่ผู้ดูแลตั้งไว้</div></div></div>
-      <div class="attrow">${Object.keys(ATT_L).map(k=>`<div class="attbox" title="${ATT_D[k]}"><div class="l">${ATT_L[k]}</div><div class="v num ${attGood(k,p.att[k])}">${pct(p.att[k],k==='mix'?2:0)}</div><div class="l">${ATT_D[k]}</div></div>`).join('')}</div>
+    <section class="card sec"><div class="sechead"><div><h2>ATT ของฉัน</h2><div class="hint">เขียว/แดง เทียบเป้าที่ผู้ดูแลตั้งไว้ · แตะเพื่อดูอันดับของฉัน</div></div></div>
+      <div class="attrow">${Object.keys(ATT_L).map(k=>`<div class="attbox clk" data-att="${k}" title="${ATT_D[k]} · แตะเพื่อดูอันดับ"><div class="l">${ATT_L[k]}</div><div class="v num ${attGood(k,p.att[k])}">${pct(p.att[k],k==='mix'?2:0)}</div><div class="l">${ATT_D[k]}</div></div>`).join('')}</div>
       <div class="h4" style="margin-top:18px">📝 Action Plan</div>
       <textarea class="note" id="note" placeholder="เช่น เน้นเสนอ Cover Plus ทุกครั้งที่ขาย iPhone, ชวนลูกค้า iPad ซื้อ Pencil…">${esc(LS.get('mt_note_'+p.id,''))}</textarea>
       <div class="localnote">บันทึกอัตโนมัติไว้ในเครื่องนี้เท่านั้น</div></section>
-    <section class="card sec"><div class="sechead"><div><h2>ยอดขายรายวันของฉัน</h2><div class="hint">บาท · ทุก Category</div></div></div><div class="chart" id="pDaily"></div></section>
+    <section class="card sec"><div class="sechead"><div><h2>ยอดขายรายวันของฉัน</h2><div class="hint">บาท · ทุก Category · แตะแท่งเพื่อดูรายละเอียดวันนั้น</div></div></div><div class="chart" id="pDaily"></div></section>
   </div>`;
   $('#personBody').innerHTML=h;
   const avgDay=tot.need>0&&M.remain?tot.pd:0;
-  barChart($('#pDaily'),dailySeries(r=>r[2]==p.id&&r[1]==p.branch,M),{h:200,label:'ยอดขายรายวัน',line:avgDay,lineLabel:avgDay?'ต้องทำวันละ '+shortNum(avgDay):'',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท`});
+  barChart($('#pDaily'),dailySeries(r=>r[2]==p.id&&r[1]==p.branch,M),{h:200,label:'ยอดขายรายวัน',line:avgDay,lineLabel:avgDay?'ต้องทำวันละ '+shortNum(avgDay):'',tip:o=>`<b>${thDate(o.d)}</b><br>${fmt(o.v)} บาท<br><span style="opacity:.75">แตะเพื่อดูรายละเอียด</span>`,onClick:o=>{ location.hash='d-'+o.d+'~'+p.id; }});
   // goal handlers
   const upd=fn=>{ const g=goalOf(p.id); fn(g); setGoal(p.id,g); render(); };
   $('#gChips').querySelectorAll('button').forEach(b=>b.onclick=()=>upd(g=>{ g.all=+b.dataset.v; g.per={}; }));
@@ -1080,6 +1095,7 @@ function renderPeople(D,id){
   $('#personBody').querySelectorAll('tbody .pctin, .planCards .pctin').forEach(w=>{ const k=w.querySelector('input').dataset.k;
     w.querySelector('input').onchange=e=>upd(g=>{ g.per[k]=Math.max(0,+e.target.value||0); });
     w.querySelectorAll('button').forEach(b=>b.onclick=()=>upd(g=>{ const cur=g.per[k]!=null?g.per[k]:g.all; g.per[k]=Math.max(0,cur+(+b.dataset.d)); })); });
+  $('#personBody').querySelectorAll('.attbox[data-att]').forEach(b=>b.onclick=()=>openAttDrill(b.dataset.att,p.id));
   const note=$('#note'); let nt; note.oninput=()=>{ clearTimeout(nt); nt=setTimeout(()=>LS.set('mt_note_'+p.id,note.value),300); };
 }
 
@@ -1995,6 +2011,43 @@ function renderExcl(D){
   const m=$('#exMap'); if(m) m.onclick=e=>{ e.preventDefault(); openMapEditor(); };
 }
 
+
+/* ---------- ATT ranking popup (from "ATT ของฉัน") ---------- */
+const ATT_NB={smile:['smileU',a=>a.iphoneU,'iPhone'],sim:['simU',a=>a.iphoneU+a.ipadU,'iPhone+iPad'],ufund:['ufundU',a=>a.iphoneU,'iPhone'],pvl:['pvlU',a=>a.iphoneU,'iPhone'],
+  ac:['acU',a=>a.macU+a.ipadU+a.awU,'Mac+iPad+AW'],pencil:['pencilU',a=>a.ipadU,'iPad'],mix:['rdS',null,'']};
+function openAttDrill(k,me){ drill={k:null,att:k,me:String(me),per:'m',date:null}; $('#drillScrim').classList.add('on'); renderAttDrill(); }
+function renderAttDrill(){
+  const k=drill.att, D=computeAll(), M=D.M, nb=ATT_NB[k];
+  const dates=[...new Set(state.rows.filter(r=>r[0].startsWith(M.ym||'x')).map(r=>r[0]))].sort(); const last=dates[dates.length-1]||'';
+  if(drill.per==='pick'&&(!drill.date||!dates.includes(drill.date))) drill.date=last;
+  let from,to,label;
+  if(drill.per==='m'){ from=M.ym+'-01'; to=M.ym+'-31'; label='ทั้งเดือน '+(M.ym?ymLong(M.ym):''); }
+  else if(drill.per==='7'){ const d0=new Date(last+'T00:00:00Z'); d0.setUTCDate(d0.getUTCDate()-6); from=d0.toISOString().slice(0,10); if(from<M.ym+'-01') from=M.ym+'-01'; to=last; label=`7 วันล่าสุด (${thDate(from)} – ${thDate(to)})`; }
+  else { from=to=(drill.per==='d'?last:drill.date); label=thDate(from); }
+  const P=D.list.map(p=>{ const a=blank(); for(const r of state.rows){ if(r[2]!=p.id||r[1]!=p.branch||r[0]<from||r[0]>to) continue; for(const kk of KEYS) a[kk]+=r[KI[kk]]||0; }
+    const v=derive(a,{},M).att[k]||0; return {p,v,n:a[nb[0]],b:nb[1]?nb[1](a):null}; });
+  P.sort((x,y)=>y.v-x.v||y.n-x.n);
+  const g=+(state.settings.att||{})[k]||0, mx=Math.max(...P.map(x=>x.v),g,1e-9), dec=k==='mix'?2:0;
+  const iMe=P.findIndex(x=>String(x.p.id)===drill.me), meX=P[iMe];
+  $('#drillTitle').textContent='อันดับ '+ATT_L[k];
+  let h=`<div class="drillbar"><div class="chips" id="drPer">${[['m','ทั้งเดือน'],['7','7 วันล่าสุด'],['d','วันล่าสุด'],['pick','เลือกวันที่']].map(([v,l])=>`<button data-v="${v}" class="${drill.per===v?'on':''}">${l}</button>`).join('')}</div>
+    ${drill.per==='pick'?`<select class="monthsel" id="drDate">${dates.slice().reverse().map(d=>`<option value="${d}" ${d===drill.date?'selected':''}>${TH_WD[new Date(d+'T00:00:00Z').getUTCDay()]} ${thDate(d)}</option>`).join('')}</select>`:''}</div>`;
+  if(meX) h+=`<div class="mebox"><div><div class="muted small">${esc(label)} · ${ATT_D[k]}</div><div class="merank">คุณอยู่อันดับ <b class="num">${iMe+1}</b> จาก ${P.length} คน</div></div>
+    <div style="text-align:right"><div class="bigval num" style="font-size:26px"><span class="${g?(meX.v>=g?'st g':'st b'):''}">${pct(meX.v,dec)}</span></div><div class="muted small">เป้า ${g?pct(g,dec):'–'}${g&&meX.v<g&&meX.b?` · ขาดอีก ${fmt(Math.max(Math.ceil(g*meX.b-meX.n-1e-9),0))} ชิ้น`:''}</div></div></div>`;
+  h+='<div class="drlist">';
+  P.forEach((x,i)=>{ const mine=String(x.p.id)===drill.me;
+    h+=`<div class="drrow ${mine?'merow':''} ${x.v>0?'':'zero'}" data-id="${x.p.id}"><span class="rk ${x.v>0&&i<3?'r'+(i+1):''}">${i+1}</span>${avatar(x.p)}
+      <div class="drmain"><div class="drname"><b>${esc(x.p.name)}${mine?' (คุณ)':''}</b></div><div class="drtrack"><i style="width:${x.v/mx*100}%"></i></div></div>
+      <div class="drval"><b class="num ${g?(x.v>=g?'st g':''):''}">${pct(x.v,dec)}</b><span class="muted small">${k==='mix'?fmt(x.n)+' บาท 3RD':`${fmt(x.n)} ชิ้น / ${fmt(x.b)} ${nb[2]}`}</span></div></div>`; });
+  h+='</div>';
+  const el=$('#drillBody'); el.innerHTML=h;
+  el.querySelectorAll('#drPer button').forEach(b=>b.onclick=()=>{ drill.per=b.dataset.v; renderAttDrill(); });
+  const dd=el.querySelector('#drDate'); if(dd) dd.onchange=()=>{ drill.date=dd.value; renderAttDrill(); };
+  el.querySelectorAll('.drrow').forEach(r=>r.onclick=()=>{ $('#drillScrim').classList.remove('on'); location.hash='s'+r.dataset.id; });
+  const mb=el.querySelector('.mebox'), hd=$('#drillScrim header'); if(mb&&hd) mb.style.top=(hd.offsetHeight-1)+'px';
+  const mr=el.querySelector('.merow'); if(mr) setTimeout(()=>mr.scrollIntoView({block:'nearest',behavior:'smooth'}),80);
+}
+
 /* ---------- modals ---------- */
 document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('click',e=>{ if(e.target===s||e.target.closest('[data-close]')) s.classList.remove('on'); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.scrim.on').forEach(s=>s.classList.remove('on')); });
@@ -2226,8 +2279,9 @@ async function save(msg){
 function apply(d,T){ T=T||state; if(!d||!Array.isArray(d.rows)) return false;
   T.source=d.source; T.updatedAt=d.updatedAt; T.staff=d.staff||T.staff; T.names=d.names||T.names;
   T.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; T.rows=d.rows; return true; }
-async function load(){
-  try{ const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
+async function load(light){
+  try{ if(light&&lastStamp){ const q=await fetch(API+'?stamp=1',{cache:'no-store'}); if(q.ok){ const st=await q.json(); if(st&&st.s&&String(st.s)===String(lastStamp)){ synced=true; return; } } }
+    const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
     if(d&&d.savedAt!==lastStamp&&apply(d,viewYm?liveBackup:state)) lastStamp=d.savedAt; }catch(e){ synced=false; }
   render(); loadHistoryIndex(); }
 $('#loginBtn').onclick=()=>{ $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); setTimeout(()=>$('#keyInp').focus(),50); };
@@ -2244,8 +2298,8 @@ async function ensureMonthHistory(){ if(!adminKey||!state.rows.length) return; t
 setAdmin(!!adminKey);
 $('#monthSel').onchange=e=>viewMonth(e.target.value);
 render(); load().then(()=>ensureMonthHistory());
-setInterval(()=>{ if(!document.hidden) load(); },5*60*1000);
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(); });
+setInterval(()=>{ if(!document.hidden) load(true); },10*60*1000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(true); });
 })();
 </script>
 </body>
