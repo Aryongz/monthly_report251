@@ -147,6 +147,8 @@ export default async (req) => {
   if (route === "data") {
     if (method === "GET") {
       if (url.searchParams.has("auth")) return new Response(null, { status: isAdmin ? 204 : 401 });
+      // light poll: only the save stamp, so open pages re-download the full data only when it changed
+      if (url.searchParams.has("stamp")) return json({ s: (await store.get("stamp", { type: "text" })) || null });
       return json((await store.get("state", { type: "text" })) || "null");
     }
     if (method === "POST") {
@@ -156,6 +158,7 @@ export default async (req) => {
       let p; try { p = JSON.parse(text); } catch { return json({ error: "bad json" }, 400); }
       if (!p || !Array.isArray(p.rows)) return json({ error: "missing rows" }, 400);
       await store.set("state", text);
+      await store.set("stamp", String(p.savedAt || Date.now()));
       return json({ ok: true });
     }
     return json({ error: "method not allowed" }, 405);
