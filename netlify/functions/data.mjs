@@ -174,6 +174,22 @@ export default async (req) => {
     return json({ ym: m.ym, rows: m.rows, tg: m.tg || {}, staff: m.staff || [], x: m.x || null });
   }
 
+  /* shift codes for one month (public: same info as the shared roster sheet) — drives the per-shift daily target.
+     manual web marks win: off→H, leave→L, absent→X, work on a roster day off→W */
+  if (route === "shifts/public" && method === "GET") {
+    const ym = url.searchParams.get("ym");
+    if (!ym || !YM.test(ym)) return json({ error: "bad ym" }, 400);
+    const roster = await getJ("roster", { months: {} }), shifts = await getJ("shifts", {});
+    const R = (roster.months || {})[ym] || {}, S = shifts[ym] || {}, out = {};
+    for (const id of new Set([...Object.keys(R), ...Object.keys(S)])) {
+      const o = {};
+      for (const [d, v] of Object.entries(R[id] || {})) o[d] = Array.isArray(v) ? String(v[1] || v[0] || "") : String(v);
+      for (const [d, st] of Object.entries(S[id] || {})) o[d] = st === "off" ? "H" : st === "leave" ? "L" : st === "absent" ? "X" : st === "work" ? (/^(H|L|EV|MT\/H|MT\/L)$/i.test(o[d] || "") || !o[d] ? "W" : o[d]) : o[d];
+      out[id] = o;
+    }
+    return new Response(JSON.stringify({ ym, codes: out }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=120" } });
+  }
+
   /* ---------------- everything below needs a signed-in caller ---------------- */
   const w = await who();
   if (!w || !w.role) return deny(w);
