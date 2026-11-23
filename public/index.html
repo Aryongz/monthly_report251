@@ -201,6 +201,15 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 
 @media (max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
 @media (max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:12px 12px 40px}.hero{padding:18px}.meta{margin-left:0;width:100%}.form{grid-template-columns:1fr}.dgrid{grid-template-columns:repeat(2,1fr)}.kpi .val{font-size:24px}}
+/* v12 shift target + coaching */
+.shcard .shpill{font-size:11.5px;padding:1px 8px;border-radius:99px;background:rgba(255,255,255,.18);color:#fff;white-space:nowrap}
+.shline{font-size:12.5px;margin-top:6px;color:rgba(255,255,255,.88);line-height:1.45}.shline b{color:#fff}.shline.g{color:#9be8b4;font-weight:500}
+.shnext{margin-top:8px;font-size:12px}.shnext summary{cursor:pointer;color:rgba(255,255,255,.8);list-style:none}.shnext summary::-webkit-details-marker{display:none}.shnext summary::after{content:' ▾'}.shnext[open] summary::after{content:' ▴'}
+.shstrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:6px;text-align:center}
+.shd{border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:4px 0;font-size:11px;line-height:1.35}.shd b{font-size:11.5px}.shd.off{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-style:dashed}.shd.on{border-color:#fff;box-shadow:inset 0 0 0 1px #fff;background:rgba(255,255,255,.14)}
+.coachbox{margin-bottom:6px}.coachrow .btn{flex:none;white-space:nowrap}
+.teamwin{margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--good-soft);color:var(--good);font-weight:500;font-size:13.5px}
+details.shfair>summary{cursor:pointer;list-style:none}details.shfair>summary::-webkit-details-marker{display:none}
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
@@ -1060,10 +1069,11 @@ function renderPeople(D,id){
   const sel=$('#picker .pk.on'); if(sel) centerX($('#picker'),sel);
   const G=goalOf(p.id);
   const gp=c=> (G.per[c.k]!=null? G.per[c.k] : G.all)/100;
-  const rows=CATS.map(c=>{ const t=+p.tg[c.k]||0, a=p.a[c.a], ac=t?a/t:0, fc=a*p.fcf, fcp=t?fc/t:0, g=gp(c), nt=t*g, need=nt-a, pd=M.remain?need/M.remain:need; return {c,t,a,ac,fc,fcp,g,nt,need,pd}; });
+  const SP0=M.remain?shPerson(shiftModel(D),p):null; const WL=SP0&&SP0.nLeft?SP0.nLeft:M.remain;
+  const rows=CATS.map(c=>{ const t=+p.tg[c.k]||0, a=p.a[c.a], ac=t?a/t:0, fc=a*p.fcf, fcp=t?fc/t:0, g=gp(c), nt=t*g, need=nt-a, pd=WL?need/WL:need; return {c,t,a,ac,fc,fcp,g,nt,need,pd}; });
   const S=rows.filter(r=>!r.c.unit);
   const tot={t:S.reduce((s,r)=>s+r.t,0),a:S.reduce((s,r)=>s+r.a,0),nt:S.reduce((s,r)=>s+r.nt,0)};
-  tot.need=S.reduce((s,r)=>s+Math.max(r.need,0),0); tot.pd=M.remain?tot.need/M.remain:tot.need; tot.ac=tot.t?tot.a/tot.t:0; tot.fc=tot.a*p.fcf; tot.fcp=tot.t?tot.fc/tot.t:0;
+  tot.need=S.reduce((s,r)=>s+Math.max(r.need,0),0); tot.pd=WL?tot.need/WL:tot.need; const SHC=M.remain?shTodayCard(p,tot,D):null; tot.ac=tot.t?tot.a/tot.t:0; tot.fc=tot.a*p.fcf; tot.fcp=tot.t?tot.fc/tot.t:0;
   const R=46,C=2*Math.PI*R, ringCol=`var(--${stCls(p.ac,M.pace)==='g'?'good':stCls(p.ac,M.pace)==='w'?'warn':'bad'})`;
   const unitF=(r,v)=>r.c.unit? fmt(v,Math.abs(v)%1?1:0) : fmt(v);
   const presets=[80,90,100,110,120];
@@ -1082,8 +1092,8 @@ function renderPeople(D,id){
   </section>
   <div class="sumcards" style="margin-top:12px">
     ${M.remain?`<div class="sumcard"><div class="l">ต้องขายเพิ่มอีก (6 Category)</div><div class="v num">${tot.need>0?fmt(tot.need):'0'}<small>บาท</small></div><div class="f">เป้าใหม่ ${fmt(tot.nt)} บาท</div></div>
-    <div class="sumcard"><div class="l">เหลือวันขาย</div><div class="v num">${M.remain}<small>วัน</small></div><div class="f">ข้อมูลถึงวันที่ ${M.day} จาก ${M.dim} วัน</div></div>
-    <div class="sumcard"><div class="l">ต้องขายเฉลี่ยต่อวัน</div><div class="v num">${tot.need>0?fmt(tot.pd):'0'}<small>บาท/วัน</small></div><div class="f">${tot.need>0?'ถ้าขายตามนี้ทุกวันจะถึงเป้าที่ตั้งไว้':'🎉 ถึงเป้าที่ตั้งไว้แล้ว'}</div></div>`
+    <div class="sumcard"><div class="l">เหลือวันขาย</div><div class="v num">${SHC?SHC.sp.nLeft:M.remain}<small>วัน${SHC?'ทำงาน':''}</small></div><div class="f">${SHC?`ไม่นับวันหยุด · ข้อมูลถึงวันที่ ${M.day}`:`ข้อมูลถึงวันที่ ${M.day} จาก ${M.dim} วัน`}</div></div>
+    ${SHC?SHC.html:`<div class="sumcard"><div class="l">ต้องขายเฉลี่ยต่อวัน</div><div class="v num">${tot.need>0?fmt(tot.pd):'0'}<small>บาท/วัน</small></div><div class="f">${tot.need>0?'ถ้าขายตามนี้ทุกวันจะถึงเป้าที่ตั้งไว้':'🎉 ถึงเป้าที่ตั้งไว้แล้ว'}</div></div>`}`
     :`<div class="sumcard"><div class="l">ผลสิ้นเดือน (6 Category)</div><div class="v num">${pct(tot.ac,1)}</div><div class="f">${fmt(tot.a)} / เป้า ${fmt(tot.t)} บาท</div></div>
     <div class="sumcard"><div class="l">${tot.need>0?'ขาดจากเป้าที่ตั้งไว้':'ถึงเป้าที่ตั้งไว้'}</div><div class="v num">${tot.need>0?fmt(tot.need):'✓'}<small>${tot.need>0?'บาท':''}</small></div><div class="f">เป้าที่ตั้งไว้ ${fmt(tot.nt)} บาท</div></div>
     <div class="sumcard"><div class="l">สถานะ</div><div class="v num">ปิดเดือน</div><div class="f">ข้อมูลครบ ${M.day} จาก ${M.dim} วัน</div></div>`}
@@ -1376,7 +1386,7 @@ function bindShifts(){
     const id=td.dataset.id, d=td.dataset.d, ym=shiftYm; const cur=shiftOf(ym,id)[d]||''; const nx=SH_NEXT[cur];
     const rs=((rosterOf(ym,id)[d])||[''])[0]||''; const send=nx===rs?'clear':(nx||'work'); const prevMan=manualOf(ym,id)[d]||'clear';
     setShiftLocal(ym,id,d,send); paintCell(td,ym,id,d);
-    try{ await api('shifts',{method:'POST',body:{id,ym,day:+d,status:send}}); clearTimeout(shiftRefreshT); shiftRefreshT=setTimeout(()=>loadProfiles(true),2500); }
+    try{ await api('shifts',{method:'POST',body:{id,ym,day:+d,status:send}}); clearTimeout(shiftRefreshT); shiftRefreshT=setTimeout(()=>{ loadProfiles(true); loadShiftCodes(true); },2500); }
     catch(e){ setShiftLocal(ym,id,d,prevMan); paintCell(td,ym,id,d); toast('บันทึกปฏิทินไม่สำเร็จ: '+e.message); }
   });
 }
@@ -1443,10 +1453,11 @@ function mgrOverview(D){
   const flagged=rows.filter(r=>r.w.length);
   return `<section class="card sec">
     <div class="sechead"><div><h2>⚠️ สัญญาณที่ควรดู</h2><div class="hint">ระบบเตือนเพื่อช่วยเลือกว่าจะดึงแฟ้มของใครมาดู · ไม่ใช่การตัดสิน</div></div><button class="btn sm" id="profReload">↻ รีเฟรช</button></div>
-    ${flagged.length?flagged.map(r=>`<div class="warnrow" data-id="${r.p.id}">${avatar(r.p)}<div style="flex:1"><b>${esc(r.p.name)}</b> <span class="muted small">${esc(r.p.id)}</span><div class="chips2">${r.w.map(x=>`<span class="chip ${x.c}">${x.t}</span>`).join('')}</div></div><span class="muted">เปิดแฟ้ม ›</span></div>`).join(''):'<div class="empty" style="padding:16px">✓ ไม่มีสัญญาณเตือนในตอนนี้</div>'}
+    ${coachBlock(D)}${flagged.length?`<div class="h4" style="margin:12px 0 4px">📁 จากประวัติหลายเดือน</div>`:''}${flagged.length?flagged.map(r=>`<div class="warnrow" data-id="${r.p.id}">${avatar(r.p)}<div style="flex:1"><b>${esc(r.p.name)}</b> <span class="muted small">${esc(r.p.id)}</span><div class="chips2">${r.w.map(x=>`<span class="chip ${x.c}">${x.t}</span>`).join('')}</div></div><span class="muted">เปิดแฟ้ม ›</span></div>`).join(''):'<div class="muted small" style="margin-top:10px">📁 ประวัติหลายเดือน: ✓ ไม่มีสัญญาณเตือน</div>'}
   </section>
   ${teamShiftGrid()}
   ${rosterPlanner()}
+  ${shiftFairCard(D)}
   ${mgrCommTable(rows)}
   <section class="card sec" style="margin-top:12px">
     <div class="sechead"><div><h2>โปรไฟล์พนักงานทั้งหมด</h2><div class="hint">OVR = คะแนนเฉลี่ย 6 ด้านในช่วง ${profPeriod>=99?'ทั้งหมด':profPeriod+' เดือนล่าสุด'} · คลิกเพื่อเปิดแฟ้ม</div></div>
@@ -1468,7 +1479,7 @@ function mgrCommTable(rows){
 function periodChips(){ return `<div class="chips" id="perChips">${[[3,'3 เดือน'],[6,'6 เดือน'],[12,'12 เดือน'],[99,'ทั้งหมด']].map(([v,l])=>`<button data-v="${v}" class="${profPeriod==v?'on':''}">${l}</button>`).join('')}</div>`; }
 function bindPeriod(){ document.querySelectorAll('#perChips button').forEach(b=>b.onclick=()=>{ profPeriod=+b.dataset.v; LS.set('mt_period',profPeriod); render(); }); }
 function bindOverview(){
-  bindPeriod(); bindShifts(); $('#profReload').onclick=()=>loadProfiles(true);
+  bindPeriod(); bindCoach(); bindShifts(); $('#profReload').onclick=()=>loadProfiles(true);
   document.querySelectorAll('#profileBody .warnrow[data-id], #profileBody .pcard[data-id], #profileBody tr[data-id]').forEach(el=>el.onclick=()=>{ location.hash='p'+el.dataset.id; });
   const q=$('#profQ'); q.oninput=()=>{ profMgrQ=q.value.trim().toLowerCase(); const pos=q.selectionStart; render(); const q2=$('#profQ'); q2.focus(); q2.setSelectionRange(pos,pos); };
 }
@@ -1760,7 +1771,7 @@ async function syncRoster(buf,cfg){
   await loadXLSX(); const wb=XLSX.read(buf,{type:'array'});
   const R=parseRoster(wb,cfg); if(!R.tabs.length) throw new Error('ไม่พบแท็บของเดือน (ตั้งชื่อแท็บแบบ "Nov 26" หรือใส่ชื่อแท็บในหน้าตั้งค่า)'+(R.warn.length?' · '+R.warn.join(' · '):''));
   await api('roster',{method:'POST',body:{months:R.months,meta:{source:cfg._file?'ไฟล์ Excel':'Google Sheet',tabs:R.tabs,warn:R.warn,order:R.order}}});
-  profCache.all=null; if(isMgrRole()) loadProfiles(true);
+  profCache.all=null; if(isMgrRole()) loadProfiles(true); loadShiftCodes(true);
   return R;
 }
 function rosterOf(ym,id){
@@ -1812,6 +1823,7 @@ function focusSection(D){
     <div class="focusgrid">${ss.r.map(z=>{ const n=L.filter(l=>l.r.find(q=>q.x.m===z.x.m).ok).length; return `<div class="fitem"><div class="top"><b>${FOCUS_M[z.x.m].l}</b><span class="pct num st ${z.ok?'g':z.prog>=.85?'w':'b'}">${focusFmt(z.x,z.v)}</span></div>
       <div class="sub">เป้า ${focusFmt(z.x,z.x.t)} · ทั้งร้าน${z.ok?' ✓ ผ่านแล้ว':''}</div><div class="track"><i style="width:${Math.min(z.prog,1)*100}%"></i></div>
       <div class="row2" style="margin-top:10px"><span>${done?'ผ่าน':'ผ่านแล้ว'} <b>${n}</b> / ${L.length} คน</span></div></div>`; }).join('')}</div>
+    ${ss.r.filter(z=>z.ok).map(z=>`<div class="teamwin">🎉 ทีมผ่านภารกิจ ${esc(misName(z.x))} แล้ว (${focusFmt(z.x,z.v)} · เป้า ${focusFmt(z.x,z.x.t)})</div>`).join('')}
     <div class="h4" style="margin-top:14px">🏅 กระดานภารกิจ</div>
     <div class="flb">${L.map((l,i)=>`<div class="flrow" data-id="${l.p.id}"><span class="rk ${i<3&&l.pass?'r'+(i+1):''}">${i+1}</span>${avatar(l.p)}<b class="flname">${esc(l.p.name)}</b>
       <span class="flchips">${l.r.map(z=>`<span class="chip ${z.ok?'g':''}" title="${FOCUS_M[z.x.m].l}">${z.ok?'✓':'·'} ${focusFmt(z.x,z.v)}</span>`).join('')}</span><b class="num flpass">${l.pass}/${F.length}</b></div>`).join('')}</div></section>`;
@@ -2553,11 +2565,191 @@ async function save(msg){
 function apply(d,T){ T=T||state; if(!d||!Array.isArray(d.rows)) return false;
   T.source=d.source; T.updatedAt=d.updatedAt; T.staff=d.staff||T.staff; T.names=d.names||T.names;
   T.settings={...BASE.settings,...(d.settings||{}),att:{...BASE.settings.att,...((d.settings||{}).att||{})}}; T.rows=d.rows; T.cn=d.cn||[]; T.cnMatch=d.cnMatch||{}; if(T===liveBackup){ state.cn=T.cn; state.cnMatch=T.cnMatch; } return true; }
+/* =====================================================================
+   v12 — shift-aware daily target · coaching signals (talk / push / praise / mission) · shift fairness
+   ===================================================================== */
+let SC={ym:null,codes:{},at:0}, scLoading=false, shCache=null;
+async function loadShiftCodes(force){
+  const ym=liveYm(); if(!ym||scLoading) return; if(!force&&SC.ym===ym&&Date.now()-SC.at<5*60e3) return;
+  scLoading=true;
+  try{ const r=await fetch('/api/shifts/public?ym='+ym,{cache:force?'no-store':'default'}); if(r.ok){ const d=await r.json(); SC={ym,codes:d.codes||{},at:Date.now()}; shCache=null; if(!document.activeElement||!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) render(); } }catch(e){}
+  scLoading=false;
+}
+const SH_LBL={M:'เช้า',F:'กะ 4',A:'บ่าย',MT:'MT',D:'ทั้งวัน',W:'ทำงาน'};
+const SH_TIME={'2':'10–19','🔑':'10–19','4':'11–20','8':'13–22','MT':'14–22','53':'ทั้งวัน'};
+function shRaw(id,d){ const o=SC.codes[String(id)]; return o?String(o[String(d)]||'').trim():''; }
+function shKind(id,d){ const c=shRaw(id,d).toUpperCase(); if(!c) return null;
+  if(c==='2'||c==='🔑') return 'M'; if(c==='4') return 'F'; if(c==='8') return 'A'; if(c==='MT') return 'MT'; if(c==='53') return 'D'; if(c==='W'||/^\d+$/.test(c)) return 'W'; return 'off'; }
+const shWork=k=>k&&k!=='off'&&k!=='meet';
+function bkkToday(){ return new Date(Date.now()+7*3600e3).toISOString().slice(0,10); }
+function isWEd(ym,d){ const [y,m]=ym.split('-').map(Number); const w=new Date(Date.UTC(y,m-1,d)).getUTCDay(); return w===0||w===6; }
+const ATT_ND={smile:['smileU',['iphoneU']],sim:['simU',['iphoneU','ipadU']],ufund:['ufundU',['iphoneU']],pvl:['pvlU',['iphoneU']],ac:['acU',['macU','ipadU','awU']],pencil:['pencilU',['ipadU']]};
+const MIS_SHORT={smile:'Cover+',mix:'MIX 3RD',ac:'AC+',sim:'Sim',ufund:'UFUND',pvl:'PVL',pencil:'Pencil',total:'ยอดรวม'};
+function misName(x){ const d=FOCUS_M[x.m]; if(MIS_SHORT[x.m]) return MIS_SHORT[x.m]; if(d.k==='cat'){ const c=CATS.find(c=>c.k===d.c); return c?(c.k==='rd'?'3RD':c.k==='aba'?'BTB(APPLE)':c.l):d.l; } return d.l; }
+
+/* team model: daily sums per person + average sales per shift kind (weekday / weekend) */
+function shiftModel(D){
+  const M=D.M; if(!M.ym||SC.ym!==M.ym||viewYm) return null;
+  const key=M.ym+'|'+M.day+'|'+state.rows.length+'|'+SC.at+'|'+lastStamp;
+  if(shCache&&shCache.key===key) return shCache;
+  const P=D.list.filter(p=>p.tgSales>0&&SC.codes[String(p.id)]); const pm=new Map(P.map(p=>[String(p.id),p]));
+  const day={}; P.forEach(p=>day[String(p.id)]=[]);
+  for(const r of state.rows){ const id=String(r[2]); const p=pm.get(id); if(!p||!r[0].startsWith(M.ym)) continue; if(p.branch&&r[1]!=p.branch) continue;
+    const d=+r[0].slice(8); const a=day[id][d]||(day[id][d]=blank()); for(const k of KEYS) a[k]+=r[KI[k]]||0; }
+  const sal=(id,d)=>{ const a=day[id][d]; return a?SALES_CATS.reduce((s,c)=>s+a[c.a],0):0; };
+  const agg={}; const add=(k,v)=>{ const o=agg[k]||(agg[k]={s:0,n:0}); o.s+=v; o.n++; };
+  P.forEach(p=>{ const id=String(p.id); for(let d=1;d<=M.day;d++){ const k=shKind(id,d); if(!shWork(k)||k==='W') continue; const v=sal(id,d), t=isWEd(M.ym,d)?'we':'wd'; add(k+'_'+t,v); add(k,v); add('all_'+t,v); add('all',v); } });
+  const avg=k=>agg[k]&&agg[k].n?agg[k].s/agg[k].n:0, n=k=>(agg[k]||{}).n||0;
+  const enough=n('all')>=30&&avg('all_wd')>0;
+  const weF=enough&&n('all_we')>=8?avg('all_we')/avg('all_wd'):1.4;
+  const w=(k,d)=>{ if(k==null) k='W'; if(!shWork(k)) return 0; const we=isWEd(M.ym,d);
+    if(!enough) return (k==='MT'?0.8:1)*(we?weF:1);
+    const kk=k==='W'?'all':k, key=kk+'_'+(we?'we':'wd'); if(n(key)>=5) return avg(key);
+    const base=n(kk)>=5?avg(kk)*avg('all_wd')/(avg('all')||1):avg('all_wd'); return base*(we?weF:1); };
+  shCache={key,M,P,day,sal,agg,avg,n,enough,w,ids:new Set(P.map(p=>String(p.id)))};
+  return shCache;
+}
+/* one person: weights per day, plan per day, streaks, efficiency vs same shift */
+function shPerson(S,p,goalTotal){
+  if(!S) return null; const id=String(p.id); if(!S.ids.has(id)) return null; const M=S.M, ym=M.ym;
+  const wt=[0]; let wTot=0; for(let d=1;d<=M.dim;d++){ wt[d]=S.w(shKind(id,d),d); wTot+=wt[d]; }
+  if(!wTot) return null;
+  const tT=goalTotal!=null?goalTotal:p.tgSales;
+  const today=bkkToday(), tdy=today.slice(0,7)===ym?+today.slice(8):(today>ym?M.dim+1:0);
+  const inProg=M.last===today;
+  const doneTo=inProg?M.day-1:M.day; /* days fully closed */
+  let act=0,exp=0,wDone=0,nW=0; const hits=[];
+  for(let d=1;d<=doneTo;d++){ if(wt[d]<=0) continue; const v=S.sal(id,d); act+=v; wDone+=wt[d]; nW++; if(S.enough) exp+=wt[d];
+    const plan=p.tgSales*wt[d]/wTot; hits.push({d,v,plan,hit:v>=plan}); }
+  let streak=0; for(let i=hits.length-1;i>=0&&hits[i].hit;i--) streak++;
+  const from=inProg?M.day:Math.max(M.day+1,tdy); /* next day that still needs selling */
+  let wLeft=0,nLeft=0; for(let d=inProg?M.day:M.day+1;d<=M.dim;d++) if(wt[d]>0){ wLeft+=wt[d]; nLeft++; }
+  let dT=null; for(let d=from;d<=M.dim;d++) if(wt[d]>0){ dT=d; break; }
+  const soldToday=inProg?S.sal(id,M.day):0;
+  return {id,wt,wTot,hits,streak,act,exp,idx:S.enough&&exp?act/exp:null,nW,wDone,wLeft,nLeft,dT,from,tdy,inProg,soldToday,kind:d=>shKind(id,d),raw:d=>shRaw(id,d),tT};
+}
+function shDayLbl(ym,d){ const [y,m]=ym.split('-').map(Number); const w=new Date(Date.UTC(y,m-1,d)).getUTCDay(); return ['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'][w]+' '+d; }
+function shPill(raw,k){ if(raw==='🔑') return '🔑 เปิดร้าน · 10–19'; const t=SH_TIME[raw]; return (k==='W'?'ทำงาน':'กะ '+raw)+(t?' · '+t:''); }
+
+/* mission gap for one person (att = pieces/baht, fc = today's amount) */
+function misGap(x,p,sp){
+  const d=FOCUS_M[x.m], a=p.a;
+  if(d.k==='att'){ if(x.m==='mix'){ const g=x.t*(p.total-a.rdS)-a.rdS; return {u:'บาท',v:Math.max(Math.ceil(g),0),att:true}; }
+    const nd=ATT_ND[x.m]; if(!nd) return null; const den=nd[1].reduce((s,k)=>s+a[k],0); return {u:'ชิ้น',v:Math.max(Math.ceil(x.t*den-a[nd[0]]-1e-9),0),att:true,den}; }
+  const tg=d.k==='fc'?p.tgSales:(+p.tg[d.c]||0), av=d.k==='fc'?p.actSales:(a[(CATS.find(c=>c.k===d.c)||{}).a]||0);
+  const need=Math.max(x.t*tg-av,0); if(!sp||!sp.wLeft||sp.dT==null) return {u:'บาท',v:Math.ceil(need),fc:true};
+  return {u:'บาท',v:Math.ceil(need*sp.wt[sp.dT]/sp.wLeft),fc:true,today:true};
+}
+/* staff card: "ต้องขายวันนี้" */
+function shTodayCard(p,tot,D){
+  const M=D.M; const S=shiftModel(D); const sp=shPerson(S,p,tot.nt); if(!sp) return null;
+  const ym=M.ym; const need=Math.max(tot.need,0);
+  let big,lbl,foot,pill='';
+  const dT=sp.dT; const todayOff=sp.tdy>=1&&sp.tdy<=M.dim&&sp.tdy>=sp.from&&dT!==sp.tdy;
+  if(need<=0){ lbl='ต้องขายวันนี้'; big='0'; foot='🎉 ถึงเป้าที่ตั้งไว้แล้ว'; }
+  else if(dT==null){ lbl='ต้องขายวันนี้'; big=fmt(need); foot='ไม่มีวันทำงานเหลือในตาราง'; }
+  else { const t=sp.inProg&&dT===M.day? (()=>{ const before=need+sp.soldToday; return before*sp.wt[dT]/sp.wLeft; })() : need*sp.wt[dT]/sp.wLeft;
+    const isToday=dT===sp.tdy; const k=sp.kind(dT), raw=sp.raw(dT);
+    lbl=isToday?'ต้องขายวันนี้':todayOff?'วันนี้หยุด · เป้าวันทำงานถัดไป':'เป้าวันทำงานถัดไป';
+    pill=`<span class="shpill">${esc(shPill(raw,k))}</span>`;
+    if(isToday&&sp.inProg){ const left=Math.max(t-sp.soldToday,0); big=fmt(left); foot=left>0?`เป้าวันนี้ ${fmt(t)} · ขายแล้ว ${fmt(sp.soldToday)}`:`🎉 ถึงเป้าวันนี้แล้ว (${fmt(sp.soldToday)} / ${fmt(t)})`; }
+    else { big=fmt(t); foot=isToday?'คิดตามกะ · วันหยุดไม่มีเป้า':shDayLbl(ym,dT)+' · คิดตามกะ'; } }
+  /* praise line (only good news) */
+  let praise='';
+  if(sp.streak>=3) praise=`🔥 ถึงเป้ารายวัน ${sp.streak} วันทำงานติดแล้ว`;
+  else { const h=sp.hits[sp.hits.length-1]; if(h&&h.plan>0&&h.v>=h.plan*goalOf(p.id).all/100) praise=`🔥 ${h.d===sp.tdy-1?'เมื่อวาน':'วันที่ '+h.d} ทำได้ ${fmt(h.v/(h.plan*goalOf(p.id).all/100)*100)}% ของเป้าวันนั้น`; }
+  /* mission line */
+  let mis=''; const F=focusOf(ym);
+  if(F.length){ const sc=focusScore(F,{...p,cat:liveCat(p)});
+    if(sc.pass===F.length) mis='🏅 ภารกิจครบทุกข้อเดือนนี้';
+    else { const open=sc.r.filter(z=>!z.ok).map(z=>({z,g:misGap(z.x,p,sp)})).filter(o=>o.g);
+      const pick=open.filter(o=>o.g.att&&o.g.u==='ชิ้น'&&o.g.v<=12).sort((a,b)=>a.g.v-b.g.v)[0]||open.find(o=>o.g.fc)||open[0];
+      const done=sc.r.filter(z=>z.ok).map(z=>misName(z.x));
+      if(pick){ const nm=misName(pick.z.x);
+        mis= pick.g.att? `🎯 อีก <b>${fmt(pick.g.v)} ${pick.g.u}</b> ${nm} ก็ผ่านภารกิจ` : `🎯 ${nm} ${pick.g.today?'วันนี้':'อีก'} <b>${fmt(pick.g.v)} บาท</b> ภารกิจเดินตามเป้า`; }
+      if(done.length) mis+=(mis?' · ':'')+`✓ ผ่าน ${done.join(', ')} แล้ว`; } }
+  /* next 7 days (collapsed) */
+  const days=[]; for(let d=Math.max(sp.from,1);d<=M.dim&&days.length<7;d++){ const k=sp.kind(d), raw=sp.raw(d); const t=sp.wLeft&&need>0?need*sp.wt[d]/sp.wLeft:0;
+    days.push(`<div class="shd ${sp.wt[d]>0?'':'off'} ${d===dT?'on':''}"><div>${shDayLbl(ym,d)}</div><div>${sp.wt[d]>0?esc(raw==='🔑'?'🔑':raw||'·'):(k==='meet'?'ประชุม':'หยุด')}</div><b>${sp.wt[d]>0&&t?fmt(t/1000,0)+'k':'–'}</b></div>`); }
+  const html=`<div class="sumcard shcard"><div class="l" style="display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap"><span>${lbl}</span>${pill}</div>
+    <div class="v num">${big}<small>บาท</small></div><div class="f">${foot}</div>
+    ${praise?`<div class="shline g">${praise}</div>`:''}${mis?`<div class="shline">${mis}</div>`:''}
+    ${days.length?`<details class="shnext"><summary>ดู 7 วันข้างหน้า</summary><div class="shstrip">${days.join('')}</div></details>`:''}</div>`;
+  return {html,sp};
+}
+
+/* ---------- manager: coaching signals ---------- */
+function coachData(D){
+  const S=shiftModel(D); if(!S) return null; const M=S.M, ym=M.ym, F=focusOf(ym); const d0=M.day-7;
+  const out=[];
+  for(const p of S.P){ const sp=shPerson(S,p); if(!sp) continue; const id=sp.id; const praise=[], talk=[], push=[], drop=[];
+    /* efficiency vs same shift */
+    if(sp.idx!=null&&sp.nW>=4){ const v=Math.round(sp.idx*100); if(v<85) talk.push(`ยอดต่อกะ ${fmt(v)}% ของทีม`); else if(v<95) push.push(`ยอดต่อกะ ${fmt(v)}% ของทีม`); else if(v>=110) praise.push({t:`ยอดต่อกะ ${fmt(v)}% ของทีมในกะเดียวกัน`,txt:`ยอดขายต่อกะสูงกว่าค่าเฉลี่ยทีมในกะเดียวกัน (${fmt(v)}%) · ${ymLong(ym)}`}); }
+    if(sp.streak>=3){ const h=sp.hits.slice(-sp.streak); praise.push({t:`ถึงเป้ารายวัน ${sp.streak} วันทำงานติด`,txt:`ถึงเป้ารายวันตามกะ ${sp.streak} วันทำงานติดกัน (${h[0].d}–${h[h.length-1].d} ${TH_M[M.m-1]})`}); }
+    /* comeback: gap ratio now vs a week ago */
+    const ratioAt=dc=>{ let a=0,wd=0,wl=0; for(let d=1;d<=M.dim;d++){ if(d<=dc){ a+=S.sal(id,d); if(sp.wt[d]>0) wd+=sp.wt[d]; } else wl+=sp.wt[d]; } return (a>0&&wl>0&&wd>0)?(Math.max(p.tgSales-a,0)/wl)/(a/wd):null; };
+    if(d0>=5){ const r0=ratioAt(d0), r1=ratioAt(sp.inProg?M.day-1:M.day); if(r0&&r1&&r0>1.15&&r1<=r0*0.8) praise.push({t:`ฟื้นตัว: ช่องว่างถึงเป้าแคบลง ${fmt((1-r1/r0)*100)}% ใน 7 วัน`,txt:`สัปดาห์นี้ยอดดีขึ้นชัดเจน ช่องว่างถึงเป้าแคบลง ${fmt((1-r1/r0)*100)}% ใน 7 วัน`}); }
+    /* missions */
+    if(F.length){ const now=focusScore(F,{...p,cat:liveCat(p)});
+      let then=null; if(d0>=5){ const a0=blank(); for(let d=1;d<=d0;d++){ const x=S.day[id][d]; if(x) for(const k of KEYS) a0[k]+=x[k]; } const M0={...M,day:d0}; const dv=derive(a0,p.tg,M0); then=focusScore(F,{...dv,cat:liveCat({tg:p.tg,a:a0,fcf:dv.fcf})}); }
+      if(now.pass===F.length) praise.push({t:'🏅 ภารกิจครบทุกข้อ',txt:`ผ่านภารกิจประจำเดือนครบทุกข้อ (${F.map(misName).join(', ')}) · ${ymLong(ym)}`});
+      now.r.forEach((z,i)=>{ const nm=misName(z.x); const was=then&&then.r[i].ok;
+        if(z.ok&&then&&!was&&now.pass<F.length) praise.push({t:`เพิ่งผ่านภารกิจ ${nm}`,txt:`ผ่านภารกิจ ${nm} (${focusFmt(z.x,z.v)} เป้า ${focusFmt(z.x,z.x.t)}) · ${ymLong(ym)}`});
+        if(!z.ok&&was) drop.push(`หลุดภารกิจ ${nm} (เหลือ ${focusFmt(z.x,z.v)} · เป้า ${focusFmt(z.x,z.x.t)})`);
+        /* daily streak on the mission */
+        const dfm=FOCUS_M[z.x.m]; let st=0, first=null;
+        for(let k=sp.hits.length-1;k>=0;k--){ const d=sp.hits[k].d, a=S.day[id][d]; if(!a) break; let ok=null;
+          if(dfm.k==='att'){ if(z.x.m==='mix'){ const tot=a.macS+a.ipadS+a.iphoneS+a.awS+a.abaS+a.rdS+a.serviceS+a.trueS+a.insS-a.rdS; ok=tot>0?a.rdS/tot>=z.x.t:null; }
+            else { const nd=ATT_ND[z.x.m]; const den=nd[1].reduce((s,kk)=>s+a[kk],0); ok=den>0?a[nd[0]]/den>=z.x.t:null; } }
+          else { const tg=dfm.k==='fc'?p.tgSales:(+p.tg[dfm.c]||0), v=dfm.k==='fc'?S.sal(id,d):(a[(CATS.find(c=>c.k===dfm.c)||{}).a]||0); ok=tg>0?v>=z.x.t*tg*sp.wt[d]/sp.wTot:null; }
+          if(ok===null) continue; if(!ok) break; st++; first=d; }
+        if(st>=3) praise.push({t:`${nm} ผ่านรายวัน ${st} วันทำงานติด`,txt:`ภารกิจ ${nm} ผ่านรายวัน ${st} วันทำงานติดกัน (ตั้งแต่ ${first} ${TH_M[M.m-1]})`}); }); }
+    out.push({p,sp,praise,talk,push,drop}); }
+  return {S,list:out};
+}
+function praisedAlready(id,txt){ return logsFor(id).some(e=>e.type==='praise'&&!e.voided&&e.text===txt); }
+function coachBlock(D){
+  const C=coachData(D); if(!C) return SC.ym?'':`<div class="muted small" style="margin:0 0 10px">กำลังโหลดตารางกะ…</div>`;
+  const M=C.S.M; const L=C.list;
+  const row=(x,chips,btn)=>`<div class="warnrow coachrow" data-id="${x.p.id}">${avatar(x.p)}<div style="flex:1;min-width:0"><b>${esc(x.p.name)}</b><div class="chips2">${chips}</div></div>${btn||''}</div>`;
+  const pr=L.filter(x=>x.praise.length).sort((a,b)=>b.praise.length-a.praise.length);
+  const tk=L.filter(x=>x.talk.length), pu=L.filter(x=>x.push.length&&!x.talk.length), dr=L.filter(x=>x.drop.length);
+  const grp=(t,arr,f)=>arr.length?`<div class="h4" style="margin:12px 0 4px">${t} <span class="muted small">${arr.length} คน</span></div>${arr.map(f).join('')}`:'';
+  const pbtn=x=>{ const it={txt:x.praise.map(z=>z.txt).join(' · ')}; const done=praisedAlready(x.p.id,it.txt); return done?'<span class="chip g">✓ บันทึกแล้ว</span>':`<button class="btn sm" data-praise="${x.p.id}" data-txt="${esc(it.txt)}">👍 บันทึกคำชม</button>`; };
+  const html=`<div class="coachbox"><div class="hint" style="margin-bottom:4px">จากยอดเดือนนี้ เทียบตามกะ · ข้อมูลถึงวันที่ ${M.day} ${TH_M[M.m-1]}${C.S.enough?'':' · ข้อมูลกะยังน้อย ใช้ค่าประมาณ'}</div>
+    ${grp('👍 ควรชม',pr,x=>row(x,x.praise.map(it=>`<span class="chip g">${esc(it.t)}</span>`).join('')+(x.talk.length?`<span class="chip b">${esc(x.talk[0])}</span>`:''),pbtn(x)))}
+    ${grp('🔴 ต้องคุย',tk,x=>row(x,x.talk.map(t=>`<span class="chip b">${esc(t)}</span>`).join('')+(x.praise.length?`<span class="chip g">${esc(x.praise[0].t)}</span>`:'')))}
+    ${grp('🟡 ต้องเร่ง',pu,x=>row(x,x.push.map(t=>`<span class="chip w">${esc(t)}</span>`).join('')))}
+    ${grp('⚠ หลุดภารกิจ',dr,x=>row(x,x.drop.map(t=>`<span class="chip w">${esc(t)}</span>`).join('')))}
+    ${!pr.length&&!tk.length&&!pu.length&&!dr.length?'<div class="muted small">ยังไม่มีสัญญาณจากยอดเดือนนี้</div>':''}</div>`;
+  return html;
+}
+function bindCoach(){
+  document.querySelectorAll('#profileBody [data-praise]').forEach(b=>b.onclick=async e=>{ e.stopPropagation(); b.disabled=true; b.textContent='กำลังบันทึก…';
+    try{ await api('log',{method:'POST',body:{id:b.dataset.praise,type:'praise',date:bkkToday(),severity:'',text:b.dataset.txt,visible:true}}); toast('บันทึกคำชมแล้ว · พนักงานเห็นในแฟ้มของตัวเอง'); b.outerHTML='<span class="chip g">✓ บันทึกแล้ว</span>'; loadProfiles(true); }
+    catch(err){ b.disabled=false; b.textContent='👍 บันทึกคำชม'; toast('บันทึกไม่สำเร็จ: '+(err.message||'')); } });
+}
+/* ---------- manager: shift fairness (collapsed) ---------- */
+function shiftFairCard(D){
+  const C=coachData(D); if(!C||!C.S.enough) return '';
+  const S=C.S, M=S.M; const K=[['M','เช้า (2, 🔑)'],['F','กะ 4'],['A','บ่าย (8)'],['MT','MT'],['D','ทั้งวัน (53)']];
+  const cell=k=>S.n(k)?`${fmt(S.avg(k))} <span class="muted small">(${S.n(k)} กะ)</span>`:'<span class="muted">–</span>';
+  const ppl=C.list.filter(x=>x.sp.idx!=null).map(x=>{ const c={M:0,F:0,A:0,MT:0}; let we=0; for(let d=1;d<=M.day;d++){ const k=x.sp.kind(d); if(c[k]!=null) c[k]++; if(shWork(k)&&isWEd(M.ym,d)) we++; } return {x,c,we}; }).sort((a,b)=>b.x.sp.idx-a.x.sp.idx);
+  return `<details class="card sec shfair" style="margin-top:12px"><summary><h2 style="display:inline">⚖️ ความได้เปรียบของกะ · ${ymLong(M.ym)}</h2> <span class="hint">แตะเพื่อเปิด · ข้อมูลถึงวันที่ ${M.day}</span></summary>
+    <div class="h4" style="margin-top:12px">ยอดเฉลี่ยต่อคนต่อกะ (ทั้งทีม PIA)</div>
+    <div class="tablewrap"><table style="min-width:420px"><thead><tr><th class="l">กะ</th><th>วันธรรมดา</th><th>เสาร์-อาทิตย์</th></tr></thead><tbody>
+    ${K.map(([k,l])=>`<tr style="cursor:default"><td class="l"><b>${l}</b></td><td class="num">${cell(k+'_wd')}</td><td class="num">${cell(k+'_we')}</td></tr>`).join('')}</tbody></table></div>
+    <div class="h4" style="margin-top:14px">รายคน เทียบกับทีมในกะแบบเดียวกัน</div><div class="hint">100% = ขายเท่าค่าเฉลี่ยทีมในกะและวันแบบเดียวกัน · คนได้กะไหนมากก็ไม่เสียเปรียบ</div>
+    <div class="tablewrap"><table style="min-width:560px"><thead><tr><th class="l">พนักงาน</th><th>เทียบทีม</th><th>เช้า</th><th>กะ 4</th><th>บ่าย</th><th>MT</th><th>ทำงาน ส-อา</th></tr></thead><tbody>
+    ${ppl.map(({x,c,we})=>{ const v=Math.round(x.sp.idx*100); return `<tr data-id="${x.p.id}"><td class="l"><div class="person">${avatar(x.p)}<div class="who"><b>${esc(x.p.name)}</b><small>${esc(x.p.id)}</small></div></div></td><td><span class="chip ${v>=110?'g':v>=95?'':v>=85?'w':'b'}">${fmt(v)}%</span></td><td class="num">${c.M}</td><td class="num">${c.F}</td><td class="num">${c.A}</td><td class="num">${c.MT}</td><td class="num">${we}</td></tr>`; }).join('')}
+    </tbody></table></div></details>`;
+}
+
 async function load(light){
   try{ if(light&&lastStamp){ const q=await fetch(API+'?stamp=1',{cache:'no-store'}); if(q.ok){ const st=await q.json(); if(st&&st.s&&String(st.s)===String(lastStamp)){ synced=true; return; } } }
     const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
     if(d&&d.savedAt!==lastStamp&&apply(d,viewYm?liveBackup:state)) lastStamp=d.savedAt; }catch(e){ synced=false; }
-  render(); loadHistoryIndex(); }
+  render(); loadHistoryIndex(); loadShiftCodes(); }
 $('#loginBtn').onclick=()=>{ $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); setTimeout(()=>$('#keyInp').focus(),50); };
 $('#keyInp').onkeydown=e=>{ if(e.key==='Enter') $('#loginGo').click(); };
 $('#loginGo').onclick=async()=>{ const k=$('#keyInp').value.trim(); if(!k) return; const s=$('#loginStatus');
