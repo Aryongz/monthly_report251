@@ -210,6 +210,7 @@ textarea{width:100%;border:1px solid var(--line-2);background:var(--surface-1);c
 .coachbox{margin-bottom:6px}.coachrow .btn{flex:none;white-space:nowrap}
 .teamwin{margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--good-soft);color:var(--good);font-weight:500;font-size:13.5px}
 details.shfair>summary{cursor:pointer;list-style:none}details.shfair>summary::-webkit-details-marker{display:none}
+.rpopt{display:inline-flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--text-secondary)}.rpopt label{display:inline-flex;gap:5px;align-items:center;cursor:pointer}
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
@@ -2117,33 +2118,36 @@ function rsSheet(ym){ const o={}; for(const id of rsIds()){ const R=rosterOf(ym,
     o[id]=d; } return o; }
 function rsWeekend(ym,d){ const [y,m]=ym.split('-').map(Number); const w=new Date(Date.UTC(y,m-1,d)).getUTCDay(); return w===0||w===6; }
 
-function rsCheck(ym,S){
+function rsOpt(){ const o=LS.get('mt_rsopt',null)||{}; return {pre:o.pre!==false,F:o.F==null?1:o.F,Fhard:o.Fhard!==false}; }
+function rsCheck(ym,S,opt){ opt=opt||rsOpt();
   const N=dimOf(ym), ids=rsOrder(ym), days=[];
   for(let d=1;d<=N;d++){ const we=rsWeekend(ym,d); const c={M:0,A:0,F:0,OFF:0,ALL:0,key:0};
     ids.forEach(i=>{ const code=S[i][d]||''; const k=rsKind(code); if(c[k]!=null) c[k]++; if(code==='🔑') c.key++; });
-    const iss=[]; if(!c.ALL){ const nm=we?4:3, na=we?7:6; if(c.M<nm) iss.push(`เช้า ${c.M}/${nm}`); if(c.A<na) iss.push(`บ่าย ${c.A}/${na}`); if(we&&c.M>5) iss.push(`เช้าเกิน ${c.M}/5`); if(d>1&&c.key!==2) iss.push(`🔑 ${c.key}/2`); }
+    const iss=[]; if(!c.ALL){ const nm=we?4:3, na=we?7:6; if(c.M<nm) iss.push(`เช้า ${c.M}/${nm}`); if(c.A<na) iss.push(`บ่าย ${c.A}/${na}`); if(we&&c.M>5) iss.push(`เช้าเกิน ${c.M}/5`); if(opt.F&&c.F<1) iss.push(`กะ 4 ${c.F}/1`); if(d>1&&c.key!==2) iss.push(`🔑 ${c.key}/2`); }
     days.push({d,we,c,iss}); }
   const per={}; const keys=[];
-  for(const i of ids){ const s=S[i]; const p={M:0,A:0,F:0,key:0,we:0,weM:0,off:0,pre:[],preX:0,streak:0,keyBad:[]}; let st=0;
+  for(const i of ids){ const s=S[i]; const p={M:0,A:0,F:0,key:0,we:0,weM:0,off:0,pre:[],preX:0,streak:0,streakM:0,keyBad:[]}; let st=0, sm=0;
     for(let d=1;d<=N;d++){ const c=s[d]||'', k=rsKind(c);
       if(k==='M'||k==='A'||k==='F') p[k]++; if(c==='🔑') p.key++; if(k==='OFF') p.off++; if(k==='M'&&rsWeekend(ym,d)) p.weM++;
       if(rsWeekend(ym,d)&&k&&k!=='OFF') p.we++;
       if(c==='🔑'&&d>1){ const pk=rsKind(s[d-1]); if(pk!=='A'&&pk!=='ALL') p.keyBad.push(d); }
       if(d<N&&RS_OFF.has(String(s[d+1]||'').toUpperCase())&&k!=='M'&&k!=='OFF'&&k){ if(rsLocked(c)) p.preX++; else p.pre.push(d); }
-      st=k==='A'?st+1:0; p.streak=Math.max(p.streak,st); }
+      st=k==='A'?st+1:0; p.streak=Math.max(p.streak,st); sm=k==='M'?sm+1:0; p.streakM=Math.max(p.streakM,sm); }
+    if(!opt.pre){ p.pre=[]; p.preX=0; }
     per[i]=p; keys.push(p.key); }
   const avg=k=>ids.reduce((s,i)=>s+per[i][k],0)/Math.max(ids.length,1);
   const weMs=ids.map(i=>per[i].weM);
   return {days,per,ids,avg:{M:avg('M'),A:avg('A'),key:avg('key'),we:avg('we'),weM:avg('weM')},
-    sum:{dayBad:days.filter(x=>x.iss.length).length,pre:ids.reduce((s,i)=>s+per[i].pre.length,0),keyBad:ids.reduce((s,i)=>s+per[i].keyBad.length,0),streak:ids.filter(i=>per[i].streak>4).length,keyMin:Math.min(...keys),keyMax:Math.max(...keys),weMMin:Math.min(...weMs),weMMax:Math.max(...weMs)}};
+    sum:{dayBad:days.filter(x=>x.iss.length).length,pre:ids.reduce((s,i)=>s+per[i].pre.length,0),keyBad:ids.reduce((s,i)=>s+per[i].keyBad.length,0),streak:ids.filter(i=>per[i].streak>4).length,streakM:ids.filter(i=>per[i].streakM>4).length,keyMin:Math.min(...keys),keyMax:Math.max(...keys),weMMin:Math.min(...weMs),weMMax:Math.max(...weMs)}};
 }
 
-function rsSolve(ym,base,fromDay,seed){
+function rsSolve(ym,base,fromDay,seed,opt){
+  opt=opt||rsOpt();
   let x=seed||1; const rnd=()=>{ x=(x*1103515245+12345)&0x7fffffff; return x/0x7fffffff; };
   const N=dimOf(ym), ids=rsOrder(ym), S={};
   for(const i of ids){ S[i]={}; for(let d=1;d<=N;d++){ const c=(base[i]||{})[d]||''; if(d<fromDay||rsLocked(c)) S[i][d]=c; } }
-  const cnt={}, streak={}; ids.forEach(i=>{ cnt[i]={M:0,A:0,F:0,key:0,weM:0}; streak[i]=0; });
-  const tally=d=>ids.forEach(i=>{ const c=S[i][d]||'', k=rsKind(c); streak[i]=k==='A'?streak[i]+1:0; if(cnt[i][k]!=null) cnt[i][k]++; if(c==='🔑') cnt[i].key++; if(k==='M'&&rsWeekend(ym,d)) cnt[i].weM++; });
+  const cnt={}, streak={}, streakM={}; ids.forEach(i=>{ cnt[i]={M:0,A:0,F:0,key:0,weM:0}; streak[i]=0; streakM[i]=0; });
+  const tally=d=>ids.forEach(i=>{ const c=S[i][d]||'', k=rsKind(c); streak[i]=k==='A'?streak[i]+1:0; streakM[i]=k==='M'?streakM[i]+1:0; if(cnt[i][k]!=null) cnt[i][k]++; if(c==='🔑') cnt[i].key++; if(k==='M'&&rsWeekend(ym,d)) cnt[i].weM++; });
   for(let d=1;d<fromDay&&d<=N;d++) tally(d);
   let keysNext=new Set(fromDay>1?ids.filter(i=>S[i][fromDay]==='🔑'):[]);
   const free=(i,d)=>d<=N&&!rsLocked(S[i][d]||'')&&!(d<fromDay);
@@ -2164,14 +2168,14 @@ function rsSolve(ym,base,fromDay,seed){
       keysNext.forEach(i=>{ if(avail.includes(i)){ S[i][d]='🔑'; Mset.add(i); } });
       const avgW0=ids.reduce((t,i)=>t+cnt[i].weM,0)/ids.length;
       /* weekend: someone already ahead on weekend mornings may skip the "morning before a day off" rule (balance comes first) */
-      const preOff=new Set(avail.filter(i=>!Mset.has(i)&&d<N&&RS_OFF.has(String(S[i][d+1]||'').toUpperCase())&&!(we&&cnt[i].weM>=T)));
+      const preOff=new Set(opt.pre?avail.filter(i=>!Mset.has(i)&&d<N&&RS_OFF.has(String(S[i][d+1]||'').toUpperCase())&&!(we&&cnt[i].weM>=T)):[]);
       preOff.forEach(i=>Mset.add(i));
       // tomorrow's key holders: on afternoon today, free tomorrow
       const tWe=d<N&&rsWeekend(ym,d+1);   /* a 🔑 opening on Sat/Sun is also a weekend morning */
       const kc=avail.filter(i=>!Mset.has(i)&&free(i,d+1)&&!longA(i,d)).sort((a,b)=>(tWe?(projW(a,d+1)-projW(b,d+1)):0)||(cnt[a].key-cnt[b].key)||(streak[a]-streak[b])||(rnd()-.5));
       keysNext=new Set(d<N?kc.slice(0,2):[]); keysNext.forEach(i=>Aset.add(i));
       let rest=avail.filter(i=>!Mset.has(i)&&!Aset.has(i));
-      rest.sort((a,b)=>((longA(b,d)||streak[b]>=3)-(longA(a,d)||streak[a]>=3))||(we?(projW(a,d)-projW(b,d)):0)||(cnt[a].M-cnt[b].M)||(rnd()-.5));
+      rest.sort((a,b)=>((longA(b,d)||streak[b]>=3)-(longA(a,d)||streak[a]>=3))||((streakM[a]>=3)-(streakM[b]>=3))||(we?(projW(a,d)-projW(b,d)):0)||(cnt[a].M-cnt[b].M)||(rnd()-.5));
       while(Mset.size<nM&&rest.length) Mset.add(rest.shift());
       rest.sort((a,b)=>(longA(a,d)-longA(b,d))||(cnt[a].A-cnt[b].A)||(rnd()-.5));
       while(Aset.size<nA&&rest.length) Aset.add(rest.shift());
@@ -2183,17 +2187,25 @@ function rsSolve(ym,base,fromDay,seed){
         while(rest.length&&Mset.size<5&&Aset.size>=nA&&cnt[rest[0]].weM<=avgW) Mset.add(rest.shift());
         rest.sort((a,b)=>(cnt[a].F-cnt[b].F)||(rnd()-.5)); while(rest.length&&Fset.size<2) Fset.add(rest.shift());
         rest.forEach(i=>{ if(longA(i,d)&&Mset.size<5) Mset.add(i); else if(longA(i,d)&&Fset.size<3) Fset.add(i); else Aset.add(i); }); }
-      else rest.forEach(i=>{ (longA(i,d)?Fset:(Aset.size<nA+1?Aset:Fset)).add(i); });
+      else { /* weekday: at least opt.F on shift 4 (checks deliveries, breaks long morning/afternoon runs) */
+        rest.sort((a,b)=>((longA(b,d)||streak[b]>=3||streakM[b]>=3)-(longA(a,d)||streak[a]>=3||streakM[a]>=3))||(cnt[a].F-cnt[b].F)||(rnd()-.5));
+        while(Fset.size<opt.F&&rest.length) Fset.add(rest.shift());
+        rest.forEach(i=>{ (longA(i,d)?Fset:(Aset.size<nA+1?Aset:Fset)).add(i); }); }
+      if(Fset.size<opt.F){ /* nobody left: take from extra mornings first, then from afternoon (never key holders) */
+        const fromM=[...Mset].filter(i=>S[i][d]!=='🔑').sort((a,b)=>(preOff.has(a)-preOff.has(b))||(streakM[b]-streakM[a])||(rnd()-.5));
+        while(Fset.size<opt.F&&Mset.size>nM&&fromM.length){ const i=fromM.shift(); Mset.delete(i); Fset.add(i); }
+        const fromA=[...Aset].filter(i=>!keysNext.has(i)).sort((a,b)=>(streak[b]-streak[a])||(cnt[a].F-cnt[b].F)||(rnd()-.5));
+        while(Fset.size<opt.F&&fromA.length&&(opt.Fhard||Aset.size>nA)){ const i=fromA.shift(); Aset.delete(i); Fset.add(i); } }
       Mset.forEach(i=>{ if(S[i][d]!=='🔑') S[i][d]='2'; }); Aset.forEach(i=>S[i][d]='8'); Fset.forEach(i=>S[i][d]='4');
     }
     tally(d);
   }
   return S;
 }
-function rsScore(ym,S){ const C=rsCheck(ym,S), s=C.sum; const ms=C.ids.map(i=>C.per[i].M);
-  return s.dayBad*100+s.keyBad*30+s.streak*60+s.pre*6+(s.keyMax-s.keyMin)*8+(s.weMMax-s.weMMin)*15+(Math.max(...ms)-Math.min(...ms))*3; }
-function rsPlan(ym,fromDay){ const base=rsSheet(ym); let best=null;
-  for(let t=1;t<=400;t++){ const S=rsSolve(ym,base,fromDay,t*7919); const sc=rsScore(ym,S); if(!best||sc<best.sc) best={S,sc}; }
+function rsScore(ym,S,opt){ opt=opt||rsOpt(); const C=rsCheck(ym,S,opt), s=C.sum; const ms=C.ids.map(i=>C.per[i].M);
+  return s.dayBad*100+s.keyBad*30+s.streak*60+s.streakM*40+s.pre*(opt.pre?6:0)+(s.keyMax-s.keyMin)*8+(s.weMMax-s.weMMin)*15+(Math.max(...ms)-Math.min(...ms))*3; }
+function rsPlan(ym,fromDay,opt){ opt=opt||rsOpt(); const base=rsSheet(ym); let best=null;
+  for(let t=1;t<=400;t++){ const S=rsSolve(ym,base,fromDay,t*7919,opt); const sc=rsScore(ym,S,opt); if(!best||sc<best.sc) best={S,sc}; }
   return best.S; }
 
 /* ---------- UI ---------- */
@@ -2211,14 +2223,15 @@ function rosterPlanner(){
     <div class="hint">${dr?`<b class="st w">ร่างตารางอัตโนมัติ</b> (ยังไม่ได้อยู่ในชีต) · ช่องลายเส้น = ล็อกจากชีต (หยุด/ลา/MT/ประชุม) · คลิกช่องอื่นเพื่อสลับ 2 → 8 → 4 → 🔑`:'ตรวจตารางจาก Google Sheet ตามกฎของร้าน · กด "จัดอัตโนมัติ" ให้ระบบเติมกะเช้า/บ่าย/🔑 ให้ (วันหยุด ลา MT ประชุม ล็อกตามชีต)'}</div></div>
     <div class="chips" id="rpMonths">${yms.map(ym=>`<button data-ym="${ym}" class="${ym===rpYm?'on':''}">${ymLabel(ym)}</button>`).join('')}</div></div>
     <div class="rpbar"><button class="btn primary sm" id="rpAuto">⚙ จัดอัตโนมัติทั้งเดือน</button>
+      <span class="rpopt"><label><input type="checkbox" id="rpOptF" ${rsOpt().F?'checked':''}> ทุกวันต้องมีกะ 4</label><label><input type="checkbox" id="rpOptPre" ${rsOpt().pre?'checked':''}> ก่อนหยุดต้องเข้าเช้า</label></span>
       <span class="rpfrom">จัดใหม่ตั้งแต่วันที่ <select class="btn sm" id="rpFrom">${Array.from({length:N},(_,k)=>k+1).map(d=>`<option ${d===rpFrom?'selected':''}>${d}</option>`).join('')}</select><button class="btn sm" id="rpAutoFrom">จัด</button></span>
       ${dr?`<button class="btn sm" id="rpCopy">📋 คัดลอกไปวางในชีต</button><button class="btn sm" id="rpDl">⬇ ดาวน์โหลด</button><button class="btn sm ghost" id="rpClear">ทิ้งร่าง กลับไปดูชีต</button>`:''}
-      <span class="rpsum">${C.sum.dayBad?`<b class="st b">⚠ ${C.sum.dayBad} วันคนหรือ 🔑 ไม่ครบ</b>`:'<b class="st g">✓ ทุกวันคนครบ</b>'} · 🔑 ต่อคน ${C.sum.keyMin}–${C.sum.keyMax} · เช้า ส-อา ต่อคน ${C.sum.weMMin}–${C.sum.weMMax} · ก่อนหยุดไม่ได้เช้า ${C.sum.pre} · 🔑 เมื่อวานไม่ได้บ่าย ${C.sum.keyBad} · บ่ายติด >4 วัน ${C.sum.streak} คน</span></div>
+      <span class="rpsum">${C.sum.dayBad?`<b class="st b">⚠ ${C.sum.dayBad} วันคน กะ หรือ 🔑 ไม่ครบ</b>`:`<b class="st g">✓ ทุกวันครบ${rsOpt().F?'ทุกกะ':''}</b>`} · 🔑 ต่อคน ${C.sum.keyMin}–${C.sum.keyMax} · เช้า ส-อา ต่อคน ${C.sum.weMMin}–${C.sum.weMMax}${rsOpt().pre?` · ก่อนหยุดไม่ได้เช้า ${C.sum.pre}`:''} · 🔑 เมื่อวานไม่ได้บ่าย ${C.sum.keyBad} · บ่ายติด >4 วัน ${C.sum.streak} คน · เช้าติด >4 วัน ${C.sum.streakM} คน</span></div>
     <div class="tablewrap rpwrap"><table class="rptbl"><thead><tr><th class="l nm">PIA</th>${Array.from({length:N},(_,k)=>k+1).map(d=>`<th class="${rsWeekend(rpYm,d)?'we':''}">${d}</th>`).join('')}</tr></thead><tbody>`;
   for(const i of ids){ h+=`<tr><td class="l nm">${esc(nm(i))}</td>`; for(let d=1;d<=N;d++){ const c=S[i][d]||''; const lk=rsLocked(sheet[i][d]||'')||(dr&&d<(dr.from||1)); const bad=C.per[i].pre.includes(d)||C.per[i].keyBad.includes(d);
       h+=`<td class="rc ${cls(c)} ${lk?'lk':''} ${bad?'bad':''}" data-i="${i}" data-d="${d}" title="${esc(nm(i))} · ${d} ${ymLabel(rpYm)}${lk?' · ล็อกจากชีต':''}${C.per[i].pre.includes(d)?' · ก่อนวันหยุดควรเป็นกะเช้า':''}${C.per[i].keyBad.includes(d)?' · 🔑 แต่เมื่อวานไม่ได้เข้าบ่าย':''}">${esc(c)}</td>`; } h+='</tr>'; }
   const foot=(lab,f)=>`<tr class="rpfoot"><td class="l nm">${lab}</td>${C.days.map(x=>f(x)).join('')}</tr>`;
-  h+=`</tbody><tfoot>${foot('เช้า',x=>`<td class="${!x.c.ALL&&(x.c.M<(x.we?4:3)||(x.we&&x.c.M>5))?'short':''}">${x.c.ALL?'–':x.c.M}</td>`)}${foot('บ่าย',x=>`<td class="${!x.c.ALL&&x.c.A<(x.we?7:6)?'short':''}">${x.c.ALL?'–':x.c.A}</td>`)}${foot('กะ 4',x=>`<td>${x.c.ALL?'–':x.c.F}</td>`)}${foot('🔑',x=>`<td class="${!x.c.ALL&&x.d>1&&x.c.key!==2?'short':''}">${x.c.ALL?'–':x.c.key}</td>`)}</tfoot></table></div>
+  h+=`</tbody><tfoot>${foot('เช้า',x=>`<td class="${!x.c.ALL&&(x.c.M<(x.we?4:3)||(x.we&&x.c.M>5))?'short':''}">${x.c.ALL?'–':x.c.M}</td>`)}${foot('บ่าย',x=>`<td class="${!x.c.ALL&&x.c.A<(x.we?7:6)?'short':''}">${x.c.ALL?'–':x.c.A}</td>`)}${foot('กะ 4',x=>`<td class="${!x.c.ALL&&rsOpt().F&&x.c.F<1?'short':''}">${x.c.ALL?'–':x.c.F}</td>`)}${foot('🔑',x=>`<td class="${!x.c.ALL&&x.d>1&&x.c.key!==2?'short':''}">${x.c.ALL?'–':x.c.key}</td>`)}</tfoot></table></div>
     <div class="h4" style="margin-top:14px">สรุปรายคน <span class="muted small">สีเหลือง = ห่างจากค่าเฉลี่ยทีมมาก · ตัวเลขในวงเล็บ = ข้อยกเว้น (วันก่อนหยุดเป็น MT/ประชุม/ลา)</span></div>
     <div class="tablewrap"><table class="stafftbl" style="min-width:720px"><thead><tr><th class="l">PIA</th><th>กะเช้า</th><th>กะบ่าย</th><th>กะ 4</th><th>🔑</th><th>เช้า ส-อา</th><th>ทำงาน ส-อา</th><th>วันหยุด/ลา</th><th>ก่อนหยุดไม่ได้เช้า</th><th>บ่ายติดสูงสุด</th><th>🔑 เมื่อวานไม่บ่าย</th></tr></thead><tbody>
     ${ids.map(i=>{ const p=C.per[i], far=(v,a,t)=>Math.abs(v-a)>=t?'far':''; return `<tr style="cursor:default"><td class="l"><b>${esc(nm(i))}</b></td><td class="num ${far(p.M,C.avg.M,2)}">${p.M}</td><td class="num ${far(p.A,C.avg.A,3)}">${p.A}</td><td class="num">${p.F}</td><td class="num ${far(p.key,C.avg.key,2)}">${p.key}</td><td class="num ${far(p.weM,C.avg.weM,1.5)}">${p.weM}</td><td class="num ${far(p.we,C.avg.we,2)}">${p.we}</td><td class="num">${p.off}</td>
@@ -2235,6 +2248,8 @@ function bindPlanner(){
     setTimeout(()=>{ const prev=rpLoadDraft(rpYm);
       const S=from>1&&prev? rsPlanFrom(rpYm,prev.S,from) : rsPlan(rpYm,from);
       LS.set('mt_rsdraft_'+rpYm,{S,at:Date.now(),from}); render(); },30); };
+  const so=()=>{ LS.set('mt_rsopt',{F:$('#rpOptF').checked?1:0,pre:$('#rpOptPre').checked,Fhard:true}); render(); };
+  $('#rpOptF').onchange=so; $('#rpOptPre').onchange=so;
   $('#rpAuto').onclick=()=>{ rpFrom=1; run(1); };
   $('#rpAutoFrom').onclick=()=>{ rpFrom=+$('#rpFrom').value||1; run(rpFrom); };
   const cl=$('#rpClear'); if(cl) cl.onclick=()=>{ LS.set('mt_rsdraft_'+rpYm,null); render(); };
