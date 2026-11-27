@@ -212,7 +212,7 @@ export default async (req) => {
     if (w.role !== "admin") return json({ error: "forbidden" }, 403);
     const b = await req.json().catch(() => null); if (!b) return json({ error: "bad json" }, 400);
     const cur = await getJ("bm_dx", { d: {}, m: {} });
-    for (const [d, v] of Object.entries(b.d || {})) if (/^\d{4}-\d{2}-\d{2}$/.test(d) && v && typeof v === "object") cur.d[d] = v;
+    for (const [d, v] of Object.entries(b.d || {})) if (/^\d{4}-\d{2}-\d{2}$/.test(d) && v && typeof v === "object") cur.d[d] = { ...(cur.d[d] || {}), ...v };   // merge: bill data and daily Category totals arrive separately
     for (const [ym, v] of Object.entries(b.m || {})) if (YM.test(ym) && v && typeof v === "object") cur.m[ym] = v;
     await store.setJSON("bm_dx", cur);
     return json({ ok: true, days: Object.keys(cur.d).length });
