@@ -2877,16 +2877,25 @@ function bmExtract(aoa){
   for(const e of Object.values(D)){ e.s=Math.round(e.s); e.ar=Math.round(e.ar); e.h=e.h.map(a=>[Math.round(a[0]),a[1],a[2]]); }
   return D;
 }
-/* monthly Category totals (store, same people as the dashboard) for year-on-year */
-function bmMonths(stored,tgList){
-  const out={}, ids=new Set(state.staff.map(p=>String(p.id))); internIds().forEach(i=>ids.add(i));
-  for(const s of stored||[]){ const a=blank(); for(const r of s.rows){ if(!ids.has(String(r[2]))) continue; for(const k of KEYS) a[k]+=r[KI[k]]||0; }
-    const o={S:{mac:a.macS,ipad:a.ipadS,iphone:a.iphoneS,aw:a.awS,aba:a.abaS,rd:a.rdS},U:{mac:a.macU,ipad:a.ipadU,iphone:a.iphoneU,aw:a.awU},cp:a.smileU,last:s.rows.reduce((m,r)=>r[0]>m?r[0]:m,'')};
-    const L=tgList||(s.ym===monthInfo().ym?state.staff:null);
-    if(L){ const T={}; for(const p of L) for(const k of ['mac','ipad','iphone','aw','aba','rd']) T[k]=(T[k]||0)+(+((p.tg||{})[k])||0); if(Object.values(T).some(v=>v>0)) o.T=T; }
-    for(const k in o.S) o.S[k]=Math.round(o.S[k]);
-    out[s.ym]=o; }
-  return out;
+/* monthly Category totals for year-on-year: every seller except online bills (ID 1), so staff who have left still count */
+function bmMonthOf(rows,tgL,last){
+  const a=blank(); for(const r of rows){ if(+r[2]===1) continue; for(const k of KEYS) a[k]+=r[KI[k]]||0; }
+  const o={v:2,S:{mac:a.macS,ipad:a.ipadS,iphone:a.iphoneS,aw:a.awS,aba:a.abaS,rd:a.rdS},U:{mac:a.macU,ipad:a.ipadU,iphone:a.iphoneU,aw:a.awU},cp:a.smileU,last:last||rows.reduce((m,r)=>r[0]>m?r[0]:m,'')};
+  for(const k in o.S) o.S[k]=Math.round(o.S[k]);
+  if(tgL&&tgL.length){ const T={}; for(const p of tgL){ const t=p&&p.tg?p.tg:p||{}; for(const k of ['mac','ipad','iphone','aw','aba','rd']) T[k]=(T[k]||0)+(+t[k]||0); } if(Object.values(T).some(v=>v>0)) o.T=T; }
+  return o;
+}
+function bmMonths(stored,tgList){ const out={}; for(const s of stored||[]) out[s.ym]=bmMonthOf(s.rows,tgList||(s.ym===monthInfo().ym?state.staff:null)); return out; }
+let bmRebuilding=null;
+async function bmRebuild(){
+  if(bmRebuilding||!adminKey) return; bmRebuilding='เริ่ม…'; render();
+  try{ const idx=await fetch('/api/history',{cache:'no-store'}).then(r=>r.json()); const m={}; let n=0;
+    for(const e of idx){ bmRebuilding=`${++n}/${idx.length} · ${ymLong(e.ym)}`; if(route().v==='bm') { const b=$('#bmRb'); if(b) b.textContent='⏳ สร้างสรุปรายเดือนใหม่ '+bmRebuilding; }
+      const h=await fetch('/api/history?ym='+e.ym,{cache:'no-store'}).then(r=>r.ok?r.json():null); if(!h||!h.rows) continue;
+      m[e.ym]=bmMonthOf(h.rows,Object.values(h.tg||{}),e.last); }
+    await bmPush(null,m); toast(`✓ สร้างสรุปรายเดือนใหม่ ${Object.keys(m).length} เดือน`); }
+  catch(e){ toast('สร้างสรุปไม่สำเร็จ: '+(e.message||e)); }
+  bmRebuilding=null; render();
 }
 async function bmPush(d,m){ if(!adminKey) return; try{ await api('bm/dx',{method:'POST',body:{d:d||{},m:m||{}}},'admin'); if(bmData){ Object.assign(bmData.dx.d,d||{}); Object.assign(bmData.dx.m,m||{}); } }catch(e){ console.warn('bm push',e); } }
 async function loadBM(force){ if(bmLoading||(!force&&bmData)) return; bmLoading=true; bmErr=null;
@@ -2953,6 +2962,7 @@ function renderBM(D){
     $('#bmLogin').onclick=()=>{ $('#loginScrim').classList.add('on'); }; return; }
   if(!bmData){ if(!bmLoading&&!bmErr) loadBM(); el.innerHTML=bmErr?`<div class="card sec empty">โหลดข้อมูลไม่สำเร็จ: ${esc(bmErr.message)} <button class="btn sm" id="bmRetry">ลองใหม่</button></div>`:'<div class="card sec empty">⏳ กำลังโหลด…</div>';
     const r=$('#bmRetry'); if(r) r.onclick=()=>{ bmErr=null; loadBM(true); }; return; }
+  if(adminKey&&!bmRebuilding&&Object.values(bmData.dx.m).some(x=>!x.v)) setTimeout(bmRebuild,50);
   const live=bmLiveYm(); if(!bmUI.ym) bmUI.ym=live;
   const lastD=Object.keys(bmData.dx.d).filter(d=>d.startsWith(bmUI.ym)).sort().pop()||(bmUI.ym===live&&D.M.ym?D.M.ym+'-'+String(D.M.day).padStart(2,'0'):bmUI.ym+'-01');
   if(!bmUI.date||!bmUI.date.startsWith(bmUI.ym)) bmUI.date=lastD;
@@ -2966,9 +2976,11 @@ function renderBM(D){
   const pb=A.b?A.s/A.b:0, pbL=B.b?B.s/B.b:0, at=A.lob?A.ar/A.lob:0, atL=B.lob?B.ar/B.lob:0, cv=A.tr?A.stTr/A.tr:0, cvL=B.tr?B.stTr/B.tr:0;
   const g=bmData.rep||{}; const cvT=(+g.cv||5)/100, atT=+g.at||1600;
   const kp=(l,v,sub,note)=>`<div class="card kpi"><div class="l">${l}</div><div class="v num">${v}</div><div class="f">${sub}</div>${note?`<div class="muted small">${note}</div>`:''}</div>`;
-  let h=`<section class="card sec bmhead"><div><h2 style="margin:0">📊 BM · ${esc(label)}</h2><div class="hint">ข้อมูลร้าน${A.days?` ${A.days} วัน`:''} · เทียบช่วงเดียวกันปีก่อน${B.days?'':' (ยังไม่มีข้อมูลปีก่อน)'}</div></div>
+  let h=bmRebuilding?`<div class="card sec" id="bmRb" style="padding:12px 16px">⏳ สร้างสรุปรายเดือนใหม่ ${esc(bmRebuilding)}</div>`:'';
+  h+=`<section class="card sec bmhead"><div><h2 style="margin:0">📊 BM · ${esc(label)}</h2><div class="hint">ข้อมูลร้าน${A.days?` ${A.days} วัน`:''} · เทียบช่วงเดียวกันปีก่อน${B.days?'':' (ยังไม่มีข้อมูลปีก่อน)'}</div></div>
     <div class="bmctl"><div class="chips" id="bmPer">${Object.entries(perL).map(([k,l])=>`<button data-v="${k}" class="${bmUI.per===k?'on':''}">${l}</button>`).join('')}</div>
     <select class="monthsel" id="bmYm">${yms.map(ym=>`<option value="${ym}" ${ym===bmUI.ym?'selected':''}>${ymLong(ym)}</option>`).join('')}</select>
+    ${adminKey?'<button class="btn sm" id="bmRebuild" title="คำนวณยอดรายเดือนใหม่จากประวัติที่อัปไว้">↻ คำนวณรายเดือนใหม่</button>':''}
     ${bmUI.per==='d'||bmUI.per==='w'?`<input type="date" class="monthsel" id="bmDate" value="${bmUI.date}" min="${bmUI.ym}-01" max="${bmDates('m',bmUI.ym)[1]}">`:''}</div></section>`;
   h+=`<div class="kpis bmkpis">
     ${kp('ยอดขายตามบิล (ทุกหมวด)',money(A.s)+'<small>บาท</small>',`ปีก่อน ${B.s?money(B.s):'–'} · ${bmDelta(bmPct(A.s,B.s))}`)}
@@ -3003,7 +3015,7 @@ function bmHeat(from,to){
   const ramp=['#eef4fc','#dbe9fa','#b5d4f4','#85b7eb','#4f94e0','#2a78d6','#185fa5'];
   const f=v=>md==='cv'?pct(v,1):md==='s'||md==='pb'?(v>=1e6?fmt(v/1e6,1)+'M':v>=1e3?fmt(v/1e3,0)+'k':fmt(v)):md==='tr'?fmt(Math.round(v)):fmt(v,v<10?1:0);
   const modes=[['tr','Traffic'],['u','ST unit'],['s','ยอดขาย'],['cv','Conversion'],['pb','Per bill']];
-  return `<section class="card sec"><div class="sechead"><div><h2>ช่วงเวลา (วัน × ชั่วโมง)</h2><div class="hint">ค่าเฉลี่ยต่อวัน · ${thDate(from)} – ${thDate(to)} · ชั่วโมงตามเวลาออกบิล</div></div><div class="chips" id="bmMode">${modes.map(([k,l])=>`<button data-v="${k}" class="${md===k?'on':''}">${l}</button>`).join('')}</div></div>
+  return `<section class="card sec"><div class="sechead"><div><h2>ช่วงเวลา (วัน × ชั่วโมง)</h2><div class="hint">ค่าเฉลี่ยต่อวัน · ${thDate(from)} – ${thDate(to)} · ชั่วโมงตามเวลาออกบิล (ลูกค้าที่เดินเข้าช่วงบ่ายอาจจ่ายเงินตอนค่ำ Conversion ช่วงค่ำจึงสูงกว่าจริง)</div></div><div class="chips" id="bmMode">${modes.map(([k,l])=>`<button data-v="${k}" class="${md===k?'on':''}">${l}</button>`).join('')}</div></div>
     <div class="tablewrap"><div class="bmheat"><span></span>${[...Array(BM_NH)].map((_,i)=>`<span class="muted small">${BM_H0+i}</span>`).join('')}
     ${[0,1,2,3,4,5,6].map(w=>`<span class="small"><b>${TH_WD[w]}</b></span>`+agg[w].map(c=>{ const v=val(c); if(v==null) return '<span class="bmc empty">–</span>'; const i=Math.min(6,Math.floor(v/(mx||1)*6.99)); return `<span class="bmc" style="background:${ramp[i]};color:${i>=4?'#fff':'#14213d'}">${f(v)}</span>`; }).join('')).join('')}</div></div>
     ${md==='tr'||md==='cv'?(Object.keys(bmData.tr).some(d=>d>=from&&d<=to)?'':'<div class="muted small">ยังไม่มี Traffic ของช่วงนี้ · ใส่ได้ที่การ์ด Traffic ด้านล่าง</div>'):''}</section>`;
@@ -3130,6 +3142,7 @@ async function buildDeck(){
 function bindBM(){
   const el=$('#bmBody');
   el.querySelectorAll('#bmPer button').forEach(b=>b.onclick=()=>{ bmUI.per=b.dataset.v; render(); });
+  const rb=$('#bmRebuild'); if(rb) rb.onclick=()=>bmRebuild();
   const ys=$('#bmYm'); if(ys) ys.onchange=()=>{ bmUI.ym=ys.value; bmUI.date=null; bmUI.tday=null; render(); };
   const dt=$('#bmDate'); if(dt) dt.onchange=()=>{ if(dt.value){ bmUI.date=dt.value; render(); } };
   el.querySelectorAll('#bmMode button').forEach(b=>b.onclick=()=>{ bmUI.mode=b.dataset.v; render(); });
