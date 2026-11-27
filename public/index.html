@@ -230,6 +230,15 @@ details.shfair>summary{cursor:pointer;list-style:none}details.shfair>summary::-w
 .bmhrs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.bmhrs label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--text-secondary)}.bmhrs input{height:42px;text-align:center;font-size:16px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-1);color:var(--text-primary);font-family:inherit}
 .bmrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px}.bmrow input{height:38px;width:110px;text-align:center;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-1);color:var(--text-primary);font:inherit}
 .bmrep{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.bmck{display:flex;gap:10px;align-items:center;padding:8px 2px;border-top:1px solid var(--line);font-size:14px;cursor:pointer}.bmck span:nth-child(2){flex:1}.bmck input{width:18px;height:18px}
+/* v17 BM */
+.bmhead2{display:flex;flex-direction:column;gap:10px}.bmtop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bmmodes{flex-wrap:wrap}.bmctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bmcmp{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:12px;background:var(--surface-2)}.bmcmp>div{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}.bmcmp>div>span:first-child{min-width:58px}
+.bmtog{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--text-secondary);cursor:pointer}.bmtog input{width:16px;height:16px}
+.bmcat{min-width:860px}.bmcat tr.tot td,.bmyoy tr.tot td{font-weight:600;border-top:2px solid var(--line-2)}
+.bmyoy{min-width:1060px}.bmyoy td,.bmyoy th{text-align:center;padding:6px 4px}.bmyoy td .num{font-size:12.5px}.bmyoy td .small{font-size:11px}.bmyoy th small{display:block;font-weight:400;color:var(--text-muted)}.bmyoy tr.sep td{padding:2px;border:none;background:var(--surface-2)}
+.bmyoy td:first-child,.bmyoy th:first-child{text-align:left;position:sticky;left:0;background:var(--surface-1);z-index:1}
+.bmkpis .kpi .v{font-size:24px;white-space:nowrap}.bmkpis .kpi .v small{font-size:13px;margin-left:3px}
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
@@ -2627,7 +2636,7 @@ async function handleFile(f){
       state.names={...state.names,...names};
       status('busy','⏳ กำลังบันทึกประวัติรายเดือน…');
       const stored=await storeUploadedMonths(rows,tg,f.name,$('#mergeChk').checked,lastCheck?lastCheck.xd:null);
-      const curYm=monthInfo().ym; const latest=stored[stored.length-1]; bmM=bmMonths(stored,tg);
+      const curYm=monthInfo().ym; const latest=stored[stored.length-1]; bmM=bmMonths(stored,tg); for(const sm of stored){ const c=bmDayCats(sm.rows); for(const [d,v] of Object.entries(c)){ BX=BX||{}; BX[d]=Object.assign(BX[d]||{},{c:v}); } }
       if(!state.rows.length||!curYm||latest.ym>=curYm){ state.rows=latest.rows; state.source=f.name; state.updatedAt=Date.now(); upd=true;
         if(tg){ applyTG(tg); } }
       msg.push(`อ่านยอดขาย ${fmt(n)} รายการ${bad?` (ข้ามแถวที่อ่านวันที่ไม่ได้ ${bad} แถว)`:''}`);
@@ -2851,7 +2860,7 @@ const BM_ABA=new Set([162,51,50,52,73]), BM_AC=49, BM_LOB={48:'iphone',54:'ipad'
 const BM_PODS=new Set(['airpods & airpods pro','airpods max']);
 const BM_H0=10, BM_NH=12;   /* 10:00 … 21:00 */
 let bmData=null, bmLoading=false, bmErr=null;
-let bmUI={per:'m', ym:null, date:null, mode:'tr', cat:'mac', tday:null, rtype:'m', ryear:null, rq:null, off:{}};
+let bmUI={mode:'m', mode2:'tr', yb:'cal', ym2:'s', hc:'a', cat:'mac', tday:null, tym:null, off:{}, cm:false};
 const bmEmptyDay=()=>({s:0,b:0,st:0,lob:0,ar:0,u:{iphone:0,ipad:0,mac:0,aw:0,pods:0},h:Array.from({length:BM_NH},()=>[0,0,0])});
 
 /* read the raw DATA sheet once more for what the dashboard rows don't keep: bills, hours, attach revenue */
@@ -2880,7 +2889,7 @@ function bmExtract(aoa){
 /* monthly Category totals for year-on-year: every seller except online bills (ID 1), so staff who have left still count */
 function bmMonthOf(rows,tgL,last){
   const a=blank(); for(const r of rows){ if(+r[2]===1) continue; for(const k of KEYS) a[k]+=r[KI[k]]||0; }
-  const o={v:2,S:{mac:a.macS,ipad:a.ipadS,iphone:a.iphoneS,aw:a.awS,aba:a.abaS,rd:a.rdS},U:{mac:a.macU,ipad:a.ipadU,iphone:a.iphoneU,aw:a.awU},cp:a.smileU,last:last||rows.reduce((m,r)=>r[0]>m?r[0]:m,'')};
+  const o={v:3,S:{mac:a.macS,ipad:a.ipadS,iphone:a.iphoneS,aw:a.awS,aba:a.abaS,rd:a.rdS},U:{mac:a.macU,ipad:a.ipadU,iphone:a.iphoneU,aw:a.awU},cp:a.smileU,last:last||rows.reduce((m,r)=>r[0]>m?r[0]:m,'')};
   for(const k in o.S) o.S[k]=Math.round(o.S[k]);
   if(tgL&&tgL.length){ const T={}; for(const p of tgL){ const t=p&&p.tg?p.tg:p||{}; for(const k of ['mac','ipad','iphone','aw','aba','rd']) T[k]=(T[k]||0)+(+t[k]||0); } if(Object.values(T).some(v=>v>0)) o.T=T; }
   return o;
@@ -2889,15 +2898,15 @@ function bmMonths(stored,tgList){ const out={}; for(const s of stored||[]) out[s
 let bmRebuilding=null;
 async function bmRebuild(){
   if(bmRebuilding||!adminKey) return; bmRebuilding='เริ่ม…'; render();
-  try{ const idx=await fetch('/api/history',{cache:'no-store'}).then(r=>r.json()); const m={}; let n=0;
+  try{ const idx=await fetch('/api/history',{cache:'no-store'}).then(r=>r.json()); const m={}, dd={}; let n=0;
     for(const e of idx){ bmRebuilding=`${++n}/${idx.length} · ${ymLong(e.ym)}`; if(route().v==='bm') { const b=$('#bmRb'); if(b) b.textContent='⏳ สร้างสรุปรายเดือนใหม่ '+bmRebuilding; }
       const h=await fetch('/api/history?ym='+e.ym,{cache:'no-store'}).then(r=>r.ok?r.json():null); if(!h||!h.rows) continue;
-      m[e.ym]=bmMonthOf(h.rows,Object.values(h.tg||{}),e.last); }
-    await bmPush(null,m); toast(`✓ สร้างสรุปรายเดือนใหม่ ${Object.keys(m).length} เดือน`); }
+      m[e.ym]=bmMonthOf(h.rows,Object.values(h.tg||{}),e.last); const c=bmDayCats(h.rows); for(const [d,v] of Object.entries(c)) dd[d]={c:v}; }
+    await bmPush(dd,m); bmLiveCat=null; toast(`✓ สร้างสรุปรายเดือนใหม่ ${Object.keys(m).length} เดือน`); }
   catch(e){ toast('สร้างสรุปไม่สำเร็จ: '+(e.message||e)); }
   bmRebuilding=null; render();
 }
-async function bmPush(d,m){ if(!adminKey) return; try{ await api('bm/dx',{method:'POST',body:{d:d||{},m:m||{}}},'admin'); if(bmData){ Object.assign(bmData.dx.d,d||{}); Object.assign(bmData.dx.m,m||{}); } }catch(e){ console.warn('bm push',e); } }
+async function bmPush(d,m){ if(!adminKey) return; try{ await api('bm/dx',{method:'POST',body:{d:d||{},m:m||{}}},'admin'); if(bmData){ for(const [k,v] of Object.entries(d||{})) bmData.dx.d[k]={...(bmData.dx.d[k]||{}),...v}; Object.assign(bmData.dx.m,m||{}); } }catch(e){ console.warn('bm push',e); } }
 async function loadBM(force){ if(bmLoading||(!force&&bmData)) return; bmLoading=true; bmErr=null;
   try{ bmData=await api('bm'); bmData.dx=bmData.dx||{d:{},m:{}}; bmData.dx.d=bmData.dx.d||{}; bmData.dx.m=bmData.dx.m||{}; bmData.tr=bmData.tr||{}; bmData.rep=bmData.rep||{}; }
   catch(e){ bmErr=e; } bmLoading=false; if(route().v==='bm') render(); }
@@ -2924,36 +2933,118 @@ async function handleTrafficFiles(files){
 }
 const isTrafficFile=f=>/\.csv$/i.test(f.name);
 
-/* ---------- period math ---------- */
-function bmLiveYm(){ return liveYm()||monthInfo().ym; }
-function bmDates(per,ym,date){
-  const [y,m]=ym.split('-').map(Number), dim=new Date(Date.UTC(y,m,0)).getUTCDate(); const iso=dt=>dt.toISOString().slice(0,10);
-  if(per==='d') return [date,date];
-  if(per==='w'){ const e=new Date(date+'T00:00:00Z'), s=new Date(e); s.setUTCDate(s.getUTCDate()-6); return [iso(s),date]; }
-  if(per==='m') return [ym+'-01',ym+'-'+String(dim).padStart(2,'0')];
-  if(per==='q'){ const q0=Math.floor((m-1)/3)*3; const e=new Date(Date.UTC(y,q0+3,0)); return [`${y}-${String(q0+1).padStart(2,'0')}-01`,iso(e)]; }
-  return [`${y}-01-01`,ym+'-'+String(dim).padStart(2,'0')];
-}
-function bmShiftYear(d,n){ return (+d.slice(0,4)+n)+d.slice(4); }
-function bmSum(from,to,capDay){ const X=bmData.dx.d, T=bmData.tr; const o={s:0,b:0,st:0,lob:0,ar:0,days:0,tr:0,trDays:0,stTr:0,u:{iphone:0,ipad:0,mac:0,aw:0,pods:0}};
-  for(const [d,e] of Object.entries(X)){ if(d<from||d>to||(capDay&&d.slice(5)>capDay)) continue; o.days++; o.s+=e.s; o.b+=e.b; o.st+=e.st; o.lob+=e.lob; o.ar+=e.ar; for(const k in o.u) o.u[k]+=(e.u||{})[k]||0;
+/* ---------- dates + Apple fiscal calendar (weeks Sun–Sat, FY ends last Saturday of September, quarters 13 WK = P 5-4-4) ---------- */
+const DAYMS=864e5;
+const dAdd=(d,n)=>new Date(Date.parse(d+'T00:00:00Z')+n*DAYMS).toISOString().slice(0,10);
+const dDiff=(a,b)=>Math.round((Date.parse(b+'T00:00:00Z')-Date.parse(a+'T00:00:00Z'))/DAYMS);
+const wdOf=d=>new Date(d+'T00:00:00Z').getUTCDay();
+const dYear=(d,n)=>{ const y=+d.slice(0,4)+n; let s=y+d.slice(4); if(s.slice(5)==='02-29'&&new Date(Date.UTC(y,1,29)).getUTCMonth()!==1) s=y+'-02-28'; return s; };
+function lastSatSep(y){ let d=`${y}-09-30`; while(wdOf(d)!==6) d=dAdd(d,-1); return d; }
+const fyStart=fy=>dAdd(lastSatSep(fy-1),1), fyEnd=fy=>lastSatSep(fy);
+const fyOf=d=>{ const y=+d.slice(0,4); return d>fyEnd(y)?y+1:y; };
+const fyWeeks=fy=>(dDiff(fyStart(fy),fyEnd(fy))+1)/7;
+const wkRange=(fy,wk)=>{ const s=dAdd(fyStart(fy),(wk-1)*7); return [s,dAdd(s,6)]; };
+const wkOf=d=>{ const fy=fyOf(d); return {fy,wk:Math.floor(dDiff(fyStart(fy),d)/7)+1}; };
+const wkP=wk=>{ if(wk>52) return 12; const q=Math.ceil(wk/13), w=(wk-1)%13; return (q-1)*3+(w<5?1:w<9?2:3); };
+const pWeeks=(fy,p)=>{ const q=Math.ceil(p/3), o=(p-1)%3, b=(q-1)*13; let e=b+(o===0?5:o===1?9:13); if(p===12) e=fyWeeks(fy); return [b+(o===0?1:o===1?6:10),e]; };
+const qWeeks=(fy,q)=>[(q-1)*13+1,q===4?fyWeeks(fy):q*13];
+const P_MON=p=>TH_MS[(p+8)%12];
+const shortD=d=>`${+d.slice(8)} ${TH_MS[+d.slice(5,7)-1]}`;
+const shortDY=d=>`${shortD(d)} ${String(+d.slice(0,4)+543).slice(2)}`;
+const rangeTxt=(a,b)=>a===b?`${TH_WD[wdOf(a)]} ${shortDY(a)}`:`${shortD(a)} – ${shortDY(b)}`;
+
+/* ---------- daily Category totals (every seller except online ID 1) ---------- */
+const BM_CK=[['mac','macS','macU'],['ipad','ipadS','ipadU'],['iphone','iphoneS','iphoneU'],['aw','awS','awU'],['aba','abaS',null],['rd','rdS',null]];
+function bmDayCats(rows){ const out={};
+  for(const r of rows){ if(+r[2]===1) continue; const d=r[0]; const c=out[d]||(out[d]={}); for(const [k,s,u] of BM_CK){ const e=c[k]||(c[k]=[0,0]); e[0]+=r[KI[s]]||0; if(u) e[1]+=r[KI[u]]||0; } c.cp=(c.cp||0)+(r[KI.smileU]||0); }
+  for(const c of Object.values(out)) for(const [k] of BM_CK) c[k][0]=Math.round(c[k][0]);
+  return out; }
+let bmLiveCat=null;
+function bmLiveCats(D){ const key=D.M.ym+'|'+state.rows.length+'|'+lastStamp; if(bmLiveCat&&bmLiveCat.key===key) return bmLiveCat;
+  bmLiveCat={key,ym:viewYm?null:D.M.ym,c:viewYm?{}:bmDayCats(state.rows.filter(r=>r[0].startsWith(D.M.ym)))}; return bmLiveCat; }
+function bmLastDay(D){ let L=Object.keys(bmData.dx.d).sort().pop()||''; if(!viewYm&&D.M.ym&&D.M.day){ const l=D.M.ym+'-'+String(D.M.day).padStart(2,'0'); if(l>L) L=l; } return L||bkkToday(); }
+
+/* aggregate any date range */
+function bmAgg(from,to,D,withH){
+  const X=bmData.dx.d, T=bmData.tr, LC=bmLiveCats(D);
+  const o={n:dDiff(from,to)+1,days:0,s:0,b:0,st:0,lob:0,ar:0,u:{iphone:0,ipad:0,mac:0,aw:0,pods:0},tr:0,trDays:0,stTr:0,cat:{},cp:0,catDays:0};
+  for(const [k] of BM_CK) o.cat[k]={S:0,U:0};
+  for(let d=from;d<=to;d=dAdd(d,1)){ const e=X[d];
+    const c=(LC.ym&&d.startsWith(LC.ym))?LC.c[d]:(e&&e.c);
+    if(c){ o.catDays++; for(const [k] of BM_CK){ const v=c[k]||[0,0]; o.cat[k].S+=v[0]; o.cat[k].U+=v[1]; } o.cp+=c.cp||0; }
+    if(!e||e.s==null) continue; o.days++; o.s+=e.s; o.b+=e.b; o.st+=e.st; o.lob+=e.lob; o.ar+=e.ar; for(const k in o.u) o.u[k]+=(e.u||{})[k]||0;
     const t=T[d]; if(t&&t.t){ o.tr+=t.t; o.trDays++; o.stTr+=e.st; } }
+  o.six=Object.values(o.cat).reduce((a,x)=>a+x.S,0); o.units=['mac','ipad','iphone','aw'].reduce((a,k)=>a+o.cat[k].U,0);
   return o; }
-function bmYms(from,to){ const out=[]; let ym=from.slice(0,7); while(ym<=to.slice(0,7)){ out.push(ym); ym=ymShift(ym,1); } return out; }
-function bmCat(from,to,lastDayCap){ /* Category totals for whole months in range; live month from the dashboard */
-  const D=computeAll(), live=D.M.ym; const S={mac:0,ipad:0,iphone:0,aw:0,aba:0,rd:0}, U={mac:0,ipad:0,iphone:0,aw:0}, T={}; let have=0, tHave=0, months=0;
-  for(const ym of bmYms(from,to)){ months++; let src=null;
-    if(ym===live&&!viewYm){ const a=D.store.a; src={S:{mac:a.macS,ipad:a.ipadS,iphone:a.iphoneS,aw:a.awS,aba:a.abaS,rd:a.rdS},U:{mac:a.macU,ipad:a.ipadU,iphone:a.iphoneU,aw:a.awU},T:Object.fromEntries(['mac','ipad','iphone','aw','aba','rd'].map(k=>[k,D.list.reduce((s,p)=>s+(+p.tg[k]||0),0)]))}; }
-    else src=bmData.dx.m[ym];
-    if(!src) continue; have++;
-    for(const k in S) S[k]+=src.S[k]||0; for(const k in U) U[k]+=(src.U||{})[k]||0;
-    if(src.T){ tHave++; for(const k in src.T) T[k]=(T[k]||0)+src.T[k]; } }
-  return {S,U,T:tHave?T:null,have,months,tot:Object.values(S).reduce((a,b)=>a+b,0)};
+/* target for a range: each month's target × share of its days in the range (null if any month has no target) */
+function bmTarget(from,to,D){ const T={}; for(const [k] of BM_CK) T[k]=0; let ok=true;
+  for(let ym=from.slice(0,7); ym<=to.slice(0,7); ym=ymShift(ym,1)){ const [y,m]=ym.split('-').map(Number), dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+    const a=from>ym+'-01'?from:ym+'-01', b=to<`${ym}-${dim}`?to:`${ym}-${String(dim).padStart(2,'0')}`; const share=(dDiff(a,b)+1)/dim;
+    let mt=null; if(!viewYm&&ym===D.M.ym) mt=Object.fromEntries(BM_CK.map(([k])=>[k,D.list.reduce((s,p)=>s+(+p.tg[k]||0),0)])); else if(bmData.dx.m[ym]&&bmData.dx.m[ym].T) mt=bmData.dx.m[ym].T;
+    if(!mt||!Object.values(mt).some(v=>v>0)){ ok=false; break; } for(const k in T) T[k]+=(mt[k]||0)*share; }
+  return ok?T:null; }
+
+/* ---------- the selected range and its comparison ---------- */
+const BM_MODES=[['d','วัน'],['7','7 วัน'],['wk','WK'],['p','P (เดือน FY)'],['fq','ไตรมาส FY'],['m','เดือน'],['ytd','YTD'],['fytd','FYTD'],['c','กำหนดเอง']];
+function bmResolve(D){
+  const U=bmUI, L=bmLastDay(D), cur=wkOf(L); let from,to,label,cf,ct,clabel,kind='date';
+  const fy=U.fy||cur.fy;
+  switch(U.mode){
+    case 'd': from=to=U.date&&U.date<=L?U.date:L; label=rangeTxt(from,to); kind=U.same?'date':'364'; break;
+    case '7': to=U.date&&U.date<=L?U.date:L; from=dAdd(to,-6); label='7 วัน '+rangeTxt(from,to); kind='364'; break;
+    case 'wk': { const a=U.wk1||cur.wk, b=Math.max(a,U.wk2||a); from=wkRange(fy,a)[0]; to=wkRange(fy,b)[1]; label=`WK${a}${b>a?'–'+b:''} FY${String(fy).slice(2)} · ${rangeTxt(from,to)}`; kind='fy'; break; }
+    case 'p': { const p=U.p||wkP(cur.wk); const [a,b]=pWeeks(fy,p); from=wkRange(fy,a)[0]; to=wkRange(fy,b)[1]; label=`P${p} (${P_MON(p)}) FY${String(fy).slice(2)} · WK${a}–${b}`; kind='fy'; break; }
+    case 'fq': { const q=U.q||Math.ceil(cur.wk/13); const [a,b]=qWeeks(fy,q); from=wkRange(fy,a)[0]; to=wkRange(fy,b)[1]; label=`Q${q} FY${String(fy).slice(2)} (${P_MON(q*3-2)}–${P_MON(q*3)}) · WK${a}–${b}`; kind='fy'; break; }
+    case 'm': { const ym=U.ym||L.slice(0,7); const [y,m]=ym.split('-').map(Number); from=ym+'-01'; to=`${ym}-${String(new Date(Date.UTC(y,m,0)).getUTCDate()).padStart(2,'0')}`; label=ymLong(ym); break; }
+    case 'ytd': { const y=U.y||+L.slice(0,4); from=y+'-01-01'; to=y+'-12-31'; label=`YTD ${y+543}`; break; }
+    case 'fytd': from=fyStart(fy); to=fyEnd(fy); label=`FYTD FY${String(fy).slice(2)}`; kind='fy'; break;
+    default: from=U.cf||dAdd(L,-13); to=U.ct||L; if(to<from) [from,to]=[to,from]; label=rangeTxt(from,to);
+  }
+  const full=[from,to]; let capped=false; if(to>L){ to=L<from?from:L; capped=true; }
+  if(U.cm&&U.mode==='wk'&&U.cwk1){ const cfy=U.cfy||fy-1, a=U.cwk1, b=Math.max(a,U.cwk2||a); cf=wkRange(cfy,a)[0]; ct=wkRange(cfy,b)[1]; clabel=`WK${a}${b>a?'–'+b:''} FY${String(cfy).slice(2)} · ${rangeTxt(cf,ct)}`; }
+  else if(U.cm&&U.ccf&&U.cct){ cf=U.ccf<=U.cct?U.ccf:U.cct; ct=U.ccf<=U.cct?U.cct:U.ccf; clabel=rangeTxt(cf,ct); }
+  else { if(kind==='364'){ cf=dAdd(from,-364); ct=dAdd(to,-364); }
+    else if(kind==='fy'){ const f0=fyOf(full[0]); const off=dDiff(fyStart(f0),from); cf=dAdd(fyStart(f0-1),off); ct=dAdd(cf,dDiff(from,to)); }
+    else { cf=dYear(from,-1); ct=dYear(to,-1); }
+    clabel=(kind==='fy'?label.replace(/FY(\d\d)/,(m,y)=>'FY'+String(+y-1).padStart(2,'0')).replace(/ · .*$/,'')+' · ':'')+rangeTxt(cf,ct); }
+  return {from,to,cf,ct,label,clabel,capped,L,manual:!!U.cm,days:dDiff(from,to)+1,cdays:dDiff(cf,ct)+1,fy,ffrom:full[0],fto:full[1]};
 }
-const bmPct=(a,b)=>b?a/b-1:null;
-const bmDelta=v=>v==null?'<span class="muted">ไม่มีข้อมูลปีก่อน</span>':`<b class="st ${v>=0?'g':'b'}">${v>=0?'+':''}${pct(v,1)}</b>`;
+
+/* ---------- small render helpers ---------- */
+const bmPctTxt=(a,b)=>b?((a/b-1)>=0?'+':'')+pct(a/b-1,1):'–';
+const bmDl=(a,b)=>b?`<b class="st ${a>=b?'g':'b'}">${bmPctTxt(a,b)}</b>`:'<span class="muted">–</span>';
+const bmSign=(v,f)=>`<span class="st ${v>=0?'g':'b'}">${v>=0?'+':''}${f(v)}</span>`;
+const bmM=v=>Math.abs(v)>=1e6?fmt(v/1e6,2)+'M':fmt(v);
 const BM_CATS=[['mac','Mac'],['ipad','iPad'],['iphone','iPhone'],['aba','BTB (ABA)'],['rd','BTB (3RD)'],['aw','Apple Watch']];
 const TH_MS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function bmControls(R,D){
+  const U=bmUI, L=R.L, cur=wkOf(L); const first=Object.keys(bmData.dx.d).sort()[0]||L;
+  const fys=[]; for(let f=fyOf(first); f<=cur.fy; f++) fys.push(f);
+  const fySel=(id,v)=>`<select class="monthsel" id="${id}">${fys.slice().reverse().map(f=>`<option value="${f}" ${f===v?'selected':''}>FY${f} (${shortDY(fyStart(f))} – ${shortDY(fyEnd(f))})</option>`).join('')}</select>`;
+  const wkOpts=(fy,v,max)=>{ let h=''; for(let w=1; w<=fyWeeks(fy); w++){ const [a,b]=wkRange(fy,w); if(max&&a>max) break; h+=`<option value="${w}" ${w===v?'selected':''}>WK${w} · ${shortD(a)}–${shortD(b)}</option>`; } return h; };
+  const fy=R.fy; let x='';
+  if(U.mode==='d'||U.mode==='7') x=`<input type="date" class="monthsel" id="bmDate" value="${R.to}" max="${L}"> ${U.mode==='d'?`<label class="bmtog"><input type="checkbox" id="bmSame" ${U.same?'checked':''}> เทียบวันที่เดียวกัน (ไม่ใช่วันเดียวกันในสัปดาห์)</label>`:''}`;
+  else if(U.mode==='wk'){ const w1=U.wk1||cur.wk; x=fySel('bmFy',fy)+`<select class="monthsel" id="bmW1">${wkOpts(fy,w1,fy===cur.fy?L:null)}</select><span class="muted">ถึง</span><select class="monthsel" id="bmW2">${wkOpts(fy,Math.max(w1,U.wk2||w1),fy===cur.fy?L:null)}</select>`; }
+  else if(U.mode==='p'){ const p=U.p||wkP(cur.wk); x=fySel('bmFy',fy)+`<select class="monthsel" id="bmP">${[...Array(12)].map((_,i)=>{ const [a,b]=pWeeks(fy,i+1); const r0=wkRange(fy,a)[0]; return r0>L?'':`<option value="${i+1}" ${i+1===p?'selected':''}>P${i+1} · ${P_MON(i+1)} (WK${a}–${b})</option>`; }).join('')}</select>`; }
+  else if(U.mode==='fq'){ const q=U.q||Math.ceil(cur.wk/13); x=fySel('bmFy',fy)+`<select class="monthsel" id="bmQ">${[1,2,3,4].map(i=>wkRange(fy,qWeeks(fy,i)[0])[0]>L?'':`<option value="${i}" ${i===q?'selected':''}>Q${i} · ${P_MON(i*3-2)}–${P_MON(i*3)}</option>`).join('')}</select>`; }
+  else if(U.mode==='m'){ const yms=[]; for(let ym=first.slice(0,7); ym<=L.slice(0,7); ym=ymShift(ym,1)) yms.push(ym); x=`<select class="monthsel" id="bmYm">${yms.reverse().map(ym=>`<option value="${ym}" ${ym===(U.ym||L.slice(0,7))?'selected':''}>${ymLong(ym)}</option>`).join('')}</select>`; }
+  else if(U.mode==='ytd'){ const ys=[]; for(let y=+first.slice(0,4); y<=+L.slice(0,4); y++) ys.push(y); x=`<select class="monthsel" id="bmY">${ys.reverse().map(y=>`<option value="${y}" ${y===(U.y||+L.slice(0,4))?'selected':''}>${y+543}</option>`).join('')}</select>`; }
+  else if(U.mode==='fytd') x=fySel('bmFy',fy);
+  else x=`<input type="date" class="monthsel" id="bmCf" value="${R.from}" max="${L}"><span class="muted">ถึง</span><input type="date" class="monthsel" id="bmCt" value="${R.to}" max="${L}">`;
+  /* comparison */
+  let cm='';
+  if(U.cm){ if(U.mode==='wk'){ const cfy=U.cfy||fy-1, a=U.cwk1||U.wk1||cur.wk; cm=fySel('bmCfy',cfy)+`<select class="monthsel" id="bmCw1">${wkOpts(cfy,a)}</select><span class="muted">ถึง</span><select class="monthsel" id="bmCw2">${wkOpts(cfy,Math.max(a,U.cwk2||a))}</select>`; }
+    else cm=`<input type="date" class="monthsel" id="bmCcf" value="${R.cf}"><span class="muted">ถึง</span><input type="date" class="monthsel" id="bmCct" value="${R.ct}">`; }
+  return `<section class="card sec bmhead2">
+    <div class="bmtop"><h2 style="margin:0">📊 BM</h2>${adminKey?'<button class="btn sm" id="bmRebuild" title="คำนวณคลังข้อมูลใหม่จากประวัติที่อัปไว้">↻ คำนวณคลังใหม่</button>':''}</div>
+    <div class="chips bmmodes" id="bmMode">${BM_MODES.map(([k,l])=>`<button data-v="${k}" class="${U.mode===k?'on':''}">${l}</button>`).join('')}</div>
+    <div class="bmctl">${x}</div>
+    <div class="bmcmp"><div><span class="muted small">ช่วงนี้</span><b>${esc(R.label)}</b>${R.capped?`<span class="muted small">ข้อมูลถึง ${shortDY(R.L)}</span>`:''}</div>
+      <div><span class="muted small">เทียบกับ</span><b>${esc(R.clabel)}</b>${R.manual?'<span class="chip w">เลือกช่วงเทียบเอง</span>':''}${R.days!==R.cdays?`<span class="chip w">จำนวนวันไม่เท่ากัน ${R.days} : ${R.cdays}</span>`:''}</div>
+      <label class="bmtog"><input type="checkbox" id="bmCm" ${U.cm?'checked':''}> เลือกช่วงเทียบเอง</label>${U.cm?`<div class="bmctl">${cm}</div>`:''}</div>
+  </section>`;
+}
 
 /* ---------- page ---------- */
 function renderBM(D){
@@ -2962,96 +3053,116 @@ function renderBM(D){
     $('#bmLogin').onclick=()=>{ $('#loginScrim').classList.add('on'); }; return; }
   if(!bmData){ if(!bmLoading&&!bmErr) loadBM(); el.innerHTML=bmErr?`<div class="card sec empty">โหลดข้อมูลไม่สำเร็จ: ${esc(bmErr.message)} <button class="btn sm" id="bmRetry">ลองใหม่</button></div>`:'<div class="card sec empty">⏳ กำลังโหลด…</div>';
     const r=$('#bmRetry'); if(r) r.onclick=()=>{ bmErr=null; loadBM(true); }; return; }
-  if(adminKey&&!bmRebuilding&&Object.values(bmData.dx.m).some(x=>!x.v)) setTimeout(bmRebuild,50);
-  const live=bmLiveYm(); if(!bmUI.ym) bmUI.ym=live;
-  const lastD=Object.keys(bmData.dx.d).filter(d=>d.startsWith(bmUI.ym)).sort().pop()||(bmUI.ym===live&&D.M.ym?D.M.ym+'-'+String(D.M.day).padStart(2,'0'):bmUI.ym+'-01');
-  if(!bmUI.date||!bmUI.date.startsWith(bmUI.ym)) bmUI.date=lastD;
-  const [from,to]=bmDates(bmUI.per,bmUI.ym,bmUI.date); const capTo=to>lastD&&bmUI.per!=='d'&&bmUI.per!=='w'?lastD:to;
-  const pf=bmShiftYear(from,-1), pt=bmShiftYear(capTo,-1);
-  const A=bmSum(from,capTo), B=bmSum(pf,pt);
-  const C=['m','q','y'].includes(bmUI.per)?bmCat(from,to):null, CL=C?bmCat(pf,bmShiftYear(to,-1)):null;
-  const yms=[...new Set([live,...Object.keys(bmData.dx.m),...Object.keys(bmData.dx.d).map(d=>d.slice(0,7))])].filter(Boolean).sort().reverse();
-  const perL={d:'วัน',w:'7 วัน',m:'เดือน',q:'ไตรมาส',y:'YTD'};
-  const label=bmUI.per==='d'?thDate(from):bmUI.per==='w'?`${thDate(from)} – ${thDate(to)}`:bmUI.per==='m'?ymLong(bmUI.ym):bmUI.per==='q'?`ไตรมาส ${Math.floor((+bmUI.ym.slice(5)-1)/3)+1}/${+bmUI.ym.slice(0,4)+543} (${thDate(from)} – ${thDate(capTo)})`:`YTD ${+bmUI.ym.slice(0,4)+543} (ถึง ${thDate(capTo)})`;
+  if(adminKey&&!bmRebuilding&&Object.values(bmData.dx.m).some(x=>(x.v||0)<3)) setTimeout(bmRebuild,50);
+  const R=bmResolve(D); bmUI.tym=R.to.slice(0,7);
+  const A=bmAgg(R.from,R.to,D), B=bmAgg(R.cf,R.ct,D), TA=bmTarget(R.ffrom,R.fto,D);
+  const rp=bmData.rep||{}, cvT=(+rp.cv||5)/100, atT=+rp.at||1600;
   const pb=A.b?A.s/A.b:0, pbL=B.b?B.s/B.b:0, at=A.lob?A.ar/A.lob:0, atL=B.lob?B.ar/B.lob:0, cv=A.tr?A.stTr/A.tr:0, cvL=B.tr?B.stTr/B.tr:0;
-  const g=bmData.rep||{}; const cvT=(+g.cv||5)/100, atT=+g.at||1600;
+  const tT=TA?Object.values(TA).reduce((a,b)=>a+b,0):0;
   const kp=(l,v,sub,note)=>`<div class="card kpi"><div class="l">${l}</div><div class="v num">${v}</div><div class="f">${sub}</div>${note?`<div class="muted small">${note}</div>`:''}</div>`;
-  let h=bmRebuilding?`<div class="card sec" id="bmRb" style="padding:12px 16px">⏳ สร้างสรุปรายเดือนใหม่ ${esc(bmRebuilding)}</div>`:'';
-  h+=`<section class="card sec bmhead"><div><h2 style="margin:0">📊 BM · ${esc(label)}</h2><div class="hint">ข้อมูลร้าน${A.days?` ${A.days} วัน`:''} · เทียบช่วงเดียวกันปีก่อน${B.days?'':' (ยังไม่มีข้อมูลปีก่อน)'}</div></div>
-    <div class="bmctl"><div class="chips" id="bmPer">${Object.entries(perL).map(([k,l])=>`<button data-v="${k}" class="${bmUI.per===k?'on':''}">${l}</button>`).join('')}</div>
-    <select class="monthsel" id="bmYm">${yms.map(ym=>`<option value="${ym}" ${ym===bmUI.ym?'selected':''}>${ymLong(ym)}</option>`).join('')}</select>
-    ${adminKey?'<button class="btn sm" id="bmRebuild" title="คำนวณยอดรายเดือนใหม่จากประวัติที่อัปไว้">↻ คำนวณรายเดือนใหม่</button>':''}
-    ${bmUI.per==='d'||bmUI.per==='w'?`<input type="date" class="monthsel" id="bmDate" value="${bmUI.date}" min="${bmUI.ym}-01" max="${bmDates('m',bmUI.ym)[1]}">`:''}</div></section>`;
+  let h=bmRebuilding?`<div class="card sec" id="bmRb" style="padding:12px 16px">⏳ กำลังคำนวณคลังข้อมูลใหม่ ${esc(bmRebuilding)}</div>`:'';
+  h+=bmControls(R,D);
   h+=`<div class="kpis bmkpis">
-    ${kp('ยอดขายตามบิล (ทุกหมวด)',money(A.s)+'<small>บาท</small>',`ปีก่อน ${B.s?money(B.s):'–'} · ${bmDelta(bmPct(A.s,B.s))}`)}
-    ${C?kp('ยอด 6 Category เทียบเป้า',money(C.tot)+'<small>บาท</small>',C.T?`เป้า ${money(Object.values(C.T).reduce((a,b)=>a+b,0))} · <b class="st ${C.tot>=Object.values(C.T).reduce((a,b)=>a+b,0)?'g':'b'}">${pct(C.tot/Object.values(C.T).reduce((a,b)=>a+b,0),0)}</b>`:'ยังไม่มีเป้าของช่วงนี้',CL&&CL.have?`ปีก่อน ${money(CL.tot)} · ${bmDelta(bmPct(C.tot,CL.tot))}`:''):''}
-    ${kp('Sell per bill',A.b?fmt(pb):'–',`${fmt(A.b)} บิล · ปีก่อน ${pbL?fmt(pbL):'–'} · ${bmDelta(pbL?pb/pbL-1:null)}`,'ยอดขายทั้งหมด ÷ จำนวนบิล')}
-    ${kp('Attach revenue',A.lob?fmt(at)+'<small>฿</small>':'–',`เป้า ${fmt(atT)} · <b class="st ${at>=atT?'g':'b'}">${A.lob?pct(at/atT,0):'–'}</b> · ปีก่อน ${atL?fmt(atL):'–'}`,'(ABA + AppleCare+) ÷ iPhone, iPad, Mac, Watch')}
-    ${kp('Conversion',A.tr?pct(cv,1):'–',A.tr?`เป้า ${pct(cvT,0)} · <b class="st ${cv>=cvT?'g':'b'}">${cv>=cvT?'ถึงเป้า':'ต่ำกว่าเป้า'}</b> · ปีก่อน ${cvL?pct(cvL,1):'–'}`:'ยังไม่มี Traffic ของช่วงนี้',A.tr?`ST unit ${fmt(A.stTr)} ÷ Traffic ${fmt(A.tr)} · ${A.trDays}/${A.days} วัน`:'ST unit ÷ Traffic')}
-    ${kp('Traffic คนเข้าร้าน',A.tr?fmt(A.tr):'–',B.tr?`ปีก่อน ${fmt(B.tr)} · ${bmDelta(bmPct(A.tr,B.tr))}`:'ปีก่อน –',A.trDays?`เฉลี่ยวันละ ${fmt(A.tr/A.trDays)} คน`:'')}
+    ${kp('ยอดขายตามบิล (ทุกหมวด)',money(A.s)+'<small>บาท</small>',`เทียบ ${B.s?money(B.s):'–'} · ${bmDl(A.s,B.s)}`,`${A.days}/${A.n} วันมีข้อมูล`)}
+    ${kp('ยอด 6 Category',money(A.six)+'<small>บาท</small>',`เทียบ ${B.six?money(B.six):'–'} · ${bmDl(A.six,B.six)}`,TA?`เป้า ${money(tT)} · <b class="st ${A.six>=tT?'g':'b'}">${pct(A.six/tT,0)}</b>`:'ยังไม่มีเป้าของช่วงนี้')}
+    ${kp('Sell per bill',A.b?fmt(pb):'–',`${fmt(A.b)} บิล · เทียบ ${pbL?fmt(pbL):'–'} · ${bmDl(pb,pbL)}`,'ยอดขายทั้งหมด ÷ จำนวนบิล')}
+    ${kp('Attach revenue',A.lob?fmt(at)+'<small>฿</small>':'–',`เป้า ${fmt(atT)} · เทียบ ${atL?fmt(atL):'–'} · ${bmDl(at,atL)}`,'(ABA + AppleCare+) ÷ iPhone, iPad, Mac, Watch')}
+    ${kp('Conversion',A.tr?pct(cv,1):'–',A.tr?`เป้า ${pct(cvT,0)} · เทียบ ${cvL?pct(cvL,1):'–'}`:'ยังไม่มี Traffic ของช่วงนี้',A.tr?`ST unit ${fmt(A.stTr)} ÷ Traffic ${fmt(A.tr)} · ${A.trDays}/${A.n} วัน`:'ST unit ÷ Traffic')}
+    ${kp('Traffic คนเข้าร้าน',A.tr?fmt(A.tr):'–',`เทียบ ${B.tr?fmt(B.tr):'–'} · ${bmDl(A.tr,B.tr)}`,A.trDays?`เฉลี่ยวันละ ${fmt(A.tr/A.trDays)} คน`:'')}
   </div>`;
-  /* monthly YoY */
-  const yr=+bmUI.ym.slice(0,4); const mm=[...Array(12)].map((_,i)=>{ const a=bmCat(`${yr}-${String(i+1).padStart(2,'0')}-01`,`${yr}-${String(i+1).padStart(2,'0')}-28`), b=bmCat(`${yr-1}-${String(i+1).padStart(2,'0')}-01`,`${yr-1}-${String(i+1).padStart(2,'0')}-28`); return {a:a.have?a.tot:null,b:b.have?b.tot:null}; });
-  const mx=Math.max(1,...mm.flatMap(x=>[x.a||0,x.b||0]));
-  const sa=mm.reduce((s,x,i)=>s+(x.a!=null&&x.b!=null?x.a:0),0), sb=mm.reduce((s,x)=>s+(x.a!=null&&x.b!=null?x.b:0),0);
-  h+=`<section class="card sec"><div class="sechead"><div><h2>ยอด 6 Category รายเดือน ${yr+543} เทียบ ${yr+542}</h2><div class="hint">${sb?`เดือนที่มีทั้ง 2 ปี: ${money(sa)} เทียบ ${money(sb)} · ${bmDelta(sa/sb-1)}`:'ยังไม่มีข้อมูลปีก่อน · อัปไฟล์ DATA ของเดือนเก่าที่ปุ่ม "อัปเดตข้อมูล" ระบบจะเก็บเข้าคลังเอง'}</div></div>
-    <div class="bmleg"><span><i style="background:#a8a59b"></i>${yr+542}</span><span><i style="background:var(--s1)"></i>${yr+543}</span></div></div>
-    <div class="tablewrap"><div class="bmbars">${mm.map((x,i)=>`<div class="bmcol" data-ym="${yr}-${String(i+1).padStart(2,'0')}"><div class="bmpair"><i style="height:${(x.b||0)/mx*100}%;background:#a8a59b" title="${x.b!=null?money(x.b):'–'}"></i><i style="height:${(x.a||0)/mx*100}%;background:var(--s1)" title="${x.a!=null?money(x.a):'–'}"></i></div><span>${TH_MS[i]}</span><b class="small ${x.a!=null&&x.b?(x.a>=x.b?'st g':'st b'):''}">${x.a!=null&&x.b?(x.a>=x.b?'+':'')+pct(x.a/x.b-1,0):''}</b></div>`).join('')}</div></div></section>`;
-  /* category table */
-  if(C){ const tg=C.T||{};
-    h+=`<section class="card sec"><h2>ราย Category · ${esc(label)}</h2><div class="tablewrap"><table class="stafftbl" style="min-width:720px"><thead><tr><th class="l">Category</th><th>เป้า</th><th>ทำได้</th><th>% Ach</th><th>ต่าง</th><th>ปีก่อน</th><th>YoY</th><th>ชิ้น</th><th>ชิ้นปีก่อน</th></tr></thead><tbody>
-      ${BM_CATS.map(([k,l])=>{ const a=C.S[k], t=tg[k]||0, b=CL&&CL.have?CL.S[k]:null; return `<tr style="cursor:default"><td class="l"><b>${l}</b></td><td class="num">${t?money(t):'–'}</td><td class="num">${money(a)}</td><td>${t?`<span class="chip ${a>=t?'g':'b'}">${pct(a/t,0)}</span>`:'–'}</td><td class="num ${a-t>=0?'st g':'st b'}">${t?(a-t>=0?'+':'')+money(a-t):'–'}</td><td class="num muted">${b!=null?money(b):'–'}</td><td>${bmDelta(b?a/b-1:null)}</td><td class="num">${C.U[k]!=null?fmt(C.U[k]):'–'}</td><td class="num muted">${CL&&CL.have&&CL.U[k]!=null?fmt(CL.U[k]):'–'}</td></tr>`; }).join('')}
-      </tbody><tfoot><tr><td class="l">รวม</td><td class="num">${C.T?money(Object.values(tg).reduce((a,b)=>a+b,0)):'–'}</td><td class="num">${money(C.tot)}</td><td>${C.T?pct(C.tot/Object.values(tg).reduce((a,b)=>a+b,0),0):'–'}</td><td></td><td class="num">${CL&&CL.have?money(CL.tot):'–'}</td><td>${bmDelta(CL&&CL.have?C.tot/CL.tot-1:null)}</td><td class="num">${fmt(Object.values(C.U).reduce((a,b)=>a+b,0))}</td><td></td></tr></tfoot></table></div>
-      ${C.have<C.months?`<div class="muted small">ข้อมูลครบ ${C.have}/${C.months} เดือน</div>`:''}${to>lastD?`<div class="muted small">เดือนนี้ยังไม่จบ (ข้อมูลถึง ${thDate(lastD)}) · ปีก่อนเป็นยอดทั้งเดือน</div>`:''}</section>`; }
-  h+=bmHeat(from,capTo)+bmPerBill(yr)+bmWeekly(from,capTo)+bmTrafficCard()+bmReportCard(D);
+  h+=bmCatTable(R,A,B,TA)+bmYoY(R,D)+bmHeat(R,D)+bmWeekly(R,D)+bmTrafficCard()+bmReportCard(D);
   el.innerHTML=h; bindBM();
 }
-function bmHeat(from,to){
-  const X=bmData.dx.d, T=bmData.tr; const agg=[...Array(7)].map(()=>[...Array(BM_NH)].map(()=>({t:0,u:0,s:0,b:0,n:0,nt:0})));
-  for(const [d,e] of Object.entries(X)){ if(d<from||d>to) continue; const w=new Date(d+'T00:00:00Z').getUTCDay(); const tr=T[d];
-    for(let i=0;i<BM_NH;i++){ const c=agg[w][i]; c.s+=e.h[i][0]; c.u+=e.h[i][1]; c.b+=e.h[i][2]; c.n++; if(tr&&tr.h){ c.t+=tr.h[i]||0; c.nt++; } } }
-  const md=bmUI.mode; const val=c=>{ if(!c.n) return null; if(md==='tr') return c.nt?c.t/c.nt:null; if(md==='u') return c.u/c.n; if(md==='s') return c.s/c.n; if(md==='cv') return c.t>=20?c.u/c.t:null; if(md==='pb') return c.b?c.s/c.b:null; };
-  let mx=0; agg.forEach(r=>r.forEach(c=>{ const v=val(c); if(v!=null&&v>mx) mx=v; }));
+function bmCatTable(R,A,B,TA){
+  const row=(name,a,b,ua,ub,t,bold)=>{ const has=b!=null; return `<tr style="cursor:default"${bold?' class="tot"':''}><td class="l">${bold?'<b>'+name+'</b>':'<b>'+name+'</b>'}</td>
+    <td class="num">${money(a)}</td><td class="num muted">${has?money(b):'–'}</td><td class="num">${has?bmSign(a-b,bmM):'–'}</td><td>${has?bmDl(a,b):'–'}</td>
+    <td class="num">${ua==null?'–':fmt(ua)}</td><td class="num muted">${ub==null?'–':fmt(ub)}</td><td class="num">${ua==null||ub==null?'–':bmSign(ua-ub,fmt)}</td><td>${ua==null||ub==null?'–':bmDl(ua,ub)}</td>
+    <td class="num muted">${t!=null?money(t):'–'}</td><td>${t?`<span class="chip ${a>=t?'g':'b'}">${pct(a/t,0)}</span>`:'–'}</td></tr>`; };
+  const hasB=B.catDays>0, hasU=k=>['mac','ipad','iphone','aw'].includes(k);
+  const tT=TA?Object.values(TA).reduce((a,b)=>a+b,0):null;
+  const body=BM_CATS.map(([k,l])=>row(l,A.cat[k].S,hasB?B.cat[k].S:null,hasU(k)?A.cat[k].U:null,hasU(k)&&hasB?B.cat[k].U:null,TA?TA[k]:null)).join('')
+    +`<tr style="cursor:default"><td class="l"><b>Cover+</b> <span class="muted small">ชิ้น</span></td><td colspan="4" class="muted small">ATT ${A.cat.iphone.U?pct(A.cp/A.cat.iphone.U,0):'–'} · เทียบ ${hasB&&B.cat.iphone.U?pct(B.cp/B.cat.iphone.U,0):'–'}</td><td class="num">${fmt(A.cp)}</td><td class="num muted">${hasB?fmt(B.cp):'–'}</td><td class="num">${hasB?bmSign(A.cp-B.cp,fmt):'–'}</td><td>${hasB?bmDl(A.cp,B.cp):'–'}</td><td></td><td></td></tr>`
+    +row('รวม 6 Category',A.six,hasB?B.six:null,A.units,hasB?B.units:null,tT,true);
+  return `<section class="card sec"><div class="sechead"><div><h2>ราย Category</h2><div class="hint">${esc(R.label)} เทียบ ${esc(R.clabel)}${A.catDays<A.n?` · มีข้อมูล ${A.catDays}/${A.n} วัน`:''}${hasB&&B.catDays<B.n?` · ช่วงเทียบมี ${B.catDays}/${B.n} วัน`:''}${TA?(R.capped?' · เป้าเป็นของทั้งช่วง':'')+(dDiff(R.ffrom,R.fto)<27?' · เป้าเฉลี่ยจากเป้าเดือนตามจำนวนวัน':''):''}</div></div></div>
+    <div class="tablewrap"><table class="stafftbl bmcat"><thead><tr><th class="l">Category</th><th>ยอด</th><th>เทียบ</th><th>ต่าง (บาท)</th><th>%</th><th>ชิ้น</th><th>เทียบ</th><th>ต่าง (ชิ้น)</th><th>%</th><th>เป้า</th><th>% Ach</th></tr></thead><tbody>${body}</tbody></table></div></section>`;
+}
+/* year view: 12 calendar months or 12 Apple periods, this year vs last, every column cut to the same days */
+function bmYoY(R,D){
+  const U=bmUI, fyB=U.yb==='fy', L=R.L; const yr=fyB?fyOf(R.to):+R.to.slice(0,4);
+  const cols=[...Array(12)].map((_,i)=>{ let a,b,c0,c1,lab;
+    if(fyB){ const [w1,w2]=pWeeks(yr,i+1); a=wkRange(yr,w1)[0]; b=wkRange(yr,w2)[1]; c0=dAdd(fyStart(yr-1),dDiff(fyStart(yr),a)); lab=`P${i+1}<small>${P_MON(i+1)}</small>`; }
+    else { const ym=`${yr}-${String(i+1).padStart(2,'0')}`; const dim=new Date(Date.UTC(yr,i+1,0)).getUTCDate(); a=ym+'-01'; b=`${ym}-${String(dim).padStart(2,'0')}`; c0=dYear(a,-1); lab=TH_MS[i]; }
+    if(a>L) return {lab,none:true}; const cut=b>L; if(cut) b=L; c1=fyB?dAdd(c0,dDiff(a,b)):dYear(b,-1);
+    return {lab,cut,A:bmAgg(a,b,D),B:bmAgg(c0,c1,D)}; });
+  const ya=fyB?fyStart(yr):`${yr}-01-01`, yb=L<(fyB?fyEnd(yr):`${yr}-12-31`)?L:(fyB?fyEnd(yr):`${yr}-12-31`);
+  const YA=bmAgg(ya,yb,D), YB=bmAgg(fyB?fyStart(yr-1):dYear(ya,-1),fyB?dAdd(fyStart(yr-1),dDiff(ya,yb)):dYear(yb,-1),D);
+  const met=U.ym2||'s';
+  const val=(o,k)=>{ if(!o) return null; const ck=!['bill','nb','pb','at','tr','cv'].includes(k); if(ck?!o.catDays:!o.days) return null; if(k==='tot') return met==='u'?o.units:o.six; if(k==='bill') return o.s; if(k==='nb') return o.b; if(k==='pb') return o.b?o.s/o.b:null; if(k==='at') return o.lob?o.ar/o.lob:null; if(k==='tr') return o.tr||null; if(k==='cv') return o.tr?o.stTr/o.tr:null; return met==='u'?(['aba','rd'].includes(k)?null:o.cat[k].U):o.cat[k].S; };
+  const f=(k,v)=>v==null?'–':k==='cv'?pct(v,1):k==='pb'||k==='at'?fmt(v):k==='nb'||k==='tr'||met==='u'&&!['bill'].includes(k)?fmt(v):bmM(v);
+  const cell=(k,x)=>{ if(!x||x.none) return '<td class="muted">·</td>'; const a=val(x.A,k), b=val(x.B,k); if(a==null) return '<td class="muted">–</td>';
+    const g=b?a/b-1:null; const bg=g==null?'':g>=0.1?'background:rgba(15,138,60,.18)':g>=0?'background:rgba(15,138,60,.07)':g>-0.1?'background:rgba(201,56,54,.07)':'background:rgba(201,56,54,.18)';
+    return `<td style="${bg}" title="เทียบ ${b==null?'–':f(k,b)}"><div class="num">${f(k,a)}</div><div class="small ${g==null?'muted':g>=0?'st g':'st b'}">${g==null?'–':(g>=0?'+':'')+pct(g,0)}</div></td>`; };
+  const rows=[...BM_CATS.map(([k,l])=>[k,l]).filter(([k])=>met!=='u'||!['aba','rd'].includes(k)),['tot',met==='u'?'รวมเครื่อง':'รวม 6 Category']];
+  const st=[['bill','ยอดตามบิล'],['nb','จำนวนบิล'],['pb','Per bill'],['at','Attach'],['tr','Traffic'],['cv','Conversion']];
+  const chart=cols.map(x=>x.none?null:{a:val(x.A,'tot'),b:val(x.B,'tot')}); const mx=Math.max(1,...chart.filter(Boolean).flatMap(x=>[x.a||0,x.b||0]));
+  return `<section class="card sec"><div class="sechead"><div><h2>YoY ทั้งปี · ${fyB?'FY'+yr:yr+543} เทียบ ${fyB?'FY'+(yr-1):yr+542}</h2>
+      <div class="hint">${fyB?'เดือนตามปีงบ Apple (P1 = ต.ค.)':'เดือนตามปฏิทิน'} · เดือนที่ยังไม่จบเทียบเท่าจำนวนวันเดียวกัน · รวม ${fyB?'FYTD':'YTD'} ${rangeTxt(ya,yb)}: ${money(val(YA,'tot'))} เทียบ ${money(val(YB,'tot'))} · ${bmDl(val(YA,'tot'),val(YB,'tot'))}</div></div>
+      <div class="bmctl"><div class="chips" id="bmYb"><button data-v="cal" class="${!fyB?'on':''}">ปีปฏิทิน</button><button data-v="fy" class="${fyB?'on':''}">ปีงบ Apple</button></div><div class="chips" id="bmYm2"><button data-v="s" class="${met!=='u'?'on':''}">บาท</button><button data-v="u" class="${met==='u'?'on':''}">ชิ้น</button></div></div></div>
+    <div class="tablewrap"><div class="bmbars">${cols.map((x,i)=>`<div class="bmcol"><div class="bmpair"><i style="height:${chart[i]?(chart[i].b||0)/mx*100:0}%;background:#a8a59b"></i><i style="height:${chart[i]?(chart[i].a||0)/mx*100:0}%;background:var(--s1)"></i></div><span>${x.lab.replace(/<small>.*<\/small>/,'')}</span></div>`).join('')}</div></div>
+    <div class="bmleg" style="margin:6px 0 12px"><span><i style="background:#a8a59b"></i>${fyB?'FY'+(yr-1):yr+542}</span><span><i style="background:var(--s1)"></i>${fyB?'FY'+yr:yr+543}</span></div>
+    <div class="tablewrap"><table class="stafftbl bmyoy"><thead><tr><th class="l"></th>${cols.map(x=>`<th>${x.lab}${x.cut?'<small>*</small>':''}</th>`).join('')}<th>${fyB?'FYTD':'YTD'}</th></tr></thead><tbody>
+      ${rows.map(([k,l])=>`<tr style="cursor:default" class="${k==='tot'?'tot':''}"><td class="l"><b>${l}</b></td>${cols.map(x=>cell(k,x)).join('')}${cell(k,{A:YA,B:YB})}</tr>`).join('')}
+      <tr class="sep"><td colspan="14"></td></tr>
+      ${st.map(([k,l])=>`<tr style="cursor:default"><td class="l">${l}</td>${cols.map(x=>cell(k,x)).join('')}${cell(k,{A:YA,B:YB})}</tr>`).join('')}
+    </tbody></table></div><div class="muted small">* เดือนที่ยังไม่จบ · ตัวบน = ปีนี้ · ตัวล่าง = % เทียบปีก่อน · แตะค้างที่ช่องเพื่อดูตัวเลขปีก่อน</div></section>`;
+}
+/* day × hour: 1 day = actual vs comparison day; ≤ 7 days = one row per date; longer = average by weekday */
+function bmHeat(R,D){
+  const X=bmData.dx.d, T=bmData.tr, md=bmUI.mode2||'tr', useC=bmUI.hc==='c';
+  const from=useC?R.cf:R.from, to=useC?R.ct:R.to, n=dDiff(from,to)+1;
+  const blankC=()=>({t:0,u:0,s:0,b:0,n:0,nt:0});
+  const addDay=(row,d)=>{ const e=X[d], tr=T[d]; if(!e||!e.h) return; for(let i=0;i<BM_NH;i++){ const c=row.c[i]; c.s+=e.h[i][0]; c.u+=e.h[i][1]; c.b+=e.h[i][2]; c.n++; if(tr&&tr.h){ c.t+=tr.h[i]||0; c.nt++; } } row.n++; if(tr&&tr.h) row.nt++; };
+  let rows=[], avg=false;
+  if(n===1){ const r1={lab:`${TH_WD[wdOf(R.from)]} ${shortDY(R.from)}`,c:[...Array(BM_NH)].map(blankC),n:0,nt:0}, r2={lab:`${TH_WD[wdOf(R.cf)]} ${shortDY(R.cf)}`,c:[...Array(BM_NH)].map(blankC),n:0,nt:0,cmp:true}; addDay(r1,R.from); addDay(r2,R.cf); rows=[r1,r2]; }
+  else if(n<=7){ for(let d=from;d<=to;d=dAdd(d,1)){ const r={lab:`${TH_WD[wdOf(d)]} ${shortD(d)}`,c:[...Array(BM_NH)].map(blankC),n:0,nt:0}; addDay(r,d); rows.push(r); } }
+  else { avg=true; rows=[0,1,2,3,4,5,6].map(w=>({lab:TH_WD[w],c:[...Array(BM_NH)].map(blankC),n:0,nt:0})); for(let d=from;d<=to;d=dAdd(d,1)) addDay(rows[wdOf(d)],d); }
+  const val=c=>{ const k=avg?(md==='tr'?c.nt:c.n):1; if(!c.n) return null; if(md==='tr') return c.nt?c.t/k:null; if(md==='u') return c.u/k; if(md==='s') return c.s/k; if(md==='cv') return c.t>=20?c.u/c.t:null; if(md==='pb') return c.b?c.s/c.b:null; };
+  let mx=0; rows.forEach(r=>r.c.forEach(c=>{ const v=val(c); if(v!=null&&v>mx) mx=v; }));
   const ramp=['#eef4fc','#dbe9fa','#b5d4f4','#85b7eb','#4f94e0','#2a78d6','#185fa5'];
-  const f=v=>md==='cv'?pct(v,1):md==='s'||md==='pb'?(v>=1e6?fmt(v/1e6,1)+'M':v>=1e3?fmt(v/1e3,0)+'k':fmt(v)):md==='tr'?fmt(Math.round(v)):fmt(v,v<10?1:0);
+  const f=v=>md==='cv'?pct(v,1):md==='s'||md==='pb'?(v>=1e6?fmt(v/1e6,1)+'M':v>=1e3?fmt(v/1e3,0)+'k':fmt(v)):md==='tr'?fmt(Math.round(v)):fmt(v,avg&&v<10?1:0);
+  const tot=r=>{ const s=r.c.reduce((a,c)=>({t:a.t+c.t,u:a.u+c.u,s:a.s+c.s,b:a.b+c.b,n:Math.max(a.n,c.n),nt:Math.max(a.nt,c.nt)}),{t:0,u:0,s:0,b:0,n:0,nt:0}); return val(s); };
   const modes=[['tr','Traffic'],['u','ST unit'],['s','ยอดขาย'],['cv','Conversion'],['pb','Per bill']];
-  return `<section class="card sec"><div class="sechead"><div><h2>ช่วงเวลา (วัน × ชั่วโมง)</h2><div class="hint">ค่าเฉลี่ยต่อวัน · ${thDate(from)} – ${thDate(to)} · ชั่วโมงตามเวลาออกบิล (ลูกค้าที่เดินเข้าช่วงบ่ายอาจจ่ายเงินตอนค่ำ Conversion ช่วงค่ำจึงสูงกว่าจริง)</div></div><div class="chips" id="bmMode">${modes.map(([k,l])=>`<button data-v="${k}" class="${md===k?'on':''}">${l}</button>`).join('')}</div></div>
-    <div class="tablewrap"><div class="bmheat"><span></span>${[...Array(BM_NH)].map((_,i)=>`<span class="muted small">${BM_H0+i}</span>`).join('')}
-    ${[0,1,2,3,4,5,6].map(w=>`<span class="small"><b>${TH_WD[w]}</b></span>`+agg[w].map(c=>{ const v=val(c); if(v==null) return '<span class="bmc empty">–</span>'; const i=Math.min(6,Math.floor(v/(mx||1)*6.99)); return `<span class="bmc" style="background:${ramp[i]};color:${i>=4?'#fff':'#14213d'}">${f(v)}</span>`; }).join('')).join('')}</div></div>
-    ${md==='tr'||md==='cv'?(Object.keys(bmData.tr).some(d=>d>=from&&d<=to)?'':'<div class="muted small">ยังไม่มี Traffic ของช่วงนี้ · ใส่ได้ที่การ์ด Traffic ด้านล่าง</div>'):''}</section>`;
+  const kind=n===1?'ค่าจริงของวัน เทียบวันที่ใช้เทียบ':avg?`ค่าเฉลี่ยต่อวัน แยกตามวันในสัปดาห์ (${shortD(from)} – ${shortDY(to)})`:'ค่าจริงรายวัน';
+  return `<section class="card sec"><div class="sechead"><div><h2>ช่วงเวลา (วัน × ชั่วโมง)</h2><div class="hint"><b>${kind}</b> · ชั่วโมงตามเวลาออกบิล (ลูกค้าที่เดินเข้าช่วงบ่ายอาจจ่ายเงินตอนค่ำ)</div></div>
+    <div class="bmctl"><div class="chips" id="bmMode2">${modes.map(([k,l])=>`<button data-v="${k}" class="${md===k?'on':''}">${l}</button>`).join('')}</div>${n>1||useC?`<div class="chips" id="bmHc"><button data-v="a" class="${!useC?'on':''}">ช่วงนี้</button><button data-v="c" class="${useC?'on':''}">ช่วงเทียบ</button></div>`:''}</div></div>
+    <div class="tablewrap"><div class="bmheat" style="grid-template-columns:110px repeat(12,minmax(40px,1fr)) 70px"><span></span>${[...Array(BM_NH)].map((_,i)=>`<span class="muted small">${BM_H0+i}</span>`).join('')}<span class="muted small">${md==='cv'||md==='pb'?'รวม':avg?'รวม/วัน':'รวม'}</span>
+    ${rows.map(r=>`<span class="small" style="text-align:left">${r.cmp?'<span class="muted">เทียบ </span>':''}<b>${r.lab}</b>${avg?`<span class="muted"> · ${md==='tr'||md==='cv'?r.nt:r.n} วัน</span>`:''}</span>`+r.c.map(c=>{ const v=val(c); if(v==null) return '<span class="bmc empty">–</span>'; const i=Math.min(6,Math.floor(v/(mx||1)*6.99)); return `<span class="bmc" style="background:${ramp[i]};color:${i>=4?'#fff':'#14213d'}">${f(v)}</span>`; }).join('')+`<span class="small"><b>${(()=>{ const v=tot(r); return v==null?'–':f(v); })()}</b></span>`).join('')}</div></div>
+    ${(md==='tr'||md==='cv')&&!rows.some(r=>r.nt)?'<div class="muted small">ยังไม่มี Traffic ของช่วงนี้ · ใส่ได้ที่การ์ด Traffic ด้านล่าง</div>':''}</section>`;
 }
-function bmPerBill(yr){
-  const row=y=>[...Array(12)].map((_,i)=>{ const ym=`${y}-${String(i+1).padStart(2,'0')}`; const o=bmSum(ym+'-01',ym+'-31'); return o.b?{pb:o.s/o.b,b:o.b}:null; });
-  const a=row(yr), b=row(yr-1); if(!a.some(Boolean)&&!b.some(Boolean)) return '';
-  return `<section class="card sec"><h2>Sell per bill รายเดือน</h2><div class="hint">ยอดขายทั้งหมด ÷ จำนวนบิล · ไม่นับบิลออนไลน์</div><div class="tablewrap"><table class="stafftbl" style="min-width:900px"><thead><tr><th class="l">ปี</th>${TH_MS.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>
-    <tr style="cursor:default"><td class="l">${yr+542}</td>${b.map(x=>`<td class="num muted">${x?fmt(x.pb):'–'}</td>`).join('')}</tr>
-    <tr style="cursor:default"><td class="l"><b>${yr+543}</b></td>${a.map(x=>`<td class="num"><b>${x?fmt(x.pb):'–'}</b></td>`).join('')}</tr>
-    <tr style="cursor:default"><td class="l">ต่าง</td>${a.map((x,i)=>`<td>${x&&b[i]?bmDelta(x.pb/b[i].pb-1):''}</td>`).join('')}</tr>
-    <tr style="cursor:default"><td class="l muted">บิล ${yr+543}</td>${a.map(x=>`<td class="num muted small">${x?fmt(x.b):''}</td>`).join('')}</tr></tbody></table></div></section>`;
-}
-function bmWeekly(from,to){
-  if(!['m','q','y'].includes(bmUI.per)) return '';
-  const k=bmUI.cat, X=bmData.dx.d; const wk=(d0,d1)=>{ const out=[]; let s=new Date(d0+'T00:00:00Z'); const e=new Date(d1+'T00:00:00Z'); while(s<=e){ const a=s.toISOString().slice(0,10); const n=new Date(s); n.setUTCDate(n.getUTCDate()+6); const b=(n<e?n:e).toISOString().slice(0,10); let u=0; for(const [d,x] of Object.entries(X)) if(d>=a&&d<=b) u+=(x.u||{})[k]||0; out.push(u); s.setUTCDate(s.getUTCDate()+7); } return out; };
-  const A=wk(from,to), B=wk(bmShiftYear(from,-1),bmShiftYear(to,-1)); const n=Math.max(A.length,B.length), mx=Math.max(1,...A,...B);
-  const sa=A.reduce((a,b)=>a+b,0), sb=B.reduce((a,b)=>a+b,0);
+/* Apple WK of the fiscal quarter, this FY vs last FY */
+function bmWeekly(R,D){
+  const k=bmUI.cat||'mac', fy=fyOf(R.to), q=Math.ceil(wkOf(R.to).wk/13), [w1,w2]=qWeeks(fy,q);
   const L={mac:'Mac',ipad:'iPad',iphone:'iPhone',aw:'Apple Watch',pods:'AirPods'};
-  return `<section class="card sec"><div class="sechead"><div><h2>${L[k]} รายสัปดาห์ เทียบปีก่อน</h2><div class="hint">WK1–${n} · ${fmt(sa)} เครื่อง เทียบ ${fmt(sb)} · ${bmDelta(sb?sa/sb-1:null)}${sb?` · ต่าง ${sa-sb>=0?'+':''}${fmt(sa-sb)} เครื่อง`:''}</div></div>
+  const get=(a,b)=>{ if(k==='pods'){ let u=0; for(let d=a;d<=b;d=dAdd(d,1)) u+=((bmData.dx.d[d]||{}).u||{}).pods||0; return u; } return bmAgg(a,b,D).cat[k].U; };
+  const W=[]; for(let w=w1; w<=w2; w++){ const [a,b0]=wkRange(fy,w); if(a>R.L) break; const b=b0>R.L?R.L:b0; const [c,d0]=wkRange(fy-1,w); W.push({w,a:get(a,b),b:get(c,dAdd(c,dDiff(a,b))),cut:b<b0}); }
+  const sa=W.reduce((s,x)=>s+x.a,0), sb=W.reduce((s,x)=>s+x.b,0), mx=Math.max(1,...W.flatMap(x=>[x.a,x.b]));
+  return `<section class="card sec"><div class="sechead"><div><h2>${L[k]} รายสัปดาห์ · Q${q} FY${fy} เทียบ FY${fy-1}</h2><div class="hint">WK${w1}–${W.length?W[W.length-1].w:w1} · ${fmt(sa)} เครื่อง เทียบ ${fmt(sb)} · ${bmDl(sa,sb)}${sb?` · ต่าง ${sa-sb>=0?'+':''}${fmt(sa-sb)} เครื่อง`:''}</div></div>
     <div class="chips" id="bmCat">${Object.entries(L).map(([v,l])=>`<button data-v="${v}" class="${k===v?'on':''}">${l}</button>`).join('')}</div></div>
-    <div class="tablewrap"><div class="bmbars wk">${[...Array(n)].map((_,i)=>`<div class="bmcol"><div class="bmpair"><i style="height:${(B[i]||0)/mx*100}%;background:#a8a59b" title="${B[i]||0}"></i><i style="height:${(A[i]||0)/mx*100}%;background:var(--s1)" title="${A[i]||0}"></i></div><span>WK${i+1}</span><b class="small">${A[i]!=null?A[i]:''}</b></div>`).join('')}</div></div></section>`;
+    <div class="tablewrap"><div class="bmbars wk">${W.map(x=>`<div class="bmcol"><div class="bmpair"><i style="height:${x.b/mx*100}%;background:#a8a59b" title="FY${fy-1}: ${x.b}"></i><i style="height:${x.a/mx*100}%;background:var(--s1)" title="FY${fy}: ${x.a}"></i></div><span>WK${x.w}${x.cut?'*':''}</span><b class="small">${x.a}<span class="muted"> / ${x.b}</span></b></div>`).join('')}</div></div></section>`;
 }
 function bmTrafficCard(){
-  const T=bmData.tr; const ym=bmUI.ym; const [y,m]=ym.split('-').map(Number); const dim=new Date(Date.UTC(y,m,0)).getUTCDate(); const first=new Date(Date.UTC(y,m-1,1)).getUTCDay();
+  const T=bmData.tr; const ym=bmUI.tym; const [y,m]=ym.split('-').map(Number); const dim=new Date(Date.UTC(y,m,0)).getUTCDate(); const first=new Date(Date.UTC(y,m-1,1)).getUTCDay();
   if(!bmUI.tday||!bmUI.tday.startsWith(ym)) bmUI.tday=(Object.keys(bmData.dx.d).filter(d=>d.startsWith(ym)).sort().pop())||ym+'-01';
   const cur=T[bmUI.tday]||{}; const hv=cur.h||Array(BM_NH).fill('');
   let cal=TH_WD.map(w=>`<span class="muted small">${w}</span>`).join('')+'<span></span>'.repeat(first);
   let miss=0; const today=bkkToday();
   for(let d=1;d<=dim;d++){ const ds=`${ym}-${String(d).padStart(2,'0')}`; const t=T[ds]; const k=t?(t.h?'h':'t'):'n'; if(!t&&ds<today) miss++;
     cal+=`<button class="bmday ${k} ${ds===bmUI.tday?'on':''}" data-d="${ds}">${d}<small>${t?fmt(t.t):''}</small></button>`; }
-  return `<section class="card sec" id="bmTraffic"><div class="sechead"><div><h2>👣 Traffic คนเข้าร้าน</h2><div class="hint">จาก Ignite Prism · ใช้คิด Conversion และช่วงเวลา</div></div></div>
+  return `<section class="card sec" id="bmTraffic"><div class="sechead"><div><h2>👣 Traffic คนเข้าร้าน · ${ymLong(ym)}</h2><div class="hint">จาก Ignite Prism · ใช้คิด Conversion และช่วงเวลา · เปลี่ยนเดือนได้จากช่วงด้านบน</div></div></div>
     <div class="bmtr">
       <div><label class="bmdrop" id="bmDrop"><b>ลากไฟล์ CSV จาก Prism มาวาง</b><span class="muted small">เลือกหลายไฟล์พร้อมกันได้ · วันซ้ำเขียนทับ</span><input type="file" id="bmCsv" accept=".csv,text/csv" multiple></label>
         <div class="bmcal">${cal}</div><div class="muted small" style="margin-top:6px"><span class="bmkey h"></span>รายชั่วโมง <span class="bmkey t"></span>ยอดรวมวัน <span class="bmkey n"></span>ยังไม่มี${miss?` · ขาด ${miss} วัน`:''}</div></div>
-      <div><div class="sechead" style="margin:0 0 8px"><h3 style="margin:0">กรอกมือ · ${TH_WD[new Date(bmUI.tday+'T00:00:00Z').getUTCDay()]} ${thDate(bmUI.tday)}</h3><span class="muted">รวม <b id="bmTsum">${fmt(cur.t||0)}</b> คน</span></div>
+      <div><div class="sechead" style="margin:0 0 8px"><h3 style="margin:0">กรอกมือ · ${TH_WD[wdOf(bmUI.tday)]} ${thDate(bmUI.tday)}</h3><span class="muted">รวม <b id="bmTsum">${fmt(cur.t||0)}</b> คน</span></div>
         <div class="bmhrs">${[...Array(BM_NH)].map((_,i)=>`<label><span>${BM_H0+i}:00</span><input inputmode="numeric" data-hi="${i}" value="${hv[i]===''||hv[i]==null?'':hv[i]}"></label>`).join('')}</div>
         <div class="bmrow"><label class="small muted">หรือยอดรวมทั้งวัน <input id="bmTday" inputmode="numeric" value="${!cur.h&&cur.t?cur.t:''}" placeholder="เช่น 855"></label></div>
         <div class="bmrow"><button class="btn primary" id="bmTsave">บันทึก</button><button class="btn" id="bmTpaste">วางตัวเลข 12 ช่อง</button>${cur.t?'<button class="btn" id="bmTdel">ลบวันนี้</button>':''}</div>
@@ -3060,10 +3171,10 @@ function bmTrafficCard(){
 }
 
 /* ---------- report builder ---------- */
-const BM_SLIDES=[['cover','หน้าปก','a'],['yoy','YOY Performance รายเดือน','a'],['ytd','YTD by Category (บาท + ชิ้น)','a'],['perf','Performance ประจำเดือน ราย Category','a'],['bill','Per bill เทียบปีก่อน','a'],['sales','Sale Performance (ชิ้น · Conversion · Attach)','a'],['se','Store Excellent 4 หมวด','f'],['act','Action เดือนหน้า','f']];
+const BM_SLIDES=[['cover','หน้าปก','a'],['yoy','YOY Performance รายเดือน','a'],['ytd','YTD by Category (บาท + ชิ้น)','a'],['perf','Performance ประจำเดือน ราย Category','a'],['bill','Per bill เทียบปีก่อน','a'],['wk','WK Growth (Category ที่เลือกในกราฟรายสัปดาห์)','a'],['sales','Sale Performance ไตรมาส FY (ชิ้น · Conversion · Attach)','a'],['se','Store Excellent 4 หมวด','f'],['act','Action เดือนหน้า','f']];
 function bmReportCard(D){
-  const R=bmData.rep||{}; const ym=bmUI.ym;
-  return `<section class="card sec" id="bmRep"><div class="sechead"><div><h2>📑 สร้างสไลด์รีพอร์ต</h2><div class="hint">ใช้ข้อมูลของเดือนที่เลือกด้านบน (${ymLong(ym)}) · ได้ไฟล์ .pptx เปิดใน Keynote / PowerPoint แก้ต่อได้</div></div></div>
+  const R=bmData.rep||{}; const L=bmLastDay(D), ym=(bmUI.mode==='m'&&bmUI.ym)||L.slice(0,7), fy=fyOf(L), q=Math.ceil(wkOf(L).wk/13);
+  return `<section class="card sec" id="bmRep"><div class="sechead"><div><h2>📑 สร้างสไลด์รีพอร์ต</h2><div class="hint">เดือน ${ymLong(ym)} · ไตรมาส Q${q} FY${fy} (ตามปีงบ Apple) · ได้ไฟล์ .pptx เปิดใน Keynote / PowerPoint แก้ต่อได้</div></div></div>
     <div class="bmrep"><div><div class="h4">สไลด์</div>${BM_SLIDES.map(([k,l,t])=>`<label class="bmck"><input type="checkbox" data-sl="${k}" ${bmUI.off[k]?'':'checked'}><span>${l}</span><span class="chip ${t==='a'?'g':'w'}">${t==='a'?'อัตโนมัติ':'กรอกเพิ่ม'}</span></label>`).join('')}</div>
     <div class="form" style="grid-template-columns:1fr 1fr;align-content:start">
       <div class="field"><label>NPS (%)</label><input id="rpNps" value="${esc(R.nps||'')}" placeholder="97.04"></div>
@@ -3078,92 +3189,104 @@ async function loadPptx(){ if(window.PptxGenJS) return; await new Promise((ok,no
 async function buildDeck(){
   const st=$('#rpSt'); st.textContent='⏳ กำลังสร้างสไลด์…';
   try{ await loadPptx(); const R=bmRepInputs(); bmData.rep={...bmData.rep,...R}; api('bm/rep',{method:'POST',body:bmData.rep}).catch(()=>{});
-    const ym=bmUI.ym, [y,m]=ym.split('-').map(Number), yr=y, D=computeAll();
-    const lastD=Object.keys(bmData.dx.d).filter(d=>d.startsWith(ym)).sort().pop()||ym+'-28';
+    const D=computeAll(), L=bmLastDay(D), ym=(bmUI.mode==='m'&&bmUI.ym)||L.slice(0,7), [y,m]=ym.split('-').map(Number), yr=y;
+    const [, mEndFull]=[0,`${ym}-${String(new Date(Date.UTC(y,m,0)).getUTCDate()).padStart(2,'0')}`]; const mEnd=mEndFull>L?L:mEndFull;
     const P=new PptxGenJS(); P.layout='LAYOUT_WIDE'; P.title='Store Review '+ym;
     const G='4E8A3E', O='E0782A', FONT='Helvetica Neue';
     const title=(s,t,sub)=>{ s.addText(t,{x:0.6,y:0.35,w:12,h:0.8,fontSize:34,bold:true,fontFace:FONT,color:'111111'}); if(sub) s.addText(sub,{x:0.6,y:1.05,w:12,h:0.45,fontSize:18,fontFace:FONT,color:'444444'}); };
-    const foot=s=>s.addText(`Data ${thDate(lastD)} · Monthly Target Tracker`,{x:0.6,y:7.0,w:12,h:0.3,fontSize:9,color:'8A8A8A',fontFace:FONT});
+    const foot=s=>s.addText(`Data ${thDate(L)} · Monthly Target Tracker`,{x:0.6,y:7.0,w:12,h:0.3,fontSize:9,color:'8A8A8A',fontFace:FONT});
     const hd=(t,c)=>({text:t,options:{bold:true,color:'FFFFFF',fill:{color:c||G},align:'center'}});
     const cell=(t,o)=>({text:String(t),options:Object.assign({align:'center'},o||{})});
-    const M=n=>n==null?'–':(n/1e6).toFixed(2)+'M', P1=v=>v==null?'–':(v>=0?'+':'')+(v*100).toFixed(1)+'%';
-    const red={color:'8C1D16',fill:{color:'F6C9C4'}}, grn={color:'20501A',fill:{color:'CFE8C3'}};
+    const M=n=>n==null?'–':(n/1e6).toFixed(2)+'M', P1=v=>v==null||!isFinite(v)?'–':(v>=0?'+':'')+(v*100).toFixed(1)+'%';
+    const red={color:'8C1D16',fill:{color:'F6C9C4'}}, grn={color:'20501A',fill:{color:'CFE8C3'}}, gr=v=>v>=0?grn:red;
     const on=k=>!bmUI.off[k];
     const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     if(on('cover')){ const s=P.addSlide(); s.addText('Store Review '+MONTHS[m-1]+' '+y,{x:0.8,y:2.6,w:11,h:1.1,fontSize:48,bold:true,fontFace:FONT}); s.addText('ID251 : Studio7 Mega Bangna',{x:0.8,y:3.7,w:11,h:0.6,fontSize:24,bold:true,fontFace:FONT,color:'333333'}); }
-    const monthly=[...Array(12)].map((_,i)=>{ const a=bmCat(`${yr}-${String(i+1).padStart(2,'0')}-01`,`${yr}-${String(i+1).padStart(2,'0')}-28`), b=bmCat(`${yr-1}-${String(i+1).padStart(2,'0')}-01`,`${yr-1}-${String(i+1).padStart(2,'0')}-28`); return {a:a.have?a.tot:null,b:b.have?b.tot:null}; });
+    const monthly=[...Array(12)].map((_,i)=>{ const a0=`${yr}-${String(i+1).padStart(2,'0')}-01`; if(a0>L) return {a:null,b:null}; let b0=`${yr}-${String(i+1).padStart(2,'0')}-${String(new Date(Date.UTC(yr,i+1,0)).getUTCDate()).padStart(2,'0')}`; if(b0>L) b0=L;
+      const A=bmAgg(a0,b0,D), B=bmAgg(dYear(a0,-1),dYear(b0,-1),D); return {a:A.catDays?A.six:null,b:B.catDays?B.six:null}; });
     if(on('yoy')){ const s=P.addSlide(); title(s,'YOY Performance',`${yr-1} vs ${yr}`);
       s.addChart(P.charts.BAR,[{name:String(yr-1),labels:MONTHS,values:monthly.map(x=>x.b!=null?+(x.b/1e6).toFixed(2):0)},{name:String(yr),labels:MONTHS,values:monthly.map(x=>x.a!=null?+(x.a/1e6).toFixed(2):0)}],
         {x:0.6,y:1.6,w:12.1,h:4.6,barDir:'col',barGrouping:'clustered',chartColors:['3F6B4F','9CCC8C'],showValue:true,dataLabelFontSize:9,dataLabelFormatCode:'0.0;-0.0;;',valAxisHidden:true,valGridLine:{style:'none'},catAxisLabelFontSize:11,showLegend:true,legendPos:'b'});
       const both=monthly.filter(x=>x.a!=null&&x.b!=null), sa=both.reduce((t,x)=>t+x.a,0), sb=both.reduce((t,x)=>t+x.b,0);
       s.addText([{text:`${yr-1}: ${M(sb)}   ${yr}: ${M(sa)}   `,options:{color:'333333'}},{text:sb?`YOY ${P1(sa/sb-1)} (${M(sa-sb)})`:'ยังไม่มีข้อมูลปีก่อน',options:{bold:true,color:sa>=sb?'2F8A3C':'D23A33'}}],{x:0.6,y:6.35,w:12,h:0.5,fontSize:18,fontFace:FONT}); foot(s); }
-    const Cy=bmCat(`${yr}-01-01`,ym+'-31'), Cl=bmCat(`${yr-1}-01-01`,`${yr-1}${ym.slice(4)}-31`);
-    if(on('ytd')){ const s=P.addSlide(); title(s,'YTD by Category');
+    if(on('ytd')){ const s=P.addSlide(); const Cy=bmAgg(`${yr}-01-01`,L,D), Cl=bmAgg(dYear(`${yr}-01-01`,-1),dYear(L,-1),D); title(s,'YTD by Category',`1 Jan – ${shortD(L)} ${yr} vs ${yr-1}`);
       const rows=[[hd('Category'),hd(String(yr-1)),hd(String(yr)),hd('Diff'),hd('YTD'),hd(String(yr-1),O),hd(String(yr),O),hd('Diff',O),hd('YTD',O)]];
-      BM_CATS.forEach(([k,l])=>{ const a=Cy.S[k], b=Cl.have?Cl.S[k]:null, ua=Cy.U[k], ub=Cl.have?Cl.U[k]:null; const d=b!=null?a-b:null, du=ua!=null&&ub!=null?ua-ub:null;
-        rows.push([cell(l,{bold:true}),cell(M(b)),cell(M(a)),cell(d==null?'–':M(d),d==null?{}:d>=0?grn:red),cell(b?P1(a/b-1):'–',d==null?{}:d>=0?grn:red),cell(ub==null?'':fmt(ub)),cell(ua==null?'':fmt(ua)),cell(du==null?'':fmt(du),du==null?{}:du>=0?grn:red),cell(du==null||!ub?'':P1(ua/ub-1),du==null?{}:du>=0?grn:red)]); });
-      const ua=Object.values(Cy.U).reduce((a,b)=>a+b,0), ub=Object.values(Cl.U).reduce((a,b)=>a+b,0);
-      rows.push([hd('Total'),hd(M(Cl.have?Cl.tot:null)),hd(M(Cy.tot)),hd(Cl.have?M(Cy.tot-Cl.tot):'–'),hd(Cl.have?P1(Cy.tot/Cl.tot-1):'–'),hd(Cl.have?fmt(ub):'–',O),hd(fmt(ua),O),hd(Cl.have?fmt(ua-ub):'–',O),hd(Cl.have&&ub?P1(ua/ub-1):'–',O)]);
-      s.addTable(rows,{x:0.6,y:1.4,w:12.1,fontSize:14,fontFace:FONT,border:{type:'solid',color:'E2E2E2',pt:1},rowH:0.5}); foot(s); }
-    if(on('perf')){ const s=P.addSlide(); const C=bmCat(ym+'-01',ym+'-31'); const T=C.T||{}; title(s,`Performance ${MONTHS[m-1].charAt(0)+MONTHS[m-1].slice(1).toLowerCase()} '${String(y).slice(2)}`);
+      BM_CATS.forEach(([k,l])=>{ const a=Cy.cat[k].S, b=Cl.cat[k].S, uu=['mac','ipad','iphone','aw'].includes(k), ua=Cy.cat[k].U, ub=Cl.cat[k].U;
+        rows.push([cell(l,{bold:true}),cell(M(b)),cell(M(a)),cell(M(a-b),gr(a-b)),cell(b?P1(a/b-1):'–',gr(a-b)),cell(uu?fmt(ub):''),cell(uu?fmt(ua):''),cell(uu?fmt(ua-ub):'',uu?gr(ua-ub):{}),cell(uu&&ub?P1(ua/ub-1):'',uu?gr(ua-ub):{})]); });
+      rows.push([hd('Total'),hd(M(Cl.six)),hd(M(Cy.six)),hd(M(Cy.six-Cl.six)),hd(Cl.six?P1(Cy.six/Cl.six-1):'–'),hd(fmt(Cl.units),O),hd(fmt(Cy.units),O),hd(fmt(Cy.units-Cl.units),O),hd(Cl.units?P1(Cy.units/Cl.units-1):'–',O)]);
+      s.addTable(rows,{x:0.6,y:1.6,w:12.1,fontSize:14,fontFace:FONT,border:{type:'solid',color:'E2E2E2',pt:1},rowH:0.5}); foot(s); }
+    if(on('perf')){ const s=P.addSlide(); const C=bmAgg(ym+'-01',mEnd,D), T=bmTarget(ym+'-01',mEndFull,D)||{}; title(s,`Performance ${MONTHS[m-1].charAt(0)+MONTHS[m-1].slice(1).toLowerCase()} '${String(y).slice(2)}`,mEnd<mEndFull?`Data to ${shortD(mEnd)} · target = full month`:'');
       const rows=[[hd('Category'),hd('Target'),hd('Actual'),hd('% Ach'),hd('Diff Sale')]];
-      BM_CATS.forEach(([k,l])=>{ const t=T[k]||0, a=C.S[k]; rows.push([cell(l,{bold:true}),cell(t?M(t):'–'),cell(M(a)),cell(t?Math.round(a/t*100)+'%':'–',t?(a>=t?{color:'2F8A3C',bold:true}:{color:'D23A33',bold:true}):{}),cell(t?M(a-t):'–')]); });
-      const tt=Object.values(T).reduce((a,b)=>a+b,0); rows.push([hd('Total'),hd(tt?M(tt):'–'),hd(M(C.tot)),hd(tt?Math.round(C.tot/tt*100)+'%':'–'),hd(tt?M(C.tot-tt):'–')]);
-      s.addTable(rows,{x:1.2,y:1.4,w:10.9,fontSize:16,fontFace:FONT,border:{type:'solid',color:'E2E2E2',pt:1},rowH:0.55}); s.addText('* Number in THB Millions',{x:9,y:6.6,w:3.5,h:0.3,fontSize:10,color:'8A8A8A'}); foot(s); }
+      BM_CATS.forEach(([k,l])=>{ const t=T[k]||0, a=C.cat[k].S; rows.push([cell(l,{bold:true}),cell(t?M(t):'–'),cell(M(a)),cell(t?Math.round(a/t*100)+'%':'–',t?(a>=t?{color:'2F8A3C',bold:true}:{color:'D23A33',bold:true}):{}),cell(t?M(a-t):'–')]); });
+      const tt=Object.values(T).reduce((a,b)=>a+b,0); rows.push([hd('Total'),hd(tt?M(tt):'–'),hd(M(C.six)),hd(tt?Math.round(C.six/tt*100)+'%':'–'),hd(tt?M(C.six-tt):'–')]);
+      s.addTable(rows,{x:1.2,y:1.6,w:10.9,fontSize:16,fontFace:FONT,border:{type:'solid',color:'E2E2E2',pt:1},rowH:0.55}); s.addText('* Number in THB Millions',{x:9,y:6.6,w:3.5,h:0.3,fontSize:10,color:'8A8A8A'}); foot(s); }
     if(on('bill')){ const s=P.addSlide(); title(s,'Per bill');
-      const pbRow=y0=>MONTHS.map((_,i)=>{ const k=`${y0}-${String(i+1).padStart(2,'0')}`; const o=bmSum(k+'-01',k+'-31'); return o.b?o.s/o.b:null; });
+      const pbRow=y0=>MONTHS.map((_,i)=>{ const a0=`${y0}-${String(i+1).padStart(2,'0')}-01`; if(dYear(a0,yr-y0)>L) return null; let b0=`${y0}-${String(i+1).padStart(2,'0')}-${String(new Date(Date.UTC(y0,i+1,0)).getUTCDate()).padStart(2,'0')}`; const o=bmAgg(a0,b0,D); return o.b?o.s/o.b:null; });
       const a=pbRow(yr), b=pbRow(yr-1);
-      const rows=[[hd('Per Bill'),...MONTHS.map(x=>hd(x.charAt(0)+x.slice(1).toLowerCase()))],[cell(String(yr-1),{bold:true}),...b.map(v=>cell(v?fmt(v):''))],[cell(String(yr),{bold:true}),...a.map(v=>cell(v?fmt(v):''))],[cell('Diff',{bold:true}),...a.map((v,i)=>cell(v&&b[i]?P1(v/b[i]-1):'',v&&b[i]?(v>=b[i]?grn:red):{}))]];
+      const rows=[[hd('Per Bill'),...MONTHS.map(x=>hd(x.charAt(0)+x.slice(1).toLowerCase()))],[cell(String(yr-1),{bold:true}),...b.map(v=>cell(v?fmt(v):''))],[cell(String(yr),{bold:true}),...a.map(v=>cell(v?fmt(v):''))],[cell('Diff',{bold:true}),...a.map((v,i)=>cell(v&&b[i]?P1(v/b[i]-1):'',v&&b[i]?gr(v-b[i]):{}))]];
       s.addTable(rows,{x:0.4,y:2.2,w:12.5,fontSize:12,fontFace:FONT,border:{type:'solid',color:'E2E2E2',pt:1},rowH:0.6}); foot(s); }
-    if(on('sales')){ const s=P.addSlide(); const q0=Math.floor((m-1)/3)*3; const [qf,qt]=bmDates('q',ym), A=bmSum(qf,qt);
-      title(s,`Store Excellent (${TH_MS[q0]}–${TH_MS[q0+2]} ${y+543})`,'Sale Performance');
+    const fy=fyOf(L), q=Math.ceil(wkOf(L).wk/13), [qw1,qw2]=qWeeks(fy,q), qf=wkRange(fy,qw1)[0], qt0=wkRange(fy,qw2)[1], qt=qt0>L?L:qt0;
+    if(on('wk')){ const s=P.addSlide(); const k=bmUI.cat||'mac'; const NM={mac:'Mac',ipad:'iPad',iphone:'iPhone',aw:'Apple Watch',pods:'AirPods'}[k];
+      const labels=[], A=[], B=[]; for(let w=qw1; w<=qw2; w++){ const [a,b0]=wkRange(fy,w); if(a>L) break; const b=b0>L?L:b0; const c=wkRange(fy-1,w)[0];
+        const g=(x,yy)=>k==='pods'?(()=>{ let u=0; for(let d=x;d<=yy;d=dAdd(d,1)) u+=((bmData.dx.d[d]||{}).u||{}).pods||0; return u; })():bmAgg(x,yy,D).cat[k].U;
+        labels.push('WK'+w); A.push(g(a,b)); B.push(g(c,dAdd(c,dDiff(a,b)))); }
+      const sa=A.reduce((x,y)=>x+y,0), sb=B.reduce((x,y)=>x+y,0);
+      title(s,`${NM} Growth Q${q} FY${String(fy).slice(2)}`,`WK${qw1}–${qw1+labels.length-1} · FY${fy} vs FY${fy-1}`);
+      s.addChart(P.charts.BAR,[{name:'FY'+(fy-1),labels,values:B},{name:'FY'+fy,labels,values:A}],{x:0.6,y:1.6,w:12.1,h:4.4,barDir:'col',chartColors:['A8A59B','2A78D6'],showValue:true,dataLabelFontSize:10,dataLabelFormatCode:'0;-0;;',valAxisHidden:true,valGridLine:{style:'none'},showLegend:true,legendPos:'b'});
+      s.addText([{text:`FY${fy}: ${fmt(sa)} units   FY${fy-1}: ${fmt(sb)} units   `,options:{color:'333333'}},{text:sb?`YoY ${P1(sa/sb-1)} (${sa-sb>=0?'+':''}${sa-sb} units)`:'–',options:{bold:true,color:sa>=sb?'2F8A3C':'D23A33'}}],{x:0.6,y:6.2,w:12,h:0.5,fontSize:18,fontFace:FONT}); foot(s); }
+    if(on('sales')){ const s=P.addSlide(); const A=bmAgg(qf,qt,D);
+      title(s,`Store Excellent Q${q} FY${String(fy).slice(2)} (${MONTHS[(q*3+6)%12]}–${MONTHS[(q*3+8)%12]})`,'Sale Performance');
       const rows=[[hd('Cate'),hd('Unit')],...[['Mac','mac'],['iPad','ipad'],['iPhone','iphone'],['Watch','aw'],['AirPods','pods']].map(([l,k])=>[cell(l),cell(fmt(A.u[k]))]),[cell('Total',{bold:true}),cell(fmt(A.st),{bold:true})]];
       s.addTable(rows,{x:0.6,y:1.8,w:3.2,fontSize:15,fontFace:FONT,border:{type:'solid',color:'E2E2E2',pt:1},rowH:0.5});
-      const g=bmData.rep||{}; const cvT=(+g.cv||5)/100, atT=+g.at||1600; const cv=A.tr?A.stTr/A.tr:null, at=A.lob?A.ar/A.lob:null;
+      const rp=bmData.rep||{}, cvT=(+rp.cv||5)/100, atT=+rp.at||1600; const cv=A.tr?A.stTr/A.tr:null, at=A.lob?A.ar/A.lob:null;
       const box=(x,lab,tg,val,note)=>{ s.addShape(P.shapes.ROUNDED_RECTANGLE,{x,y:1.8,w:4.2,h:3.6,fill:{color:'EEF5EA'},line:{color:'EEF5EA'},rectRadius:0.2});
         s.addText(tg,{x:x+0.3,y:2.0,w:3.6,h:0.4,fontSize:14,color:'4B4B4B'}); s.addText(lab,{x:x+0.3,y:2.4,w:3.6,h:0.5,fontSize:20,bold:true});
         s.addText(val,{x:x+0.3,y:3.0,w:3.6,h:1.2,fontSize:54,bold:true,color:'B3261E'}); s.addText(note,{x:x+0.3,y:4.4,w:3.6,h:0.7,fontSize:12,color:'4B4B4B'}); };
-      box(4.2,'Conversion Rate','TG '+Math.round(cvT*100)+'%',cv==null?'–':(cv*100).toFixed(1)+'%',A.tr?`ST unit ${fmt(A.stTr)} ÷ Traffic ${fmt(A.tr)} (${A.trDays} วัน)`:'ยังไม่มี Traffic');
+      box(4.2,'Conversion Rate','TG '+Math.round(cvT*100)+'%',cv==null?'–':(cv*100).toFixed(1)+'%',A.tr?`ST unit ${fmt(A.stTr)} ÷ Traffic ${fmt(A.tr)} (${A.trDays} days)`:'No traffic data yet');
       box(8.6,'Attach Revenue','TG '+fmt(atT)+'฿',at==null?'–':fmt(at)+'฿','(ABA + AppleCare+) ÷ Main LOB unit '+fmt(A.lob));
-      foot(s); }
-    if(on('se')){ const s=P.addSlide(); title(s,'Store Excellent','Combine to the total score 100%'); const [qf,qt]=bmDates('q',ym), A=bmSum(qf,qt);
+      s.addText(`${shortD(qf)} – ${shortDY(qt)} · WK${qw1}–${wkOf(qt).wk}`,{x:0.6,y:5.7,w:12,h:0.4,fontSize:12,color:'6F6C64'}); foot(s); }
+    if(on('se')){ const s=P.addSlide(); title(s,'Store Excellent','Combine to the total score 100%'); const A=bmAgg(qf,qt,D);
       const items=[['Sales Performance',`Conversion ${A.tr?(A.stTr/A.tr*100).toFixed(1)+'%':'–'} (15%)\nAttach ${A.lob?fmt(A.ar/A.lob)+'฿':'–'} (10%)`],['Merchandising','Audit '+(R.mer||'–')],['Staff','NPS '+(R.nps?R.nps+'%':'–')],['Special Objective',R.so||'–']];
       items.forEach(([t,v],i)=>{ const x=0.6+i*3.1; s.addShape(P.shapes.ROUNDED_RECTANGLE,{x,y:1.9,w:2.9,h:4.2,fill:{color:'F7F7F9'},line:{color:'F7F7F9'},rectRadius:0.2});
         s.addText(String(i+1),{x:x+1.15,y:2.15,w:0.6,h:0.6,fontSize:16,bold:true,color:'FFFFFF',align:'center',shape:P.shapes.OVAL,fill:{color:'2A62C9'}});
         s.addText(t,{x:x+0.1,y:2.95,w:2.7,h:0.6,fontSize:18,bold:true,color:'1F5FBF',align:'center'}); s.addText(v,{x:x+0.15,y:3.6,w:2.6,h:1.4,fontSize:13,color:'333333',align:'center'});
         s.addText('25%',{x:x+0.1,y:5.2,w:2.7,h:0.6,fontSize:28,bold:true,color:'2A62C9',align:'center'}); }); foot(s); }
     if(on('act')){ const s=P.addSlide(); title(s,'Action : '+MONTHS[m-1].charAt(0)+MONTHS[m-1].slice(1).toLowerCase()+' '+String(y).slice(2));
-      const L=(R.act||'').split(/\n/).map(t=>t.trim()).filter(Boolean); s.addText(L.length?L.map(t=>({text:t,options:{bullet:true,breakLine:true}})):[{text:'[พิมพ์ Action ในช่องด้านล่างแล้วสร้างใหม่]'}],{x:0.8,y:1.5,w:11.8,h:5,fontSize:18,fontFace:FONT,valign:'top',paraSpaceAfter:8}); foot(s); }
+      const Ls=(R.act||'').split(/\n/).map(t=>t.trim()).filter(Boolean); s.addText(Ls.length?Ls.map(t=>({text:t,options:{bullet:true,breakLine:true}})):[{text:'[พิมพ์ Action ในช่องด้านล่างแล้วสร้างใหม่]'}],{x:0.8,y:1.5,w:11.8,h:5,fontSize:18,fontFace:FONT,valign:'top',paraSpaceAfter:8}); foot(s); }
     if(!P.slides.length) throw new Error('ยังไม่ได้เลือกสไลด์');
     await P.writeFile({fileName:`Store_Review_${ym}.pptx`}); st.textContent='✓ สร้างแล้ว '+P.slides.length+' สไลด์';
   }catch(e){ console.error(e); st.textContent='✕ '+(e.message||e); }
 }
 
 function bindBM(){
-  const el=$('#bmBody');
-  el.querySelectorAll('#bmPer button').forEach(b=>b.onclick=()=>{ bmUI.per=b.dataset.v; render(); });
+  const el=$('#bmBody'), U=bmUI, rr=()=>render();
   const rb=$('#bmRebuild'); if(rb) rb.onclick=()=>bmRebuild();
-  const ys=$('#bmYm'); if(ys) ys.onchange=()=>{ bmUI.ym=ys.value; bmUI.date=null; bmUI.tday=null; render(); };
-  const dt=$('#bmDate'); if(dt) dt.onchange=()=>{ if(dt.value){ bmUI.date=dt.value; render(); } };
-  el.querySelectorAll('#bmMode button').forEach(b=>b.onclick=()=>{ bmUI.mode=b.dataset.v; render(); });
-  el.querySelectorAll('#bmCat button').forEach(b=>b.onclick=()=>{ bmUI.cat=b.dataset.v; render(); });
-  el.querySelectorAll('.bmcol[data-ym]').forEach(c=>c.onclick=()=>{ bmUI.ym=c.dataset.ym; bmUI.per='m'; bmUI.date=null; render(); });
-  el.querySelectorAll('.bmday').forEach(b=>b.onclick=()=>{ bmUI.tday=b.dataset.d; render(); });
+  el.querySelectorAll('#bmMode button').forEach(b=>b.onclick=()=>{ U.mode=b.dataset.v; U.cm=false; rr(); });
+  const on=(id,fn,ev)=>{ const x=$('#'+id); if(x) x[ev||'onchange']=()=>{ fn(x); rr(); }; };
+  on('bmDate',x=>{ if(x.value) U.date=x.value; }); on('bmSame',x=>{ U.same=x.checked; });
+  on('bmFy',x=>{ U.fy=+x.value; U.wk1=U.wk2=U.p=U.q=null; }); on('bmW1',x=>{ U.wk1=+x.value; if(!U.wk2||U.wk2<U.wk1) U.wk2=U.wk1; }); on('bmW2',x=>{ U.wk2=+x.value; });
+  on('bmP',x=>{ U.p=+x.value; }); on('bmQ',x=>{ U.q=+x.value; }); on('bmYm',x=>{ U.ym=x.value; }); on('bmY',x=>{ U.y=+x.value; });
+  on('bmCf',x=>{ U.cf=x.value; U.ct=U.ct||$('#bmCt').value; }); on('bmCt',x=>{ U.ct=x.value; U.cf=U.cf||$('#bmCf').value; });
+  on('bmCm',x=>{ U.cm=x.checked; U.cwk1=U.cwk2=U.ccf=U.cct=null; });
+  on('bmCfy',x=>{ U.cfy=+x.value; }); on('bmCw1',x=>{ U.cwk1=+x.value; if(!U.cwk2||U.cwk2<U.cwk1) U.cwk2=U.cwk1; }); on('bmCw2',x=>{ U.cwk2=+x.value; if(!U.cwk1) U.cwk1=U.cwk2; });
+  on('bmCcf',x=>{ U.ccf=x.value; U.cct=U.cct||$('#bmCct').value; }); on('bmCct',x=>{ U.cct=x.value; U.ccf=U.ccf||$('#bmCcf').value; });
+  const chip=(id,key)=>el.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{ U[key]=b.dataset.v; rr(); });
+  chip('bmYb','yb'); chip('bmYm2','ym2'); chip('bmMode2','mode2'); chip('bmHc','hc'); chip('bmCat','cat');
+  el.querySelectorAll('.bmday').forEach(b=>b.onclick=()=>{ U.tday=b.dataset.d; rr(); });
   const csv=$('#bmCsv'); if(csv) csv.onchange=async()=>{ try{ await handleTrafficFiles([...csv.files]); }catch(e){ toast(e.message); } csv.value=''; };
   const dz=$('#bmDrop'); if(dz){ ['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.add('over'); })); ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.remove('over'); }));
     dz.addEventListener('drop',async e=>{ try{ await handleTrafficFiles([...e.dataTransfer.files]); }catch(err){ toast(err.message); } }); }
   const ins=[...el.querySelectorAll('.bmhrs input')]; const sum=()=>{ const t=ins.reduce((s,i)=>s+(+i.value||0),0); $('#bmTsum').textContent=fmt(t); };
   ins.forEach(i=>i.oninput=sum);
   const sv=$('#bmTsave'); if(sv) sv.onclick=async()=>{ const hv=ins.map(i=>i.value.trim()); const any=hv.some(v=>v!==''); const tot=+($('#bmTday').value||0);
-    try{ if(any) await saveTraffic({[bmUI.tday]:{h:hv.map(v=>+v||0),src:'hand'}}); else if(tot) await saveTraffic({[bmUI.tday]:{t:tot,src:'day'}}); else toast('ยังไม่ได้กรอกตัวเลข'); }catch(e){ toast('บันทึกไม่สำเร็จ: '+e.message); } };
+    try{ if(any) await saveTraffic({[U.tday]:{h:hv.map(v=>+v||0),src:'hand'}}); else if(tot) await saveTraffic({[U.tday]:{t:tot,src:'day'}}); else toast('ยังไม่ได้กรอกตัวเลข'); }catch(e){ toast('บันทึกไม่สำเร็จ: '+e.message); } };
   const ps=$('#bmTpaste'); if(ps) ps.onclick=async()=>{ let t=''; try{ t=await navigator.clipboard.readText(); }catch(e){ t=prompt('วางตัวเลข 12 ช่อง (คั่นด้วยเว้นวรรคหรือขึ้นบรรทัด)')||''; }
     const n=(t.match(/\d[\d,]*/g)||[]).map(x=>+x.replace(/,/g,'')); if(n.length<6){ toast('อ่านตัวเลขได้ '+n.length+' ตัว · ต้องมี 12 ตัว (10:00–21:00)'); return; } ins.forEach((i,k)=>i.value=n[k]!=null?n[k]:''); sum(); toast('วางแล้ว '+Math.min(n.length,12)+' ช่อง · ตรวจแล้วกดบันทึก'); };
-  const dl=$('#bmTdel'); if(dl) dl.onclick=async()=>{ if(confirm('ลบ Traffic ของ '+thDate(bmUI.tday)+' ?')) try{ await saveTraffic({[bmUI.tday]:null},'ลบแล้ว'); }catch(e){ toast(e.message); } };
-  el.querySelectorAll('[data-sl]').forEach(c=>c.onchange=()=>{ bmUI.off[c.dataset.sl]=!c.checked; });
+  const dl=$('#bmTdel'); if(dl) dl.onclick=async()=>{ if(confirm('ลบ Traffic ของ '+thDate(U.tday)+' ?')) try{ await saveTraffic({[U.tday]:null},'ลบแล้ว'); }catch(e){ toast(e.message); } };
+  el.querySelectorAll('[data-sl]').forEach(c=>c.onchange=()=>{ U.off[c.dataset.sl]=!c.checked; });
   const go=$('#rpGo'); if(go) go.onclick=buildDeck;
-  const rs=$('#rpSave'); if(rs) rs.onclick=async()=>{ bmData.rep={...bmData.rep,...bmRepInputs()}; try{ await api('bm/rep',{method:'POST',body:bmData.rep}); toast('บันทึกแล้ว'); render(); }catch(e){ toast(e.message); } };
+  const rs=$('#rpSave'); if(rs) rs.onclick=async()=>{ bmData.rep={...bmData.rep,...bmRepInputs()}; try{ await api('bm/rep',{method:'POST',body:bmData.rep}); toast('บันทึกแล้ว'); rr(); }catch(e){ toast(e.message); } };
 }
-
 
 async function load(light){
   try{ if(light&&lastStamp){ const q=await fetch(API+'?stamp=1',{cache:'no-store'}); if(q.ok){ const st=await q.json(); if(st&&st.s&&String(st.s)===String(lastStamp)){ synced=true; return; } } }
