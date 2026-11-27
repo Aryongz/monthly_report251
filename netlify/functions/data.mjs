@@ -17,7 +17,12 @@ import crypto from "node:crypto";
     POST /api/log                  add behaviour entry           {id, type, severity, date, text, visible}
     POST /api/log/show             make a private entry visible  {id, eid}
     GET  /api/months               month index (?ym= for one month incl. rows)
+  Manager or admin (BM tab)
+    GET  /api/bm                   {dx:{d,m}, tr, rep}
+    POST /api/bm/traffic           {days:{date:{h:[12]}|{t}|null}}
+    POST /api/bm/rep               report inputs (NPS, actions …)
   Admin only
+    POST /api/bm/dx                {d:{date:{…}}, m:{ym:{…}}}  daily store archive from uploads
     POST /api/data, /api/photo, DELETE /api/photo
     POST /api/months               {months:[{ym, rows, tg, staff, summary, source}]}
     DELETE /api/months?ym=
@@ -196,6 +201,43 @@ export default async (req) => {
   const isMgr = w.role === "manager" || w.role === "admin";
 
   if (route === "whoami") return json({ role: w.role, name: w.name, staffId: w.staffId || null });
+
+  // ----- BM tab: daily store archive (bills, hourly, attach), foot traffic, report inputs -----
+  if (route === "bm" && method === "GET") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const [dx, tr, rep] = await Promise.all([getJ("bm_dx", { d: {}, m: {} }), getJ("bm_tr", {}), getJ("bm_rep", {})]);
+    return json({ dx, tr, rep });
+  }
+  if (route === "bm/dx" && method === "POST") {
+    if (w.role !== "admin") return json({ error: "forbidden" }, 403);
+    const b = await req.json().catch(() => null); if (!b) return json({ error: "bad json" }, 400);
+    const cur = await getJ("bm_dx", { d: {}, m: {} });
+    for (const [d, v] of Object.entries(b.d || {})) if (/^\d{4}-\d{2}-\d{2}$/.test(d) && v && typeof v === "object") cur.d[d] = v;
+    for (const [ym, v] of Object.entries(b.m || {})) if (YM.test(ym) && v && typeof v === "object") cur.m[ym] = v;
+    await store.setJSON("bm_dx", cur);
+    return json({ ok: true, days: Object.keys(cur.d).length });
+  }
+  if (route === "bm/traffic" && method === "POST") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const b = await req.json().catch(() => null); if (!b || typeof b.days !== "object") return json({ error: "bad json" }, 400);
+    const cur = await getJ("bm_tr", {});
+    for (const [d, v] of Object.entries(b.days)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) continue;
+      if (v === null) { delete cur[d]; continue; }
+      const h = Array.isArray(v.h) ? v.h.slice(0, 14).map((x) => Math.max(0, Math.round(+x || 0))) : null;
+      const t = h ? h.reduce((a, x) => a + x, 0) : Math.max(0, Math.round(+v.t || 0));
+      cur[d] = { t, h, src: String(v.src || "hand").slice(0, 8), by: w.name, at: Date.now() };
+    }
+    await store.setJSON("bm_tr", cur);
+    return json({ ok: true, days: Object.keys(cur).length });
+  }
+  if (route === "bm/rep" && method === "POST") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const b = await req.json().catch(() => null); if (!b) return json({ error: "bad json" }, 400);
+    const txt = JSON.stringify(b); if (txt.length > 50000) return json({ error: "too large" }, 413);
+    await store.setJSON("bm_rep", b);
+    return json({ ok: true });
+  }
 
   // ----- months -----
   if (route === "months") {
