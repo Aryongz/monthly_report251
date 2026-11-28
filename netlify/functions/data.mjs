@@ -7,6 +7,8 @@ import crypto from "node:crypto";
   Public
     GET  /api/data                 current month dashboard data
     GET  /api/photo?id=            staff photo
+    GET  /api/nps                  NPS per month {goal, months:{ym:{store, staff:{empCode:{…}}}}}
+    GET  /api/ly?ym=               last year's daily 6-Category store sales for that month
   Any signed-in role (admin / manager / staff)
     GET  /api/whoami               -> {role, name, staffId}
     GET  /api/profile?id=          monthly history + behaviour log (staff: own id only)
@@ -21,6 +23,7 @@ import crypto from "node:crypto";
     GET  /api/bm                   {dx:{d,m}, tr, rep}
     POST /api/bm/traffic           {days:{date:{h:[12]}|{t}|null}}
     POST /api/bm/rep               report inputs (NPS, actions …)
+    POST /api/nps                  {ym, from, to, store, staff} | {goal} | {del:ym}
   Admin only
     POST /api/bm/dx                {d:{date:{…}}, m:{ym:{…}}}  daily store archive from uploads
     POST /api/data, /api/photo, DELETE /api/photo
@@ -195,6 +198,25 @@ export default async (req) => {
     return new Response(JSON.stringify({ ym, codes: out }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=120" } });
   }
 
+  /* ---------------- NPS (public: store + per-staff answer rate and score, like sales) ---------------- */
+  if (route === "nps" && method === "GET") {
+    const n = await getJ("nps", { goal: 0.25, months: {} });
+    return new Response(JSON.stringify(n), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=60" } });
+  }
+  /* last year's daily 6-Category store sales for one month (public: store total only, no bills or staff) */
+  if (route === "ly" && method === "GET") {
+    const ym = url.searchParams.get("ym");
+    if (!ym || !YM.test(ym)) return json({ error: "bad ym" }, 400);
+    const ly = (+ym.slice(0, 4) - 1) + ym.slice(4);
+    const dx = await getJ("bm_dx", { d: {} }), out = {};
+    for (const [d, v] of Object.entries(dx.d || {})) {
+      if (!d.startsWith(ly) || !v || !v.c) continue;
+      let s = 0; for (const k of ["mac", "ipad", "iphone", "aw", "aba", "rd"]) s += +((v.c[k] || [])[0]) || 0;
+      out[+d.slice(8)] = Math.round(s);
+    }
+    return new Response(JSON.stringify({ ym: ly, d: out }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=600" } });
+  }
+
   /* ---------------- everything below needs a signed-in caller ---------------- */
   const w = await who();
   if (!w || !w.role) return deny(w);
@@ -237,6 +259,22 @@ export default async (req) => {
     const txt = JSON.stringify(b); if (txt.length > 50000) return json({ error: "too large" }, 413);
     await store.setJSON("bm_rep", b);
     return json({ ok: true });
+  }
+
+  // ----- NPS from the CSAT back office (sent by the manager's bookmarklet; overwritten per month) -----
+  if (route === "nps" && method === "POST") {
+    if (!isMgr) return json({ error: "forbidden" }, 403);
+    const txt = await req.text(); if (txt.length > 300000) return json({ error: "too large" }, 413);
+    let b; try { b = JSON.parse(txt); } catch { return json({ error: "bad json" }, 400); }
+    const n = await getJ("nps", { goal: 0.25, months: {} }); n.months = n.months || {};
+    if (b && b.goal != null) { const g = +b.goal; if (g > 0 && g < 1) n.goal = g; }
+    if (b && b.ym) {
+      if (!YM.test(b.ym) || !b.store || typeof b.staff !== "object") return json({ error: "bad data" }, 400);
+      n.months[b.ym] = { ym: b.ym, from: String(b.from || ""), to: String(b.to || ""), at: Date.now(), by: w.name, store: b.store, staff: b.staff };
+    }
+    if (b && b.del && YM.test(b.del)) delete n.months[b.del];
+    await store.setJSON("nps", n);
+    return json({ ok: true, months: Object.keys(n.months).length, goal: n.goal });
   }
 
   // ----- months -----
