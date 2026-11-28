@@ -1591,6 +1591,7 @@ function profilePage(D,id){
       ${lastM&&lastM.me.rank?`<div style="margin-top:8px"><span class="chip ${lastM.me.rank<=3?'g':''}">อันดับ ${lastM.me.rank}/${lastM.team.n} · ${ymLong(lastM.ym)}</span></div>`:''}</div></div>
     <div class="sc-ovr" style="${tier?`--tc:${tier.c}`:''}"><div class="big">${ovr!=null?ovr:'–'}</div><div class="lbl">OVR</div>${tier?`<div class="tier">${tier.i} ${tier.t}</div>`:''}<div class="muted small">ค่าเฉลี่ย ${profPeriod>=99?'ทั้งหมด':profPeriod+' เดือนล่าสุด'}</div></div>
   </section>`;
+  h+=commCard(id,ms);
   if(!ms.length){ h+=`<section class="card sec empty" style="margin-top:12px">ยังไม่มีประวัติรายเดือน — ข้อมูลจะเริ่มสะสมเมื่อผู้ดูแลอัปโหลดยอดขาย</section>`; }
   else {
     h+=`<div class="grid2">
@@ -1612,7 +1613,6 @@ function profilePage(D,id){
         <td class="num">${m.me.daysHit}/${m.me.daysSales} วัน${m.me.consMode==='cal'?'':'<span class="u">ประมาณจากวันที่มียอด</span>'}</td><td class="num"><b>${ovrOf(m.st)}</b></td></tr>`; }).join('')}
       </tbody></table></div></section>`;
   }
-  h+=commCard(id,ms);
   h+=personShiftCal(id);
   // behaviour log
   h+=`<section class="card sec" style="margin-top:12px"><div class="sechead"><div><h2>📁 แฟ้มประวัติ</h2><div class="hint">${mode==='mgr'?'บันทึกเฉพาะเมื่อมีเหตุการณ์ · ใช้ข้อเท็จจริง · บันทึกแล้วแก้ไม่ได้ (ถ้าผิดให้บันทึกรายการใหม่เพื่อแก้ไข)':'บันทึกจากหัวหน้าร้าน · กด "รับทราบ" และชี้แจงเพิ่มเติมได้'}</div></div></div>
