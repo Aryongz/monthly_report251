@@ -239,6 +239,56 @@ details.shfair>summary{cursor:pointer;list-style:none}details.shfair>summary::-w
 .bmyoy{min-width:1060px}.bmyoy td,.bmyoy th{text-align:center;padding:6px 4px}.bmyoy td .num{font-size:12.5px}.bmyoy td .small{font-size:11px}.bmyoy th small{display:block;font-weight:400;color:var(--text-muted)}.bmyoy tr.sep td{padding:2px;border:none;background:var(--surface-2)}
 .bmyoy td:first-child,.bmyoy th:first-child{text-align:left;position:sticky;left:0;background:var(--surface-1);z-index:1}
 .bmkpis .kpi .v{font-size:24px;white-space:nowrap}.bmkpis .kpi .v small{font-size:13px;margin-left:3px}
+/* v18: NPS card + store pace card */
+.grid2.duo{align-items:stretch}.grid2.duo>div>section{height:100%;box-sizing:border-box}
+.npsgrid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+@media(max-width:520px){.npsgrid{grid-template-columns:1fr;justify-items:center}.npsgrid>div{width:100%}}
+.npsdonut .npsbig{font-size:30px;font-weight:600;fill:var(--text-primary)}.npsdonut .npssm{font-size:12px;fill:var(--text-muted)}
+.npsarc{transition:stroke-dasharray .9s cubic-bezier(.2,.8,.2,1)}
+.npsstats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.npsstats>div{background:var(--surface-2);border-radius:12px;padding:8px 10px}
+.npsstats span{display:block;font-size:11.5px;color:var(--text-muted)}.npsstats b{font-size:20px;font-weight:600}
+.npsstats.mini b{font-size:17px}
+.npsrate{margin-top:12px}.npsrt{position:relative;height:10px;border-radius:99px;background:var(--surface-2)}
+.npsrt i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#ffb36b,#ff7a45)}
+.npsrt i.w{background:linear-gradient(90deg,#f5b544,#e0a03a)}.npsrt i.g{background:linear-gradient(90deg,#34d399,#0ea371)}
+.npsrt .mk{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text-secondary);border-radius:2px}
+.npsrt .mk.g{background:var(--good)}
+.npsrt .mk::after{content:attr(data-l);position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--text-muted);white-space:nowrap}
+.npsneed{margin-top:22px;font-size:13px;color:var(--text-secondary)}.npsneed b{color:var(--text-primary)}
+.npsleg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12.5px;color:var(--text-secondary)}
+.npsleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}.npsleg em{font-style:normal;color:var(--text-muted)}
+.npschips{display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 12px}
+.npschips button{font:inherit;font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px solid var(--line-2);background:transparent;color:var(--text-secondary);cursor:pointer}
+.npschips button.on{background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary)}
+.npswarn{margin-top:10px;font-size:12.5px;padding:8px 10px;border-radius:10px;background:var(--warn-soft);color:var(--warn)}
+.npsempty{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:26px 10px}
+.npslow{display:flex;flex-direction:column;gap:6px}.npslr{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;cursor:pointer}.npslr:hover{background:var(--surface-2)}
+.npshist{display:flex;gap:6px;overflow-x:auto}.npshist>div{flex:0 0 auto;min-width:64px;text-align:center;background:var(--surface-2);border-radius:10px;padding:6px 8px}
+.npshist span{display:block;font-size:11px;color:var(--text-muted)}.npshist b{display:block;font-size:16px}.npshist em{font-style:normal;font-size:11px;color:var(--text-secondary)}
+.npssteps{padding-left:20px;line-height:1.7}.npssteps li{margin:10px 0}.npssteps .btn{margin-top:6px}
+.npsbk{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}.npsbk summary{cursor:pointer;font-weight:500}
+#npsBmLink{cursor:grab}
+.pacecard .ptop{display:grid;grid-template-columns:190px minmax(0,1fr);gap:14px;align-items:center}
+@media(max-width:520px){.pacecard .ptop{grid-template-columns:1fr}.pgauge{max-width:230px;margin:0 auto}}
+.pgauge{width:100%;display:block}.pgnum{font-size:32px;font-weight:600;fill:var(--text-primary)}.pgsub{font-size:11px;fill:var(--text-muted)}
+.pbig{font-size:28px;font-weight:600;letter-spacing:-.5px}.pbig small{font-size:14px;font-weight:400;color:var(--text-secondary)}
+.psub{font-size:12.5px;color:var(--text-secondary)}.psub b{color:var(--text-primary)}
+.pchip{display:inline-block;font-size:12px;padding:4px 10px;border-radius:99px;margin-top:6px;font-weight:500}
+.pchip.warn{background:rgba(245,166,35,.16);color:#a8650a}.pchip.ok{background:rgba(52,211,153,.16);color:#08865c}
+[data-theme="dark"] .pchip.warn{color:#f5b544}[data-theme="dark"] .pchip.ok{color:#34d399}
+.pbars{display:flex;align-items:flex-end;gap:3px;height:130px;position:relative;margin-top:34px}
+.pb{flex:1;border-radius:5px 5px 2px 2px;cursor:pointer;transition:height .8s cubic-bezier(.2,.8,.2,1),opacity .2s;min-height:0}
+.pb.hit{background:linear-gradient(180deg,#34d399,#0ea371)}.pb.miss{background:linear-gradient(180deg,#ffb36b,#ff7a45)}
+.pb.fut{background:repeating-linear-gradient(135deg,rgba(140,150,170,.2) 0 4px,transparent 4px 8px);border:1px dashed rgba(140,150,170,.5);border-bottom:0}
+.pb:hover{opacity:.8}.pb.sel{outline:2px solid var(--text-primary);outline-offset:1px}
+.ptl{position:absolute;left:0;right:0;border-top:1.5px dashed var(--text-muted);pointer-events:none}
+.ptl span{position:absolute;left:0;top:-26px;font-size:11px;color:var(--text-secondary);background:var(--surface-2);padding:1px 7px;border-radius:6px}
+.paxis{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px}
+.pleg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary);margin-top:8px}
+.pleg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.pleg i.hit{background:linear-gradient(180deg,#34d399,#0ea371)}.pleg i.miss{background:linear-gradient(180deg,#ffb36b,#ff7a45)}.pleg i.fut{border:1px dashed rgba(140,150,170,.7)}
+.ptip{font-size:12.5px;color:var(--text-secondary);margin-top:8px;min-height:18px}
 
 /* ---- tracker additions ---- */
 /* ---- v5 additions ---- */
@@ -574,16 +624,7 @@ body.mgr #logoutBtn{display:inline-flex!important}
       </div>
       <div class="tablewrap"><table id="staffTbl" class="wide"></table></div>
     </section>
-    <div class="grid2">
-      <section class="card sec">
-        <div class="sechead"><div><h2>MIX 3RD (เป้า <span class="mixT">7%</span>)</h2><div class="hint">ยอด 3RD ÷ ยอดขายที่ไม่ใช่ 3RD · เส้นประ = เป้า</div></div></div>
-        <div class="chart" id="mixChart"></div>
-      </section>
-      <section class="card sec">
-        <div class="sechead"><div><h2>ยอดขายรวมรายวัน (ทั้งร้าน)</h2><div class="hint">บาท · พนักงานในรายชื่อ</div></div></div>
-        <div class="chart" id="dailyChart"></div>
-      </section>
-    </div>
+    <div class="grid2 duo"><div id="npsBox"></div><div id="paceBox"></div></div>
   </section>
 
   <!-- ================= DAY ================= -->
@@ -935,7 +976,7 @@ function renderStore(D){
   bindDrillCards($('#catGrid')); renderExcl(D);
   $('#focusBox').innerHTML=focusSection(D); $('#focusBox').querySelectorAll('.flrow[data-id]').forEach(r=>r.onclick=()=>{ location.hash='s'+r.dataset.id; });
   const lc=state.settings.lastCheck, ab=$('#adminBanner'); if(ab){ const u=adminKey&&!viewYm&&lc&&lc.unk&&lc.unk.length; ab.hidden=!u; if(u){ ab.innerHTML=`<span>⚠</span><div><b>ไฟล์ล่าสุดมี Sub Category ที่ยังไม่ได้จัด Category ${lc.unk.length} รายการ</b> (ยอด ${fmt(lc.unk.reduce((s,e)=>s+e.s,0))} บาท ยังไม่ถูกนับ)${lc.pending?' · จัดแล้วบางส่วน รออัปไฟล์ครั้งถัดไป':''} <a href="#" id="abFix">ตรวจและจัด Category ›</a></div>`; $('#abFix').onclick=e=>{ e.preventDefault(); openMapEditor(); }; } }
-  staffTable(D); mixChart(list); dailyChart(D);
+  staffTable(D); $('#npsBox').innerHTML=npsStoreCard(D); bindNpsStore($('#npsBox')); $('#paceBox').innerHTML=paceCard(D); bindPace($('#paceBox'),D);
 }
 
 function staffTable(D){
@@ -1129,6 +1170,7 @@ function renderPeople(D,id){
     <div class="sumcard"><div class="l">${tot.need>0?'ขาดจากเป้าที่ตั้งไว้':'ถึงเป้าที่ตั้งไว้'}</div><div class="v num">${tot.need>0?fmt(tot.need):'✓'}<small>${tot.need>0?'บาท':''}</small></div><div class="f">เป้าที่ตั้งไว้ ${fmt(tot.nt)} บาท</div></div>
     <div class="sumcard"><div class="l">สถานะ</div><div class="v num">ปิดเดือน</div><div class="f">ข้อมูลครบ ${M.day} จาก ${M.dim} วัน</div></div>`}
   </div>
+  ${npsPersonCard(p,D)}
   <section class="card sec" style="margin-top:12px">
     <div class="sechead"><div><h2>แผนราย Category</h2><div class="hint">FC = คาดการณ์สิ้นเดือนถ้าขายในอัตราเดิม · Sim นับเป็นเครื่อง</div></div></div>
     <div class="tablewrap planTbl"><table style="min-width:980px"><thead><tr><th class="l">Category</th><th>เป้า</th><th>ทำได้</th><th>AC%</th><th>FC</th><th>FC%</th><th>% ที่อยากปิด</th><th>เป้าใหม่</th><th>ต้องขายอีก</th><th>วันละ</th></tr></thead><tbody>`;
@@ -2811,6 +2853,10 @@ function coachData(D){
           else { const tg=dfm.k==='fc'?p.tgSales:(+p.tg[dfm.c]||0), v=dfm.k==='fc'?S.sal(id,d):(a[(CATS.find(c=>c.k===dfm.c)||{}).a]||0); ok=tg>0?v>=z.x.t*tg*sp.wt[d]/sp.wTot:null; }
           if(ok===null) continue; if(!ok) break; st++; first=d; }
         if(st>=3) praise.push({t:`${nm} ผ่านรายวัน ${st} วันทำงานติด`,txt:`ภารกิจ ${nm} ผ่านรายวัน ${st} วันทำงานติดกัน (ตั้งแต่ ${first} ${TH_M[M.m-1]})`}); }); }
+    /* NPS answer rate & score */
+    const nO=npsOf(p.id,ym); if(nO&&nO.bills>=30){ const r=npsRate(nO), tp=(nO.tgp||20)/100;
+      if(r<tp*0.5) push.push(`ตอบ NPS ${pct(r,1)} (ต้องเพิ่ม ${fmt(npsNeed(nO,npsGoal()))} บิล)`);
+      if(nO.nps>=100&&r>=tp&&nO.ans>=5) praise.push({t:`NPS 100 · ตอบ ${pct(r,0)}`,txt:`NPS 100 จากลูกค้า ${fmt(nO.ans)} คน อัตราตอบ ${pct(r,1)} · ${ymLong(ym)}`}); }
     out.push({p,sp,praise,talk,push,drop}); }
   return {S,list:out};
 }
@@ -3070,7 +3116,7 @@ function renderBM(D){
     ${kp('Conversion',A.tr?pct(cv,1):'–',A.tr?`เป้า ${pct(cvT,0)} · เทียบ ${cvL?pct(cvL,1):'–'}`:'ยังไม่มี Traffic ของช่วงนี้',A.tr?`ST unit ${fmt(A.stTr)} ÷ Traffic ${fmt(A.tr)} · ${A.trDays}/${A.n} วัน`:'ST unit ÷ Traffic')}
     ${kp('Traffic คนเข้าร้าน',A.tr?fmt(A.tr):'–',`เทียบ ${B.tr?fmt(B.tr):'–'} · ${bmDl(A.tr,B.tr)}`,A.trDays?`เฉลี่ยวันละ ${fmt(A.tr/A.trDays)} คน`:'')}
   </div>`;
-  h+=bmCatTable(R,A,B,TA)+bmYoY(R,D)+bmHeat(R,D)+bmWeekly(R,D)+bmTrafficCard()+bmReportCard(D);
+  h+=bmCatTable(R,A,B,TA)+bmYoY(R,D)+bmHeat(R,D)+bmWeekly(R,D)+bmTrafficCard()+bmNpsCard()+bmReportCard(D);
   el.innerHTML=h; bindBM();
 }
 function bmCatTable(R,A,B,TA){
@@ -3177,7 +3223,7 @@ function bmReportCard(D){
   return `<section class="card sec" id="bmRep"><div class="sechead"><div><h2>📑 สร้างสไลด์รีพอร์ต</h2><div class="hint">เดือน ${ymLong(ym)} · ไตรมาส Q${q} FY${fy} (ตามปีงบ Apple) · ได้ไฟล์ .pptx เปิดใน Keynote / PowerPoint แก้ต่อได้</div></div></div>
     <div class="bmrep"><div><div class="h4">สไลด์</div>${BM_SLIDES.map(([k,l,t])=>`<label class="bmck"><input type="checkbox" data-sl="${k}" ${bmUI.off[k]?'':'checked'}><span>${l}</span><span class="chip ${t==='a'?'g':'w'}">${t==='a'?'อัตโนมัติ':'กรอกเพิ่ม'}</span></label>`).join('')}</div>
     <div class="form" style="grid-template-columns:1fr 1fr;align-content:start">
-      <div class="field"><label>NPS (%)</label><input id="rpNps" value="${esc(R.nps||'')}" placeholder="97.04"></div>
+      <div class="field"><label>NPS (%)</label><input id="rpNps" value="${esc((npsMonth(ym)&&npsMonth(ym).store.nps!=null?String(npsMonth(ym).store.nps):'')||R.nps||'')}" placeholder="97.04"></div>
       <div class="field"><label>Merchandising Audit</label><input id="rpMer" value="${esc(R.mer||'')}" placeholder="คะแนน"></div>
       <div class="field"><label>Special Objective</label><input id="rpSo" value="${esc(R.so||'')}" placeholder="Mac Growth 7%"></div>
       <div class="field"><label>เป้า Conversion (%) · Attach (฿)</label><div style="display:flex;gap:6px"><input id="rpCv" inputmode="decimal" value="${esc(R.cv||'5')}"><input id="rpAt" inputmode="numeric" value="${esc(R.at||'1600')}"></div></div>
@@ -3288,11 +3334,209 @@ function bindBM(){
   const rs=$('#rpSave'); if(rs) rs.onclick=async()=>{ bmData.rep={...bmData.rep,...bmRepInputs()}; try{ await api('bm/rep',{method:'POST',body:bmData.rep}); toast('บันทึกแล้ว'); rr(); }catch(e){ toast(e.message); } };
 }
 
+/* =====================================================================
+   v18 — NPS from CSAT (bookmarklet → postMessage → save) + store pace card
+   ===================================================================== */
+const CSAT_ORIGIN='https://backoffice-csat.com7.in', CSAT_PAGE=CSAT_ORIGIN+'/portal/branch-report/52';
+let npsData=null, npsLoading=false, npsPending=null, npsSel=null;
+async function loadNPS(force){ if(npsLoading||(npsData&&!force)) return; npsLoading=true;
+  try{ const r=await fetch('/api/nps',{cache:'no-store'}); if(r.ok){ npsData=await r.json(); npsData.months=npsData.months||{}; } }catch(e){}
+  npsLoading=false; const v=route().v; if(v==='store'||v==='people'||v==='bm'||v==='profile') render(); }
+const npsGoal=()=>(npsData&&+npsData.goal)||0.25;
+const npsMonth=ym=>npsData&&npsData.months&&npsData.months[ym]||null;
+const npsOf=(id,ym)=>{ const m=npsMonth(ym); return m&&m.staff? (m.staff[String(id)]||null) : null; };
+const npsRate=o=>o&&o.bills?o.ans/o.bills:0;
+const npsNeed=(o,g)=>o&&o.bills? Math.max(0,Math.ceil((g*o.bills-o.ans)/(1-g))) : 0;
+const npsF=v=>v==null?'–':fmt(v,v%1?2:0);
+const npsAt=t=>t?new Date(t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+
+function npsDonut(o,size){ size=size||150; const R=size/2-12, C=2*Math.PI*R, tot=(o.pro||0)+(o.pas||0)+(o.det||0);
+  const seg=[['pro',o.pro||0,'url(#npsG1)'],['pas',o.pas||0,'#f5b544'],['det',o.det||0,'#ff7a45']]; let off=0, arcs='';
+  if(tot) for(const [k,v,c] of seg){ if(!v) continue; const L=C*v/tot, gap=tot>v?Math.min(3,L/3):0;
+    arcs+=`<circle class="npsarc" cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="${c}" stroke-width="16" stroke-dasharray="${Math.max(L-gap,0.5)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size/2} ${size/2})"/>`; off+=L; }
+  return `<svg class="npsdonut" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="NPS ${npsF(o.nps)}"><defs><linearGradient id="npsG1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#0ea371"/></linearGradient></defs>
+    <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="16"/>${arcs}
+    <text x="${size/2}" y="${size/2+2}" text-anchor="middle" class="npsbig">${npsF(o.nps)}</text><text x="${size/2}" y="${size/2+22}" text-anchor="middle" class="npssm">NPS</text></svg>`; }
+function npsLegend(o){ const tot=(o.pro||0)+(o.pas||0)+(o.det||0)||1;
+  return `<div class="npsleg"><span><i style="background:linear-gradient(135deg,#34d399,#0ea371)"></i>ชื่นชม ${fmt(o.pro)} <em>${pct(o.pro/tot,0)}</em></span><span><i style="background:#f5b544"></i>เฉย ๆ ${fmt(o.pas)}</span><span><i style="background:#ff7a45"></i>ไม่พอใจ ${fmt(o.det)}</span></div>`; }
+function npsRateBar(o,g){ const r=npsRate(o), tp=(o.tgp||20)/100, mx=Math.max(g*1.2,r*1.1,0.3);
+  const cls=r>=g?'g':r>=tp?'w':'b';
+  return `<div class="npsrate"><div class="npsrt"><i class="${cls}" style="width:${Math.min(r/mx,1)*100}%"></i><span class="mk" style="left:${tp/mx*100}%" data-l="เป้า ${fmt(tp*100)}%"></span><span class="mk g" style="left:${g/mx*100}%" data-l="${fmt(g*100)}%"></span></div></div>`; }
+function npsStats(o,g,mini){ const r=npsRate(o), need=npsNeed(o,g), tp=(o.tgp||20)/100;
+  return `<div class="npsstats${mini?' mini':''}">
+    <div><span>อัตราการตอบ</span><b class="num st ${r>=g?'g':r>=tp?'w':'b'}">${pct(r,2)}</b></div>
+    <div><span>ตอบแล้ว</span><b class="num">${fmt(o.ans)}</b></div>
+    <div><span>เป้าหมายหลัก (${fmt(tp*100)}%)</span><b class="num">${fmt(o.tg||Math.ceil(o.bills*tp))}</b></div>
+    <div><span>จำนวนบิล</span><b class="num">${fmt(o.bills)}</b></div></div>
+    ${npsRateBar(o,g)}
+    <div class="npsneed">${need>0?`ต้องได้คำตอบเพิ่มอีก <b class="num">${fmt(need)}</b> บิล ถึง ${fmt(g*100)}%`:`<b class="st g">✓ ถึง ${fmt(g*100)}% แล้ว</b>`}</div>`; }
+
+function npsYms(){ return npsData? Object.keys(npsData.months).sort() : []; }
+function npsStale(m){ if(!m||!m.to) return ''; const [y,mm]=m.ym.split('-').map(Number), last=new Date(y,mm,0).getDate(), d=+m.to.slice(8);
+  const cur=bkkToday().slice(0,7); if(m.ym<cur&&d<last) return `⚠ ข้อมูลเดือนนี้ดึงไว้ถึงวันที่ ${d} เท่านั้น · กดอัปเดตเพื่อดึงให้ครบเดือน`; return ''; }
+
+function npsStoreCard(D){
+  const pageYm=D.M.ym||bkkToday().slice(0,7), yms=npsYms();
+  const ym=(npsSel&&yms.includes(npsSel))?npsSel:pageYm, m=npsMonth(ym), g=npsGoal(), mgr=isMgrRole();
+  const chips=yms.length>1||(yms.length&&!yms.includes(pageYm))?`<div class="npschips">${[...new Set([...yms,pageYm])].sort().slice(-6).map(y=>{ const x=npsMonth(y); return `<button data-ny="${y}" class="${y===ym?'on':''}">${TH_M[+y.slice(5)-1]}${x?` <b>${npsF(x.store.nps)}</b>`:''}</button>`; }).join('')}</div>`:'';
+  const upd=mgr?`<button class="btn sm" id="npsUpd">🔄 อัปเดต NPS</button>`:'';
+  let body;
+  if(!npsData) body=`<div class="muted small" style="padding:30px 0;text-align:center">กำลังโหลด NPS…</div>`;
+  else if(!m) body=`<div class="npsempty"><div style="font-size:30px">💬</div><b>ยังไม่มีข้อมูล NPS ${ymLong(ym)}</b><div class="muted small">${mgr?'กด “อัปเดต NPS” แล้วกดบุ๊กมาร์ก 📥 ส่ง NPS ในหน้าเว็บ CSAT':'หัวหน้าร้านจะอัปเดตให้เร็ว ๆ นี้'}</div></div>`;
+  else { const S=m.store, list=D.list||[];
+    const low=list.map(p=>({p,o:npsOf(p.id,ym)})).filter(x=>x.o&&x.o.bills>=20).sort((a,b)=>npsRate(a.o)-npsRate(b.o)).slice(0,3);
+    const st=npsStale(m);
+    body=`<div class="npsgrid">${npsDonut(S,150)}<div style="min-width:0">${npsStats(S,g)}</div></div>${npsLegend(S)}
+      ${st?`<div class="npswarn">${st}</div>`:''}
+      ${low.length?`<div class="h4" style="margin:14px 0 6px">อัตราตอบน้อยสุด 3 คน</div><div class="npslow">${low.map(x=>{ const r=npsRate(x.o); return `<div class="npslr" data-id="${x.p.id}">${avatar(x.p)}<div style="flex:1;min-width:0"><b>${esc(x.p.name)}</b><div class="muted small">ตอบ ${fmt(x.o.ans)}/${fmt(x.o.bills)} บิล · ต้องเพิ่มอีก ${fmt(npsNeed(x.o,g))}</div></div><span class="chip ${r>=(x.o.tgp||20)/100?'w':'b'}">${pct(r,1)}</span></div>`; }).join('')}</div>`:''}`; }
+  return `<section class="card sec npscard"><div class="sechead"><div><h2>NPS ลูกค้า · ${TH_MF[+ym.slice(5)-1]}</h2><div class="hint">จากระบบ CSAT${m?` · ข้อมูล ${+m.from.slice(8)}–${+m.to.slice(8)} ${TH_M[+ym.slice(5)-1]} · อัปเดต ${npsAt(m.at)}`:''}</div></div>${upd}</div>${chips}${body}</section>`; }
+function bindNpsStore(el){ if(!el) return;
+  el.querySelectorAll('[data-ny]').forEach(b=>b.onclick=()=>{ npsSel=b.dataset.ny; render(); });
+  el.querySelectorAll('.npslr[data-id]').forEach(r=>r.onclick=()=>{ location.hash='s'+r.dataset.id; });
+  const u=el.querySelector('#npsUpd'); if(u) u.onclick=npsSetup; }
+
+function npsPersonCard(p,D){
+  if(!npsData) return ''; const ym=D.M.ym, m=npsMonth(ym); if(!m) return '';
+  const o=npsOf(p.id,ym), g=npsGoal();
+  const hist=npsYms().filter(y=>y<=ym).slice(-6).map(y=>({y,o:npsOf(p.id,y)})).filter(x=>x.o);
+  const h=hist.length>1?`<div class="npshist">${hist.map(x=>`<div><span>${TH_M[+x.y.slice(5)-1]}</span><b class="num">${npsF(x.o.nps)}</b><em>${pct(npsRate(x.o),0)}</em></div>`).join('')}</div>`:'';
+  if(!o) return `<section class="card sec npscard" style="margin-top:12px"><div class="sechead"><div><h2>💬 NPS ของฉัน</h2><div class="hint">อัปเดต ${npsAt(m.at)}</div></div></div><div class="muted small">ยังไม่มีบิลหรือคำตอบ NPS ของคุณในเดือนนี้</div>${h}</section>`;
+  return `<section class="card sec npscard" style="margin-top:12px"><div class="sechead"><div><h2>💬 NPS ของฉัน</h2><div class="hint">จากระบบ CSAT · ข้อมูลถึงวันที่ ${+m.to.slice(8)} · อัปเดต ${npsAt(m.at)}</div></div></div>
+    <div class="npsgrid">${npsDonut(o,140)}<div style="min-width:0">${npsStats(o,g,1)}</div></div>${npsLegend(o)}${h?`<div class="h4" style="margin:14px 0 6px">ย้อนหลัง (NPS · % ตอบ)</div>${h}`:''}</section>`; }
+
+/* ---------- manager: bookmarklet + paste fallback ---------- */
+function npsBookmarklet(){
+  const SITE=location.origin;
+  const code=`(async()=>{const SITE=${JSON.stringify(SITE)};if(!/csat\\.com7\\.in$/.test(location.hostname)){alert('เปิดหน้าเว็บ CSAT (backoffice-csat.com7.in) ก่อน แล้วค่อยกดบุ๊กมาร์กนี้');return}
+const tk=localStorage.getItem('token');if(!tk){alert('ยังไม่ได้เข้าสู่ระบบ CSAT');return}
+const br=(location.pathname.match(/branch-report\\/(\\d+)/)||[])[1]||'52';const n=new Date(),p2=x=>String(x).padStart(2,'0');
+let ym=prompt('ดึง NPS เดือนไหน (ปี ค.ศ.-เดือน)',n.getFullYear()+'-'+p2(n.getMonth()+1));if(!ym)return;ym=ym.trim();if(!/^\\d{4}-\\d{2}$/.test(ym)){alert('รูปแบบเดือนไม่ถูกต้อง เช่น 2026-11');return}
+const w=window.open(SITE+'/#npsin','mt_npsin');
+const box=document.createElement('div');box.style.cssText='position:fixed;z-index:2147483647;right:16px;bottom:16px;max-width:320px;background:#14213d;color:#fff;padding:12px 16px;border-radius:12px;font:14px/1.5 sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3)';document.body.appendChild(box);const say=t=>{box.textContent=t};
+try{const [y,m]=ym.split('-').map(Number),last=new Date(y,m,0).getDate(),cur=n.getFullYear()===y&&n.getMonth()+1===m;const from=ym+'-01',to=ym+'-'+p2(cur?n.getDate():last);
+const B='https://api-csat.com7.in/v1/backoffice/',H={Authorization:'Bearer '+tk};
+const g=async q=>{const r=await fetch(B+q,{headers:H});if(r.status===401)throw new Error('CSAT หมดเวลาเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');if(!r.ok)throw new Error('CSAT HTTP '+r.status);return(await r.json()).data};
+const q='start_date='+encodeURIComponent(from+' 00:00:00')+'&end_date='+encodeURIComponent(to+' 23:59:59')+'&branch_id='+br;
+const one=async s=>{const x=s?'&staff_id='+s:'';const[o,c]=await Promise.all([g('overviews?'+q+x+'&type=overview'),g('overviews?'+q+x+'&type=score')]);const k={};(c.nps_scores||[]).forEach(e=>{k[e.type]=e.count||0});return{bills:o.total_bill||0,ans:o.submit_bill||0,tg:o.target_bill||0,tgp:o.target_bill_percent||0,nps:c.nps_score==null?null:+c.nps_score,avg:c.avg_score==null?null:+c.avg_score,pro:k.promoter||0,pas:k.passive||0,det:k.detractor||0}};
+say('กำลังดึง NPS ร้าน…');const st=await one(0);const us=await g('branches/'+br+'/users?page_size=200');const staff={};let i=0,d=0;
+const wk=async()=>{while(i<us.length){const u=us[i++];const r=await one(u.id);d++;say('กำลังดึงรายคน '+d+'/'+us.length);if(r.bills||r.ans)staff[u.emp_code]={...r,n:u.name,pos:u.position}}};
+await Promise.all([wk(),wk(),wk(),wk()]);const data={t:'nps',v:1,ym,from,to,branch:br,store:st,staff};
+if(!w){box.textContent='';const b=document.createElement('button');b.textContent='คัดลอกข้อมูล NPS';b.style.cssText='font:inherit;padding:6px 12px;border-radius:8px;border:0;margin-top:6px';box.append('เบราว์เซอร์บล็อกหน้าต่างใหม่ · กดคัดลอก แล้วไปวางที่เว็บ Monthly Target > อัปเดต NPS > วางข้อมูล',document.createElement('br'),b);b.onclick=async()=>{await navigator.clipboard.writeText('NPS1:'+JSON.stringify(data));b.textContent='✓ คัดลอกแล้ว';setTimeout(()=>box.remove(),2500)};return}
+say('กำลังส่งไปที่เว็บ Monthly Target…');let ok=false;const ON=new URL(SITE).origin;
+addEventListener('message',e=>{if(e.origin===ON&&e.data&&e.data.t==='npsack'){ok=true;say('✓ ส่งแล้ว · ไปกดบันทึกในหน้าเว็บ Monthly Target');setTimeout(()=>box.remove(),5000)}});
+for(let k=0;k<120&&!ok;k++){try{w.postMessage(data,ON)}catch(e){}await new Promise(r=>setTimeout(r,500))}
+if(!ok)say('ส่งไม่สำเร็จ ลองกดบุ๊กมาร์กอีกครั้ง')}catch(e){box.remove();alert('ดึง NPS ไม่สำเร็จ: '+e.message)}})()`;
+  return 'javascript:'+encodeURIComponent(code.replace(/\n/g,';')); }
+function npsModal(html){ let s=$('#npsScrim'); if(!s){ s=document.createElement('div'); s.id='npsScrim'; s.className='scrim'; s.style.zIndex=38; document.body.appendChild(s); s.onclick=e=>{ if(e.target===s) s.classList.remove('on'); }; }
+  s.innerHTML=`<div class="modal" style="max-width:560px"><div style="padding:20px 22px">${html}</div></div>`; s.classList.add('on'); return s; }
+function npsSetup(){
+  const bm=npsBookmarklet(), g=npsGoal();
+  const s=npsModal(`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">🔄 อัปเดต NPS</h2><button class="btn sm ghost" id="npsX">ปิด</button></div>
+    <ol class="npssteps">
+      <li><b>เปิดหน้าเว็บ CSAT</b> แล้วเข้าสู่ระบบตามปกติ (กรอก OTP เอง)<br><a class="btn sm" href="${CSAT_PAGE}" target="_blank" rel="noopener">เปิดเว็บ CSAT ↗</a></li>
+      <li><b>กดบุ๊กมาร์ก “📥 ส่ง NPS”</b> ในหน้าเว็บ CSAT → เลือกเดือน → ระบบดึงข้อมูลร้านและรายคน แล้วเปิดหน้านี้ให้กดบันทึก</li>
+    </ol>
+    <details class="npsbk"><summary>ยังไม่มีบุ๊กมาร์ก? ตั้งครั้งเดียว</summary>
+      <div class="hint" style="margin:8px 0">คอมพิวเตอร์: ลากปุ่มนี้ไปวางบนแถบบุ๊กมาร์ก</div>
+      <a class="btn" id="npsBmLink" href="${esc(bm)}" onclick="return false">📥 ส่ง NPS</a>
+      <div class="hint" style="margin:12px 0 6px">iPad / มือถือ: กดคัดลอกโค้ด → บุ๊กมาร์กหน้าใดก็ได้ ตั้งชื่อ “ส่ง NPS” → แก้ไขบุ๊กมาร์ก วางโค้ดแทนที่ URL</div>
+      <button class="btn sm" id="npsCopy">คัดลอกโค้ดบุ๊กมาร์ก</button>
+      <div class="hint" style="margin-top:10px">บุ๊กมาร์กใช้การเข้าสู่ระบบ CSAT ในเครื่องของพี่เอง ไม่ส่งรหัสผ่านหรือ token มาที่เว็บนี้ ส่งมาเฉพาะตัวเลข NPS</div></details>
+    <details class="npsbk"><summary>วางข้อมูล (ถ้าเบราว์เซอร์บล็อกหน้าต่างใหม่)</summary><textarea id="npsPaste" class="note" style="min-height:70px" placeholder="วางข้อมูลที่ขึ้นต้นด้วย NPS1:"></textarea><button class="btn sm" id="npsPasteGo" style="margin-top:6px">ตรวจข้อมูล</button></details>
+    <details class="npsbk"><summary>ตั้งเป้าอัตราตอบ (ตอนนี้ ${fmt(g*100)}%)</summary><div style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="number" id="npsGoalIn" value="${fmt(g*100)}" min="5" max="90" style="width:90px"> % <button class="btn sm" id="npsGoalGo">บันทึก</button></div></details>`);
+  s.querySelector('#npsX').onclick=()=>s.classList.remove('on');
+  s.querySelector('#npsCopy').onclick=async e=>{ try{ await navigator.clipboard.writeText(bm); e.target.textContent='✓ คัดลอกแล้ว'; }catch(err){ prompt('คัดลอกโค้ดนี้',bm); } };
+  s.querySelector('#npsPasteGo').onclick=()=>{ const t=s.querySelector('#npsPaste').value.trim().replace(/^NPS1:/,''); try{ const d=JSON.parse(t); if(!npsValid(d)) throw 0; npsReceive(d); }catch(e){ toast('ข้อมูลไม่ถูกต้อง'); } };
+  s.querySelector('#npsGoalGo').onclick=async()=>{ const v=+s.querySelector('#npsGoalIn').value/100; if(!(v>0&&v<1)) return toast('ใส่ 5–90');
+    try{ const r=await api('nps',{method:'POST',body:{goal:v}}); npsData.goal=r.goal; toast('ตั้งเป้าอัตราตอบ '+fmt(v*100)+'%'); s.classList.remove('on'); render(); }catch(e){ toast(e.message); } };
+}
+function npsValid(d){ return d&&d.t==='nps'&&/^\d{4}-\d{2}$/.test(d.ym||'')&&d.store&&typeof d.store.bills==='number'&&d.staff&&typeof d.staff==='object'; }
+function npsReceive(d){
+  npsPending=d; const ids=new Map(state.staff.map(p=>[String(p.id),p]));
+  const m=[], u=[]; for(const [k,v] of Object.entries(d.staff)) (ids.has(k)?m:u).push({k,v,p:ids.get(k)});
+  const miss=state.staff.filter(p=>!d.staff[String(p.id)]); const S=d.store, g=npsGoal();
+  const s=npsModal(`<h2 style="margin:0 0 4px">📥 ข้อมูล NPS จาก CSAT</h2><div class="hint">${ymLong(d.ym)} · วันที่ ${+d.from.slice(8)}–${+d.to.slice(8)} · ${npsMonth(d.ym)?'จะแทนที่ข้อมูลเดิมของเดือนนี้':'เดือนใหม่'}</div>
+    <div class="npsgrid" style="margin-top:12px">${npsDonut(S,130)}<div style="min-width:0">${npsStats(S,g,1)}</div></div>
+    <div class="h4" style="margin:12px 0 4px">พนักงาน</div>
+    <div class="small">✓ ตรงกับรายชื่อ <b>${m.length}</b> คน${miss.length?` · ไม่มีบิลใน CSAT ${miss.length} คน (${miss.slice(0,6).map(p=>esc(p.name)).join(', ')}${miss.length>6?'…':''})`:''}</div>
+    ${u.length?`<div class="small muted" style="margin-top:4px">ไม่อยู่ในรายชื่อพนักงานขาย ${u.length} คน (เก็บไว้ แต่ไม่แสดง): ${u.slice(0,8).map(x=>esc(x.v.n||x.k)).join(', ')}${u.length>8?'…':''}</div>`:''}
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="npsCancel">ยกเลิก</button><button class="btn primary" id="npsSave">${isMgrRole()?'บันทึก':'เข้าสู่ระบบแล้วบันทึก'}</button></div>`);
+  s.querySelector('#npsCancel').onclick=()=>{ npsPending=null; s.classList.remove('on'); };
+  s.querySelector('#npsSave').onclick=async e=>{
+    if(!isMgrRole()){ $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); toast('เข้าสู่ระบบหัวหน้าร้านก่อน แล้วกดบันทึกอีกครั้ง'); return; }
+    const b=e.target; b.disabled=true; b.textContent='กำลังบันทึก…';
+    try{ await api('nps',{method:'POST',body:{ym:d.ym,from:d.from,to:d.to,store:d.store,staff:d.staff}}); npsPending=null; s.classList.remove('on'); toast('บันทึก NPS '+ymLong(d.ym)+' แล้ว'); npsSel=d.ym; await loadNPS(true); if(location.hash!=='#'&&location.hash!=='') location.hash=''; render(); }
+    catch(err){ b.disabled=false; b.textContent='บันทึก'; toast('บันทึกไม่สำเร็จ: '+(err.message||'')); } };
+}
+addEventListener('message',e=>{ if(e.origin!==CSAT_ORIGIN||!npsValid(e.data)) return;
+  try{ e.source&&e.source.postMessage({t:'npsack'},CSAT_ORIGIN); }catch(err){}
+  if(npsPending&&npsPending.ym===e.data.ym&&npsPending.to===e.data.to&&$('#npsScrim.on')) return;
+  npsPending=e.data; const d=e.data; let n=0; (function go(){ if(!synced&&n++<40) return setTimeout(go,400); npsReceive(d); })(); });
+if(location.hash==='#npsin') history.replaceState(null,'',location.pathname+location.search);
+
+/* ---------- store pace card: gauge + daily bars (orange → green) + last year ---------- */
+const lyCache={}; let paceAnim={};
+async function loadLY(ym){ if(!ym||lyCache[ym]!==undefined) return; lyCache[ym]=null;
+  try{ const r=await fetch('/api/ly?ym='+ym); if(r.ok){ lyCache[ym]=await r.json(); if(route().v==='store') render(); } }catch(e){} }
+function storeDaily6(D){ const M=D.M, ids=new Set(state.staff.map(p=>p.branch+':'+p.id)); internIds().forEach(i=>{ for(const r of state.rows) if(String(r[2])===i) ids.add(r[1]+':'+r[2]); });
+  const out=new Array(M.dim+1).fill(null);
+  for(const r of state.rows){ if(!r[0].startsWith(M.ym)||!ids.has(r[1]+':'+r[2])) continue; const d=+r[0].slice(8); out[d]=(out[d]||0)+r[KI.macS]+r[KI.ipadS]+r[KI.iphoneS]+r[KI.awS]+r[KI.abaS]+r[KI.rdS]; }
+  return out; }
+function paceCard(D){
+  const {M,store:S}=D; if(!M.ym) return '<section class="card sec"><div class="empty">ยังไม่มีข้อมูล</div></section>';
+  loadLY(M.ym);
+  const T=S.tgSales, dt=T/M.dim, day=storeDaily6(D), act=S.actSales, pace=M.pace, should=T*pace, behind=should-act;
+  const need=M.remain?Math.max(T-act,0)/M.remain:0;
+  const LY=lyCache[M.ym]; let lyCum=0, lyN=0; if(LY&&LY.d){ for(let d=1;d<=M.day;d++){ if(LY.d[d]!=null){ lyCum+=LY.d[d]; lyN++; } } }
+  const lyOk=lyN>=Math.min(M.day,3)&&lyCum>0, yoy=lyOk?act/lyCum-1:null;
+  const vals=[]; for(let d=1;d<=M.dim;d++) vals.push(day[d]||0);
+  const mx=Math.max(...vals,need,dt)*1.1||1; const hit=vals.slice(0,M.day).filter(v=>v>=dt).length;
+  let bars=''; for(let d=1;d<=M.dim;d++){ const v=day[d]; const iso=M.ym+'-'+String(d).padStart(2,'0');
+    if(d>M.day){ bars+=`<div class="pb fut" data-h="${M.remain?need/mx*100:0}" data-t="วันที่ ${d} · ต้องได้ ${mB(need)}" style="height:0"></div>`; continue; }
+    const ok=(v||0)>=dt, ly=LY&&LY.d&&LY.d[d]!=null?LY.d[d]:null;
+    bars+=`<div class="pb ${ok?'hit':'miss'}" data-d="${iso}" data-h="${(v||0)/mx*100}" data-t="${thDate(iso)} · ${mB(v||0)} (${fmt((v||0)/dt*100)}% ของเป้าวัน)${ly!=null?' · ปีก่อน '+money(ly):''}" style="height:0"></div>`; }
+  const ac=S.ac, ang=Math.PI*(1-Math.min(pace,1));
+  const chip=!M.remain? (act>=T?`<span class="pchip ok">ปิดเดือน เกินเป้า ${mB(act-T)}</span>`:`<span class="pchip warn">ปิดเดือน ขาดเป้า ${mB(T-act)}</span>`)
+    : behind>0?`<span class="pchip warn">ช้ากว่าเส้นควรได้ ${money(behind)}</span>`:`<span class="pchip ok">นำเส้นควรได้ ${money(-behind)}</span>`;
+  return `<section class="card sec pacecard"><div class="sechead"><div><h2>ยอดขายร้าน · ${TH_MF[M.m-1]}</h2><div class="hint">6 Category · วันที่ ${M.day}/${M.dim} · แตะแท่งเพื่อดูยอดวันนั้น</div></div></div>
+    <div class="ptop">
+      <svg class="pgauge" viewBox="0 0 220 132" role="img" aria-label="ทำได้ ${pct(ac,0)} ของเป้า"><defs><linearGradient id="pgG" x1="0" x2="1"><stop offset="0" stop-color="#ff7a45"/><stop offset=".55" stop-color="#f5b544"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+        <path d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="var(--surface-2)" stroke-width="16" stroke-linecap="round"/>
+        <path class="parc" d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="url(#pgG)" stroke-width="16" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="${283*(1-Math.min(ac,1))}" data-p="${Math.min(ac,1)}"/>
+        ${M.remain?`<line x1="${110+76*Math.cos(ang)}" y1="${115-76*Math.sin(ang)}" x2="${110+104*Math.cos(ang)}" y2="${115-104*Math.sin(ang)}" stroke="var(--text-primary)" stroke-width="2.5" stroke-linecap="round"/>`:''}
+        <text x="110" y="96" text-anchor="middle" class="pgnum" data-v="${Math.round(ac*100)}">${Math.round(ac*100)}%</text>
+        <text x="110" y="118" text-anchor="middle" class="pgsub">${M.remain?`ขีด = ควรได้ ${Math.round(pace*100)}%`:'ปิดเดือน'}</text></svg>
+      <div class="pinfo"><div class="pbig num">${shortM(act)} <small>/ ${shortM(T)} ล้าน</small></div>
+        ${lyOk?`<div class="psub">ปีก่อนช่วงเดียวกัน ${shortM(lyCum)} ล้าน · <b class="st ${yoy>=0?'g':'b'}">${yoy>=0?'+':''}${fmt(yoy*100,1)}%</b></div>`:''}
+        ${chip}
+        ${M.remain?`<div class="psub" style="margin-top:6px">เหลือ ${M.remain} วัน · ต้องได้วันละ <b>${money(need)}</b></div>`:''}</div></div>
+    <div class="pbars">${bars}<div class="ptl" style="bottom:${dt/mx*100}%"><span>เป้าวันละ ${money(dt)}</span></div></div>
+    <div class="paxis"><span>1</span><span>${Math.round(M.dim/4)+1}</span><span>${Math.round(M.dim/2)}</span><span>${Math.round(M.dim*3/4)}</span><span>${M.dim}</span></div>
+    <div class="pleg"><span><i class="hit"></i>ถึงเป้าวัน ${hit} วัน</span><span><i class="miss"></i>ยังไม่ถึง ${M.day-hit} วัน</span>${M.remain?'<span><i class="fut"></i>วันที่เหลือ</span>':''}</div>
+    <div class="ptip" id="pTip">แตะแท่งเพื่อดูยอดวันนั้น</div></section>`; }
+const shortM=v=>fmt(v/1e6,v>=1e8?1:2), mB=v=>money(v)+(Math.abs(v)>=1e6?'':' บาท');
+function bindPace(el,D){ if(!el) return; const key=D.M.ym+'|'+D.M.day+'|'+Math.round(D.store.actSales), first=!paceAnim[key]; paceAnim={[key]:1};
+  const tip=el.querySelector('#pTip');
+  el.querySelectorAll('.pb').forEach(b=>{ b.onclick=()=>{ el.querySelectorAll('.pb.sel').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+    tip.innerHTML=esc(b.dataset.t)+(b.dataset.d?` · <a href="#d-${b.dataset.d}">ดูวันนั้น ›</a>`:''); }; });
+  const arc=el.querySelector('.parc'), num=el.querySelector('.pgnum'), bs=[...el.querySelectorAll('.pb')];
+  if(!first||matchMedia('(prefers-reduced-motion: reduce)').matches){ bs.forEach(b=>b.style.height=b.dataset.h+'%'); return; }
+  arc.setAttribute('stroke-dashoffset',283); bs.forEach(b=>b.style.height='0');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ arc.style.transition='stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)'; arc.setAttribute('stroke-dashoffset',283*(1-arc.dataset.p));
+    bs.forEach((b,i)=>{ b.style.transitionDelay=i*18+'ms'; b.style.height=b.dataset.h+'%'; });
+    const tg=+num.dataset.v, t0=performance.now(); (function f(t){ const q=Math.min(1,(t-t0)/1100); num.textContent=Math.round(tg*(1-Math.pow(1-q,3)))+'%'; if(q<1) requestAnimationFrame(f); })(t0); })); }
+
+/* ---------- BM: NPS by month ---------- */
+function bmNpsCard(){ const yms=npsYms().slice(-12); if(!yms.length) return '';
+  return `<section class="card sec"><div class="sechead"><div><h2>💬 NPS รายเดือน</h2><div class="hint">จากระบบ CSAT · อัปเดตด้วยบุ๊กมาร์กในหน้าภาพรวมร้าน</div></div></div>
+    <div class="tablewrap"><table><thead><tr><th class="l">เดือน</th><th>NPS</th><th>คะแนนเฉลี่ย</th><th>ตอบ</th><th>บิล</th><th>อัตราตอบ</th><th>ไม่พอใจ</th></tr></thead><tbody>
+    ${yms.map(y=>{ const S=npsMonth(y).store, r=npsRate(S); return `<tr style="cursor:default"><td class="l">${ymLong(y)}</td><td class="num"><b>${npsF(S.nps)}</b></td><td class="num">${S.avg==null?'–':fmt(S.avg,2)}</td><td class="num">${fmt(S.ans)}</td><td class="num">${fmt(S.bills)}</td><td><span class="chip ${r>=npsGoal()?'g':r>=(S.tgp||20)/100?'w':'b'}">${pct(r,1)}</span></td><td class="num">${fmt(S.det)}</td></tr>`; }).join('')}</tbody></table></div></section>`; }
+
 async function load(light){
   try{ if(light&&lastStamp){ const q=await fetch(API+'?stamp=1',{cache:'no-store'}); if(q.ok){ const st=await q.json(); if(st&&st.s&&String(st.s)===String(lastStamp)){ synced=true; return; } } }
     const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const d=await r.json(); synced=true;
     if(d&&d.savedAt!==lastStamp&&apply(d,viewYm?liveBackup:state)) lastStamp=d.savedAt; }catch(e){ synced=false; }
-  render(); loadHistoryIndex(); loadShiftCodes(); }
+  render(); loadHistoryIndex(); loadShiftCodes(); loadNPS(light); }
 $('#loginBtn').onclick=()=>{ $('#loginStatus').className='status'; $('#keyInp').value=''; $('#loginScrim').classList.add('on'); setTimeout(()=>$('#keyInp').focus(),50); };
 $('#keyInp').onkeydown=e=>{ if(e.key==='Enter') $('#loginGo').click(); };
 $('#loginGo').onclick=async()=>{ const k=$('#keyInp').value.trim(); if(!k) return; const s=$('#loginStatus');
